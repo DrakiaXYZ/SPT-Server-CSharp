@@ -21,22 +21,22 @@ public static class Program
         // Initialize the program variables
         ProgramStatics.Initialize();
 
-        // Search for mod dlls
-        var mods = ModDllLoader.LoadAllMods();
-
         // Create web builder and logger
         var builder = CreateNewHostBuilder(args);
-
-        // validate and sort mods, this will also discard any mods that are invalid
-        var sortedLoadedMods = ValidateMods(mods);
 
         var diHandler = new DependencyInjectionHandler(builder.Services);
         // register SPT components
         diHandler.AddInjectableTypesFromTypeAssembly(typeof(Program));
         diHandler.AddInjectableTypesFromTypeAssembly(typeof(App));
 
+        List<SptMod> loadedMods = null;
         if (ProgramStatics.MODS())
         {
+            // Search for mod dlls
+            loadedMods = ModDllLoader.LoadAllMods();
+            // validate and sort mods, this will also discard any mods that are invalid
+            var sortedLoadedMods = ValidateMods(loadedMods);
+
             diHandler.AddInjectableTypesFromAssemblies(sortedLoadedMods.SelectMany(a => a.Assemblies));
         }
         diHandler.InjectAll();
@@ -53,15 +53,18 @@ public static class Program
             var appContext = serviceProvider.GetService<ApplicationContext>();
             appContext?.AddValue(ContextVariableType.SERVICE_PROVIDER, serviceProvider);
 
-            // Initialize PreSptMods
-            var preSptLoadMods = serviceProvider.GetServices<IPreSptLoadMod>();
-            foreach (var preSptLoadMod in preSptLoadMods)
+            if (ProgramStatics.MODS())
             {
-                preSptLoadMod.PreSptLoad();
+                // Initialize PreSptMods
+                var preSptLoadMods = serviceProvider.GetServices<IPreSptLoadMod>();
+                foreach (var preSptLoadMod in preSptLoadMods)
+                {
+                    preSptLoadMod.PreSptLoad();
+                }
             }
 
             // Add the Loaded Mod Assemblies for later
-            appContext?.AddValue(ContextVariableType.LOADED_MOD_ASSEMBLIES, mods);
+            appContext?.AddValue(ContextVariableType.LOADED_MOD_ASSEMBLIES, loadedMods);
 
             // This is the builder that will get use by the HttpServer to start up the web application
             appContext?.AddValue(ContextVariableType.APP_BUILDER, builder);
