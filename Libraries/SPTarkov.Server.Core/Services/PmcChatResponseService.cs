@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -59,7 +59,7 @@ public class PmcChatResponseService(
                     sessionId,
                     victimDetails,
                     message,
-                    MessageType.USER_MESSAGE
+                    MessageType.UserMessage
                 );
             }
         }
@@ -113,7 +113,7 @@ public class PmcChatResponseService(
             return;
         }
 
-        _notificationSendHelper.SendMessageToPlayer(sessionId, killerDetails, message, MessageType.USER_MESSAGE);
+        _notificationSendHelper.SendMessageToPlayer(sessionId, killerDetails, message, MessageType.UserMessage);
     }
 
     /// <summary>

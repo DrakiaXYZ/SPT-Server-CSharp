@@ -1,6 +1,6 @@
 using System.Collections.Frozen;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
@@ -793,7 +793,7 @@ public class RagfairOfferHelper(
         _mailSendService.SendDirectNpcMessageToPlayer(
             offerOwnerSessionId,
             Traders.RAGMAN,
-            MessageType.FLEAMARKET_MESSAGE,
+            MessageType.FleamarketMessage,
             GetLocalisedOfferSoldMessage(itemTpl, boughtAmount),
             paymentItemsToSendToPlayer,
             storagetime,

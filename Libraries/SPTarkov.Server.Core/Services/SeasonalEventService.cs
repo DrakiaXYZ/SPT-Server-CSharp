@@ -1,5 +1,5 @@
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -714,7 +714,8 @@ public class SeasonalEventService(
     /// </summary>
     protected void AdjustZryachiyMeleeChance()
     {
-        var zryachiyKvP = _databaseService.GetBots().Types.FirstOrDefault(x => x.Key.ToLower() == "bosszryachiy");
+        var zryachiyKvP = _databaseService.GetBots().Types
+            .FirstOrDefault(x => string.Equals(x.Key, "bosszryachiy", StringComparison.OrdinalIgnoreCase));
         var value = new Dictionary<string, double>();
 
         foreach (var chance in zryachiyKvP.Value.BotChances.EquipmentChances)

@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Services;
@@ -16,7 +16,7 @@ public class FishMessageHandler(
 
     public bool CanHandle(string message)
     {
-        return message.ToLower() == "fish";
+        return string.Equals(message, "fish", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Process(string sessionId, UserDialogInfo sptFriendUser, PmcData? sender, object? extraInfo = null)

@@ -1,8 +1,8 @@
 using System.Collections.Frozen;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Inventory;
@@ -796,38 +796,17 @@ public class InventoryHelper(
     }
 
     /// <summary>
-    ///     Get a blank two-dimensional representation of a container
-    /// </summary>
-    /// <param name="containerH">Horizontal size of container</param>
-    /// <param name="containerY">Vertical size of container</param>
-    /// <returns>Two-dimensional representation of container</returns>
-    public int[][] GetBlankContainerMap(int containerH, int containerY)
-    {
-        //var x = new int[containerY][];
-        //for (int i = 0; i < containerY; i++)
-        //{
-        //    x[i] = new int[containerH];
-        //}
-
-        //return x;
-
-        return Enumerable.Range(0, containerY)
-            .Select(i => new int[containerH])
-            .ToArray();
-    }
-
-    /// <summary>
     ///     Get a 2d mapping of a container with what grid slots are filled
     /// </summary>
-    /// <param name="containerH">Horizontal size of container</param>
-    /// <param name="containerV">Vertical size of container</param>
+    /// <param name="sizeX">Horizontal size of container</param>
+    /// <param name="sizeY">Vertical size of container</param>
     /// <param name="itemList">Players inventory items</param>
     /// <param name="containerId">Id of the container</param>
     /// <returns>Two-dimensional representation of container</returns>
-    public int[][] GetContainerMap(int containerH, int containerV, List<Item> itemList, string containerId)
+    public int[][] GetContainerMap(int sizeX, int sizeY, List<Item> itemList, string containerId)
     {
         // Create blank 2d map of container
-        var container2D = GetBlankContainerMap(containerH, containerV);
+        var containerYX = _itemHelper.GetBlankContainerMap(sizeY, sizeX);
 
         // Get all items in players inventory keyed by their parentId and by ItemId
         var inventoryItemHash = GetInventoryItemHash(itemList);
@@ -836,25 +815,26 @@ public class InventoryHelper(
         if (!inventoryItemHash.ByParentId.TryGetValue(containerId, out var containerItemHash))
             // No items in container, exit early
         {
-            return container2D;
+            return containerYX;
         }
 
         // Check each item in container
         foreach (var item in containerItemHash)
         {
             ItemLocation? itemLocation;
-            if (item.Location is JsonElement)
+            if (item.Location is JsonElement element)
             {
-                itemLocation = ((JsonElement) item.Location).ToObject<ItemLocation>();
+                // TODO: is this ever true?
+                itemLocation = element.ToObject<ItemLocation>();
             }
             else
             {
-                itemLocation = (ItemLocation) item.Location;
+                itemLocation = (ItemLocation?) item.Location;
             }
 
             if (itemLocation is null)
             {
-                // item has no location property
+                // Item has no location property
                 _logger.Error($"Unable to find 'location' property on item with id: {item.Id}, skipping");
 
                 continue;
@@ -875,14 +855,14 @@ public class InventoryHelper(
                 try
                 {
                     var rowIndex = itemLocation.Y + y;
-                    var containerRow = container2D[rowIndex.Value];
-                    if (containerRow is null)
+                    var containerX = containerYX.ElementAtOrDefault(rowIndex.Value);
+                    if (containerX is null)
                     {
                         _logger.Error($"Unable to find container: {containerId} row line: {itemLocation.Y + y}");
                     }
 
                     // Fill the corresponding cells in the container map to show the slot is taken
-                    Array.Fill(containerRow, 1, itemLocation.X.Value, fW);
+                    Array.Fill(containerX, 1, itemLocation.X.Value, fW);
                 }
                 catch (Exception ex)
                 {
@@ -900,7 +880,7 @@ public class InventoryHelper(
             }
         }
 
-        return container2D;
+        return containerYX;
     }
 
     protected bool IsVertical(ItemLocation itemLocation)
@@ -1026,7 +1006,7 @@ public class InventoryHelper(
         var containerH = firstContainerGrid.Props.CellsH;
         var containerV = firstContainerGrid.Props.CellsV;
 
-        return GetBlankContainerMap(containerH.Value, containerV.Value);
+        return _itemHelper.GetBlankContainerMap(containerH.Value, containerV.Value);
     }
 
     /// <summary>

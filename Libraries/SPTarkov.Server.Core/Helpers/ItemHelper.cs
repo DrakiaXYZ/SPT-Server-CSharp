@@ -1,9 +1,9 @@
 using System.Collections.Frozen;
-using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Inventory;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -41,20 +41,20 @@ public class ItemHelper(
 
     protected static readonly FrozenSet<string> _slotsAsStrings =
     [
-        EquipmentSlots.Headwear.ToString(),
-        EquipmentSlots.Earpiece.ToString(),
-        EquipmentSlots.FaceCover.ToString(),
-        EquipmentSlots.ArmorVest.ToString(),
-        EquipmentSlots.Eyewear.ToString(),
-        EquipmentSlots.ArmBand.ToString(),
-        EquipmentSlots.TacticalVest.ToString(),
-        EquipmentSlots.Pockets.ToString(),
-        EquipmentSlots.Backpack.ToString(),
-        EquipmentSlots.SecuredContainer.ToString(),
-        EquipmentSlots.FirstPrimaryWeapon.ToString(),
-        EquipmentSlots.SecondPrimaryWeapon.ToString(),
-        EquipmentSlots.Holster.ToString(),
-        EquipmentSlots.Scabbard.ToString()
+        nameof(EquipmentSlots.Headwear),
+        nameof(EquipmentSlots.Earpiece),
+        nameof(EquipmentSlots.FaceCover),
+        nameof(EquipmentSlots.ArmorVest),
+        nameof(EquipmentSlots.Eyewear),
+        nameof(EquipmentSlots.ArmBand),
+        nameof(EquipmentSlots.TacticalVest),
+        nameof(EquipmentSlots.Pockets),
+        nameof(EquipmentSlots.Backpack),
+        nameof(EquipmentSlots.SecuredContainer),
+        nameof(EquipmentSlots.FirstPrimaryWeapon),
+        nameof(EquipmentSlots.SecondPrimaryWeapon),
+        nameof(EquipmentSlots.Holster),
+        nameof(EquipmentSlots.Scabbard)
     ];
 
     protected static readonly FrozenSet<string> _dogTagTpls =
@@ -97,47 +97,58 @@ public class ItemHelper(
         "right_side_plate"
     ];
 
-    /**
-     * Does the provided pool of items contain the desired item
-     * @param itemPool Item collection to check
-     * @param item Item to look for
-     * @param slotId OPTIONAL - slotid of desired item
-     * @returns True if pool contains item
-     */
-    public bool HasItemWithTpl(List<Item> itemPool, string item, string slotId = null)
+    protected static readonly FrozenSet<string> _armorSlotsThatCanHoldMods =
+    [
+        BaseClasses.HEADWEAR,
+        BaseClasses.VEST,
+        BaseClasses.ARMOR
+    ];
+
+    /// <summary>
+    /// Does the provided pool of items contain the desired item
+    /// </summary>
+    /// <param name="itemPool">Item collection to check</param>
+    /// <param name="item">Item to look for</param>
+    /// <param name="slotId">OPTIONAL - slotId of desired item</param>
+    /// <returns>True if pool contains item</returns>
+    public bool HasItemWithTpl(IEnumerable<Item> itemPool, string item, string slotId = "")
     {
         // Filter the pool by slotId if provided
-        var filteredPool = slotId is not null ? itemPool.Where(item => item.SlotId?.StartsWith(slotId) ?? false) : itemPool;
+        var filteredPool =  string.IsNullOrEmpty(slotId)
+            ? itemPool
+            : itemPool.Where(item => item.SlotId?.StartsWith(slotId, StringComparison.OrdinalIgnoreCase) ?? false);
 
         // Check if any item in the filtered pool matches the provided item
         return filteredPool.Any(poolItem => string.Equals(poolItem.Template, item, StringComparison.OrdinalIgnoreCase));
     }
 
-    /**
-     * Get the first item from provided pool with the desired tpl
-     * @param itemPool Item collection to search
-     * @param item Item to look for
-     * @param slotId OPTIONAL - slotid of desired item
-     * @returns Item or null
-     */
-    public Item GetItemFromPoolByTpl(List<Item> itemPool, string item, string slotId = null)
+    /// <summary>
+    /// Get the first item from provided pool with the desired tpl
+    /// </summary>
+    /// <param name="itemPool">Item collection to search</param>
+    /// <param name="tpl">Item tpl to find</param>
+    /// <param name="slotId">OPTIONAL - slotId of desired item</param>
+    /// <returns>Item or null if no item found</returns>
+    public Item GetItemFromPoolByTpl(IEnumerable<Item> itemPool, string tpl, string slotId = "")
     {
         // Filter the pool by slotId if provided
-        var filteredPool = slotId is not null ? itemPool.Where(item => item.SlotId?.StartsWith(slotId) ?? false) : itemPool;
+        var filteredPool = string.IsNullOrEmpty(slotId)
+            ? itemPool
+            : itemPool.Where(item => item.SlotId?.StartsWith(slotId, StringComparison.OrdinalIgnoreCase) ?? false);
 
         // Check if any item in the filtered pool matches the provided item
-        return filteredPool.FirstOrDefault(poolItem => poolItem.Template.Equals(item, StringComparison.OrdinalIgnoreCase));
+        return filteredPool.FirstOrDefault(poolItem => poolItem.Template.Equals(tpl, StringComparison.OrdinalIgnoreCase));
     }
 
-    /**
-     * This method will compare two items (with all its children) and see if they are equivalent.
-     * This method will NOT compare IDs on the items
-     * @param item1 first item with all its children to compare
-     * @param item2 second item with all its children to compare
-     * @param compareUpdProperties Upd properties to compare between the items
-     * @returns true if they are the same, false if they aren't
-     */
-    public bool IsSameItems(List<Item> item1, List<Item> item2, HashSet<string>? compareUpdProperties = null)
+    /// <summary>
+    /// This method will compare two items (with all its children) and see if they are equivalent
+    /// This method will NOT compare IDs on the items
+    /// </summary>
+    /// <param name="item1">first item with all its children to compare</param>
+    /// <param name="item2">second item with all its children to compare</param>
+    /// <param name="compareUpdProperties">Upd properties to compare between the items</param>
+    /// <returns>true if they are the same</returns>
+    public bool IsSameItems(ICollection<Item> item1, ICollection<Item> item2, HashSet<string>? compareUpdProperties = null)
     {
         if (item1.Count != item2.Count)
         {
@@ -162,14 +173,14 @@ public class ItemHelper(
         return true;
     }
 
-    /**
-     * This method will compare two items and see if they are equivalent.
-     * This method will NOT compare IDs on the items
-     * @param item1 first item to compare
-     * @param item2 second item to compare
-     * @param compareUpdProperties Upd properties to compare between the items
-     * @returns true if they are the same, false if they aren't
-     */
+    /// <summary>
+    /// This method will compare two items and see if they are equivalent
+    /// This method will NOT compare IDs on the items
+    /// </summary>
+    /// <param name="item1">first item to compare</param>
+    /// <param name="item2">second item to compare</param>
+    /// <param name="compareUpdProperties">Upd properties to compare between the items</param>
+    /// <returns>true if they are the same</returns>
     public bool IsSameItem(Item item1, Item item2, HashSet<string>? compareUpdProperties = null)
     {
         // Different tpl == different item
@@ -231,16 +242,16 @@ public class ItemHelper(
         return true;
     }
 
-    /**
-     * Helper method to generate a Upd based on a template
-     * @param itemTemplate the item template to generate a Upd for
-     * @returns A Upd with all the default properties set
-     */
+    /// <summary>
+    /// Helper method to generate an Upd based on a template
+    /// </summary>
+    /// <param name="itemTemplate">The item template to generate an Upd for</param>
+    /// <returns>An Upd with all the default properties set</returns>
     public Upd GenerateUpdForItem(TemplateItem itemTemplate)
     {
         Upd itemProperties = new();
 
-        // armors, etc
+        // Armors, etc
         if (itemTemplate.Properties.MaxDurability is not null)
         {
             itemProperties.Repairable = new UpdRepairable
@@ -325,7 +336,7 @@ public class ItemHelper(
             };
         }
 
-        // Togglable face shield
+        // Toggleable face shield
         if ((itemTemplate.Properties.HasHinge ?? false) && (itemTemplate.Properties.FaceShieldComponent ?? false))
         {
             itemProperties.Togglable = new UpdTogglable
@@ -337,17 +348,17 @@ public class ItemHelper(
         return itemProperties;
     }
 
-    /**
-     * Checks if a tpl is a valid item. Valid meaning that it's an item that can be stored in stash
-     * Valid means:
-     * Not quest item
-     * 'Item' type
-     * Not on the invalid base types array
-     * Price above 0 roubles
-     * Not on item config blacklist
-     * @param tpl the template id / tpl
-     * @returns boolean; true for items that may be in player possession and not quest items
-     */
+    /// <summary>
+    /// Checks if a tpl is a valid item. Valid meaning that it's an item that can be stored in stash
+    /// Valid means:
+    /// Not quest item
+    /// 'Item' type
+    /// Not on the invalid base types array
+    /// Price above 0 roubles
+    /// </summary>
+    /// <param name="tpl">Template id to check</param>
+    /// <param name="invalidBaseTypes">OPTIONAL - Base types deemed invalid</param>
+    /// <returns>true for items that may be in player possession and not quest items</returns>
     public bool IsValidItem(string tpl, ICollection<string>? invalidBaseTypes = null)
     {
         var baseTypes = invalidBaseTypes ?? _defaultInvalidBaseTypes;
@@ -365,38 +376,45 @@ public class ItemHelper(
                !_itemFilterService.IsItemBlacklisted(tpl);
     }
 
-    // Check if the tpl / template Id provided is a descendent of the baseclass
-    //
-    // @param   string    tpl             the item template id to check
-    // @param   string    baseClassTpl    the baseclass to check for
-    // @return  bool                    is the tpl a descendent?
+    /// <summary>
+    /// Check if the tpl / template id provided is a descendant of the baseclass
+    /// </summary>
+    /// <param name="tpl">Item template id to check</param>
+    /// <param name="baseClassTpl">Baseclass to check for</param>
+    /// <returns>is the tpl a descendant</returns>
     public bool IsOfBaseclass(string tpl, string baseClassTpl)
     {
         return _itemBaseClassService.ItemHasBaseClass(tpl, [baseClassTpl]);
     }
 
-    // Check if item has any of the supplied base classes
-    // @param string tpl Item to check base classes of
-    // @param string[] baseClassTpls base classes to check for
-    // @returns true if any supplied base classes match
+    /// <summary>
+    /// Check if item has any of the supplied base classes
+    /// </summary>
+    /// <param name="tpl">Item to check base classes of</param>
+    /// <param name="baseClassTpls">Base classes to check for</param>
+    /// <returns>True if any supplied base classes match</returns>
     public bool IsOfBaseclasses(string tpl, ICollection<string> baseClassTpls)
     {
         return _itemBaseClassService.ItemHasBaseClass(tpl, baseClassTpls);
     }
 
-    // Does the provided item have the chance to require soft armor inserts
-    // Only applies to helmets/vest/armors.
-    // Not all head gear needs them
-    // @param string itemTpl item to check
-    // @returns Does item have the possibility ot need soft inserts
+    /// <summary>
+    /// Does the provided item have the chance to require soft armor inserts
+    /// Only applies to helmets/vest/armors
+    /// Not all headgear needs them
+    /// </summary>
+    /// <param name="itemTpl">Tpl to check</param>
+    /// <returns>Does item have the possibility ot need soft inserts</returns>
     public bool ArmorItemCanHoldMods(string itemTpl)
     {
-        return IsOfBaseclasses(itemTpl, [BaseClasses.HEADWEAR, BaseClasses.VEST, BaseClasses.ARMOR]);
+        return IsOfBaseclasses(itemTpl, _armorSlotsThatCanHoldMods);
     }
 
-    // Does the provided item tpl need soft/removable inserts to function
-    // @param string itemTpl Armor item
-    // @returns True if item needs some kind of insert
+    /// <summary>
+    /// Does the provided item tpl need soft/removable inserts to function
+    /// </summary>
+    /// <param name="itemTpl">Armor item</param>
+    /// <returns>True if item needs some kind of insert</returns>
     public bool ArmorItemHasRemovableOrSoftInsertSlots(string itemTpl)
     {
         if (!ArmorItemCanHoldMods(itemTpl))
@@ -407,23 +425,26 @@ public class ItemHelper(
         return ArmorItemHasRemovablePlateSlots(itemTpl) || ItemRequiresSoftInserts(itemTpl);
     }
 
-    // Does the pased in tpl have ability to hold removable plate items
-    // @param string itemTpl item tpl to check for plate support
-    // @returns True when armor can hold plates
+    /// <summary>
+    /// Does the provided tpl have ability to hold removable plate items
+    /// </summary>
+    /// <param name="itemTpl">Item tpl to check for plate support</param>
+    /// <returns>True when armor can hold plates</returns>
     public bool ArmorItemHasRemovablePlateSlots(string itemTpl)
     {
         var itemTemplate = GetItem(itemTpl);
-        var plateSlotIds = GetRemovablePlateSlotIds();
 
-        return itemTemplate.Value.Properties.Slots.Any(slot => plateSlotIds.Contains(slot.Name.ToLower()));
+        return itemTemplate.Value.Properties.Slots.Any(slot => _removablePlateSlotIds.Contains(slot.Name.ToLower()));
     }
 
-    // Does the provided item tpl require soft inserts to become a valid armor item
-    // @param string itemTpl Item tpl to check
-    // @returns True if it needs armor inserts
+    /// <summary>
+    /// Does the provided item tpl require soft inserts to become a valid armor item
+    /// </summary>
+    /// <param name="itemTpl">Item tpl to check</param>
+    /// <returns>True if it needs armor inserts</returns>
     public bool ItemRequiresSoftInserts(string itemTpl)
     {
-        // not a slot that takes soft-inserts
+        // Not a slot that takes soft-inserts
         if (!ArmorItemCanHoldMods(itemTpl))
         {
             return false;
@@ -451,8 +472,10 @@ public class ItemHelper(
         return false;
     }
 
-    // Get all soft insert slot ids
-    // @returns A List of soft insert ids (e.g. soft_armor_back, helmet_top)
+    /// <summary>
+    /// Get all soft insert slot ids
+    /// </summary>
+    /// <returns>A List of soft insert ids (e.g. soft_armor_back, helmet_top)</returns>
     public static FrozenSet<string> GetSoftInsertSlotIds()
     {
         return _softInsertIds;
@@ -461,17 +484,19 @@ public class ItemHelper(
     /// <summary>
     ///     Does the passed in slot id match a soft insert id
     /// </summary>
-    /// <param name="slotId">Id to check</param>
+    /// <param name="slotId">slotId value to check</param>
     /// <returns></returns>
     public bool IsSoftInsertId(string slotId)
     {
         return _softInsertIds.Contains(slotId);
     }
 
-    // Returns the items total price based on the handbook or as a fallback from the prices.json if the item is not
-    // found in the handbook. If the price can't be found at all return 0
-    // @param List<string> tpls item tpls to look up the price of
-    // @returns Total price in roubles
+    /// <summary>
+    /// Returns the items total price based on the handbook or as a fallback from the prices.json if the item is not
+    /// found in the handbook. If the price can't be found at all return 0
+    /// </summary>
+    /// <param name="tpls">item tpls to look up the price of</param>
+    /// <returns>Total price in roubles</returns>
     public double GetItemAndChildrenPrice(IEnumerable<string> tpls)
     {
         // Run getItemPrice for each tpl in tpls array, return sum
@@ -568,11 +593,11 @@ public class ItemHelper(
         return _cloner.Clone(_databaseService.GetItems().Values.ToList());
     }
 
-    /**
-     * Gets item data from items.json
-     * @param itemTpl items template id to look up
-     * @returns bool - is valid + template item object as array
-     */
+    /// <summary>
+    /// Gets item data from items.json
+    /// </summary>
+    /// <param name="itemTpl">template id to look up</param>
+    /// <returns>KvP, key = bool, value = template item object</returns>
     public KeyValuePair<bool, TemplateItem?> GetItem(string itemTpl)
     {
         // -> Gets item from <input: _tpl>
@@ -584,37 +609,37 @@ public class ItemHelper(
         return new KeyValuePair<bool, TemplateItem?>(false, null);
     }
 
-    /**
-     * Checks if the item has slots
-     * @param itemTpl Template id of the item to check
-     * @returns true if the item has slots
-     */
+    /// <summary>
+    /// Checks if the item has slots
+    /// </summary>
+    /// <param name="itemTpl">Template id of the item to check</param>
+    /// <returns>True if the item has slots</returns>
     public bool ItemHasSlots(string itemTpl)
     {
         if (_databaseService.GetItems().TryGetValue(itemTpl, out var item))
         {
-            return GetItem(itemTpl).Value.Properties?.Slots?.Count > 0;
+            return GetItem(itemTpl).Value?.Properties?.Slots?.Count > 0;
         }
 
         return false;
     }
 
-    /**
-     * Checks if the item is in the database
-     * @param itemTpl Template id of the item to check
-     * @returns true if the item is in the database
-     */
+    /// <summary>
+    /// Checks if the item is in the database
+    /// </summary>
+    /// <param name="itemTpl">Id of the item to check</param>
+    /// <returns>true if the item is in the database</returns>
     public bool IsItemInDb(string itemTpl)
     {
         return _databaseService.GetItems().ContainsKey(itemTpl);
     }
 
-    /**
-     * Calculate the average quality of an item and its children
-     * @param itemWithChildren An offers item to process
-     * @param skipArmorItemsWithoutDurability Skip over armor items without durability
-     * @returns % quality modifier between 0 and 1
-     */
+    /// <summary>
+    /// Calculate the average quality of an item and its children
+    /// </summary>
+    /// <param name="itemWithChildren">An offers item to process</param>
+    /// <param name="skipArmorItemsWithoutDurability">Skip over armor items without durability</param>
+    /// <returns>% quality modifier between 0 and 1</returns>
     public double GetItemQualityModifierForItems(List<Item> itemWithChildren, bool skipArmorItemsWithoutDurability = false)
     {
         if (IsOfBaseclass(itemWithChildren[0].Template, BaseClasses.WEAPON))
@@ -627,8 +652,9 @@ public class ItemHelper(
         foreach (var item in itemWithChildren)
         {
             var result = GetItemQualityModifier(item, skipArmorItemsWithoutDurability);
-            if (result == -1)
+            if (Math.Abs(result - (-1)) < 0.001)
             {
+                // Is/near zero - Skip
                 continue;
             }
 
@@ -645,13 +671,13 @@ public class ItemHelper(
         return Math.Min(Math.Round(qualityModifier / itemsWithQualityCount, 5), 1);
     }
 
-    /**
-     * Get normalized value (0-1) based on item condition
-     * Will return -1 for base armor items with 0 durability
-     * @param item Item to check
-     * @param skipArmorItemsWithoutDurability return -1 for armor items that have max durability of 0
-     * @returns Number between 0 and 1
-     */
+    /// <summary>
+    /// Get normalized value (0-1) based on item condition
+    /// Will return -1 for base armor items with 0 durability
+    /// </summary>
+    /// <param name="item">Item to check</param>
+    /// <param name="skipArmorItemsWithoutDurability">return -1 for armor items that have max durability of 0</param>
+    /// <returns>Number between 0 and 1</returns>
     public double GetItemQualityModifier(Item item, bool skipArmorItemsWithoutDurability = false)
     {
         // Default to 100%
@@ -708,20 +734,18 @@ public class ItemHelper(
             {
                 result = 0.01;
             }
-
-            return result;
         }
 
         return result;
     }
 
-    /**
-     * Get a quality value based on a repairable item's current state between current and max durability
-     * @param itemDetails Db details for item we want quality value for
-     * @param repairable Repairable properties
-     * @param item Item quality value is for
-     * @returns A number between 0 and 1
-     */
+    /// <summary>
+    /// Get a quality value based on a repairable item's current state between current and max durability
+    /// </summary>
+    /// <param name="itemDetails">Db details for item we want quality value for</param>
+    /// <param name="repairable">Repairable properties</param>
+    /// <param name="item">Item quality value is for</param>
+    /// <returns>number between 0 and 1</returns>
     protected double GetRepairableItemQualityValue(TemplateItem itemDetails, UpdRepairable repairable, Item item)
     {
         // Edge case, durability above max
@@ -747,13 +771,13 @@ public class ItemHelper(
         return Math.Sqrt(durability ?? 0);
     }
 
-    /**
-     * Recursive function that looks at every item from parameter and gets their children's Ids + includes parent item in results
-     * @param items List of items (item + possible children)
-     * @param baseItemId Parent item's id
-     * @returns a list of strings
-     */
-    public List<string> FindAndReturnChildrenByItems(List<Item> items, string baseItemId)
+    /// <summary>
+    /// Recursive function that looks at every item from parameter and gets their children's Ids + includes parent item in results
+    /// </summary>
+    /// <param name="items">List of items (item + possible children)</param>
+    /// <param name="baseItemId">Parent item's id</param>
+    /// <returns>list of child item ids</returns>
+    public List<string> FindAndReturnChildrenByItems(IEnumerable<Item> items, string baseItemId)
     {
         List<string> list = [];
 
@@ -770,14 +794,14 @@ public class ItemHelper(
         return list;
     }
 
-    /**
-     * A variant of FindAndReturnChildren where the output is list of item objects instead of their ids.
-     * @param items List of items (item + possible children)
-     * @param baseItemId Parent item's id
-     * @param modsOnly Include only mod items, exclude items stored inside root item
-     * @returns A list of Item objects
-     */
-    public List<Item> FindAndReturnChildrenAsItems(List<Item> items, string baseItemId, bool modsOnly = false)
+    /// <summary>
+    /// A variant of FindAndReturnChildren where the output is list of item objects instead of their ids.
+    /// </summary>
+    /// <param name="items">List of items (item + possible children)</param>
+    /// <param name="baseItemId">Parent item's id</param>
+    /// <param name="modsOnly">OPTIONAL - Include only mod items, exclude items stored inside root item</param>
+    /// <returns>list of Item objects</returns>
+    public List<Item> FindAndReturnChildrenAsItems(IEnumerable<Item> items, string baseItemId, bool modsOnly = false)
     {
         // Use dictionary to make key lookup faster, convert to list before being returned
         Dictionary<string, Item> result = [];
@@ -809,12 +833,12 @@ public class ItemHelper(
         return result.Values.ToList();
     }
 
-    /**
-     * Find children of the item in a given assort (weapons parts for example, need recursive loop function)
-     * @param itemIdToFind Template id of item to check for
-     * @param assort List of items to check in
-     * @returns List of children of requested item
-     */
+    /// <summary>
+    /// Find children of the item in a given assort (weapons parts for example, need recursive loop function)
+    /// </summary>
+    /// <param name="itemIdToFind">Template id of item to check for</param>
+    /// <param name="assort">List of items to check in</param>
+    /// <returns>List of children of requested item</returns>
     public List<Item> FindAndReturnChildrenByAssort(string itemIdToFind, List<Item> assort)
     {
         List<Item> list = [];
@@ -832,19 +856,14 @@ public class ItemHelper(
         return list;
     }
 
-    /**
-     * Check if the passed in item has buy count restrictions
-     * @param itemToCheck Item to check
-     * @returns true if it has buy restrictions
-     */
+    /// <summary>
+    /// Check if the passed in item has buy count restrictions
+    /// </summary>
+    /// <param name="itemToCheck">Item to check</param>
+    /// <returns>true if it has buy restrictions</returns>
     public bool HasBuyRestrictions(Item itemToCheck)
     {
-        if (itemToCheck.Upd?.BuyRestrictionCurrent is not null && itemToCheck.Upd?.BuyRestrictionMax is not null)
-        {
-            return true;
-        }
-
-        return false;
+        return itemToCheck.Upd?.BuyRestrictionCurrent is not null && itemToCheck.Upd?.BuyRestrictionMax is not null;
     }
 
     /// <summary>
@@ -1020,6 +1039,11 @@ public class ItemHelper(
         }
     }
 
+    /// <summary>
+    /// TODO - Write
+    /// </summary>
+    /// <param name="inventory"></param>
+    /// <param name="insuredItems"></param>
     public void ReplaceProfileInventoryIds(BotBaseInventory inventory, List<InsuredItem>? insuredItems = null)
     {
         // Blacklist
@@ -1203,7 +1227,10 @@ public class ItemHelper(
         {
             if (IsOfBaseclasses(item.Template, [BaseClasses.MONEY, BaseClasses.AMMO]))
             {
-                item.Upd.SpawnedInSession = null;
+                if (item.Upd is not null)
+                {
+                    item.Upd.SpawnedInSession = null;
+                }
 
                 continue;
             }
@@ -1322,7 +1349,7 @@ public class ItemHelper(
                              false;
         }
 
-        return itemTemplate.Key && parentTemplate.Key && (isNotRaidModdable || isRequiredSlot);
+        return itemTemplate.Key && parentTemplate.Key && !(isNotRaidModdable || isRequiredSlot);
     }
 
     /// <summary>
@@ -1354,34 +1381,34 @@ public class ItemHelper(
         return currentItem;
     }
 
-    /**
-     * Determines if an item is an attachment that is currently attached to its parent item.
-     * 
-     * @param item The item to check.
-     * @returns true if the item is attached attachment, otherwise false.
-     */
+    /// <summary>
+    /// Determines if an item is an attachment that is currently attached to its parent item
+    /// </summary>
+    /// <param name="item">The item to check</param>
+    /// <returns>true if the item is attached attachment, otherwise false</returns>
     public bool IsAttachmentAttached(Item item)
     {
         HashSet<string> check = ["hideout", "main"];
 
-        return !(check.Contains(item.SlotId) || _slotsAsStrings.Contains(item.SlotId) || !int.TryParse(item.SlotId, out _));
+        return !(check.Contains(item.SlotId) // Is root item
+                 || _slotsAsStrings.Contains(item.SlotId) // Is root item in equipment slot e.g. `Headwear`
+                 || int.TryParse(item.SlotId, out _)); // Has int as slotId, is inside container. e.g. cartridges
     }
 
-    /**
-     * Retrieves the equipment parent item for a given item.
-     * 
-     * This method traverses up the hierarchy of items starting from a given `itemId`, until it finds the equipment
-     * parent item. In other words, if you pass it an item id of a suppressor, it will traverse up the muzzle brake,
-     * barrel, upper receiver, gun, nested backpack, and finally return the backpack Item that is equipped.
-     * 
-     * It's important to note that traversal is expensive, so this method requires that you pass it a Dictionary of the items
-     * to traverse, where the keys are the item IDs and the values are the corresponding Item objects. This alleviates
-     * some of the performance concerns, as it allows for quick lookups of items by ID.
-     * 
-     * @param itemId - The unique identifier of the item for which to find the equipment parent.
-     * @param itemsMap - A Dictionary containing item IDs mapped to their corresponding Item objects for quick lookup.
-     * @returns The Item object representing the equipment parent of the given item, or `null` if no such parent exists.
-     */
+    /// <summary>
+    /// Retrieves the equipment parent item for a given item.
+    ///
+    /// This method traverses up the hierarchy of items starting from a given `itemId`, until it finds the equipment
+    /// parent item. In other words, if you pass it an item id of a suppressor, it will traverse up the muzzle brake,
+    /// barrel, upper receiver, gun, nested backpack, and finally return the backpack Item that is equipped.
+    ///
+    /// It's important to note that traversal is expensive, so this method requires that you pass it a Dictionary of the items
+    /// to traverse, where the keys are the item IDs and the values are the corresponding Item objects. This alleviates
+    /// some of the performance concerns, as it allows for quick lookups of items by ID.
+    /// </summary>
+    /// <param name="itemId">The unique identifier of the item for which to find the equipment parent.</param>
+    /// <param name="itemsMap">A Dictionary containing item IDs mapped to their corresponding Item objects for quick lookup.</param>
+    /// <returns>The Item object representing the equipment parent of the given item, or `null` if no such parent exists</returns>
     public Item? GetEquipmentParent(string itemId, Dictionary<string, Item> itemsMap)
     {
         var currentItem = itemsMap.GetValueOrDefault(itemId);
@@ -1398,13 +1425,13 @@ public class ItemHelper(
         return currentItem;
     }
 
-    /**
-     * Get the inventory size of an item
-     * @param items Item with children
-     * @param rootItemId
-     * @returns ItemSize object (width and height)
-     */
-    public ItemSize GetItemSize(List<Item> items, string rootItemId)
+    /// <summary>
+    /// Get the inventory size of an item
+    /// </summary>
+    /// <param name="items">Item with children</param>
+    /// <param name="rootItemId">The base items root id</param>
+    /// <returns>ItemSize object (width and height)</returns>
+    public ItemSize GetItemSize(ICollection<Item> items, string rootItemId)
     {
         var rootTemplate = GetItem(items.Where(x => x.Id.Equals(rootItemId, StringComparison.OrdinalIgnoreCase)).ToList()[0].Template).Value;
         var width = rootTemplate.Properties.Width;
@@ -1444,20 +1471,19 @@ public class ItemHelper(
 
         return new ItemSize
         {
-            Width = width ?? 0 + sizeLeft + sizeRight + forcedLeft + forcedRight,
-            Height = height ?? 0 + sizeUp + sizeDown + forcedUp + forcedDown
+            Width = (width ?? 0) + sizeLeft + sizeRight + forcedLeft + forcedRight,
+            Height = (height ?? 0) + sizeUp + sizeDown + forcedUp + forcedDown
         };
     }
 
-    /**
-     * Get a random cartridge from an items Filter property
-     * @param item Db item template to look up Cartridge filter values from
-     * @returns Caliber of cartridge
-     */
+    /// <summary>
+    /// Get a random cartridge from an items Filter property
+    /// </summary>
+    /// <param name="item">Db item template to look up Cartridge filter values from</param>
+    /// <returns>Valid caliber for cartridge</returns>
     public string? GetRandomCompatibleCaliberTemplateId(TemplateItem item)
     {
-        var cartridges = item?.Properties?.Cartridges[0]?.Props?.Filters[0]?.Filter;
-
+        var cartridges = item?.Properties?.Cartridges?.FirstOrDefault()?.Props?.Filters?.FirstOrDefault()?.Filter;
         if (cartridges is null)
         {
             _logger.Warning($"Failed to find cartridge for item: {item?.Id} {item?.Name}");
@@ -1479,7 +1505,7 @@ public class ItemHelper(
         var cartridgeDetails = GetItem(cartridgeTpl);
         var cartridgeMaxStackSize = cartridgeDetails.Value.Properties.StackMaxSize;
 
-        // Exit if ammo already exists in box
+        // Exit early if ammo already exists in box
         if (ammoBox.Any(item => item.Template.Equals(cartridgeTpl, StringComparison.OrdinalIgnoreCase)))
         {
             return;
@@ -1517,11 +1543,11 @@ public class ItemHelper(
         }
     }
 
-    /**
-     * Add a single stack of cartridges to the ammo box
-     * @param ammoBox Box to add cartridges to
-     * @param ammoBoxDetails Item template from items db
-     */
+    /// <summary>
+    /// Add a single stack of cartridges to the ammo box
+    /// </summary>
+    /// <param name="ammoBox">Box item to add cartridges to</param>
+    /// <param name="ammoBoxDetails">Item template from items db</param>
     public void AddSingleStackCartridgesToAmmoBox(List<Item> ammoBox, TemplateItem ammoBoxDetails)
     {
         var ammoBoxMaxCartridgeCount = ammoBoxDetails.Properties?.StackSlots?[0].MaxCount ?? 0;
@@ -1536,13 +1562,13 @@ public class ItemHelper(
         );
     }
 
-    /**
-     * Check if item is stored inside of a container
-     * @param itemToCheck Item to check is inside of container
-     * @param desiredContainerSlotId Name of slot to check item is in e.g. SecuredContainer/Backpack
-     * @param items Inventory with child parent items to check
-     * @returns True when item is in container
-     */
+    /// <summary>
+    /// Check if item is stored inside a container
+    /// </summary>
+    /// <param name="itemToCheck">Item to check is inside of container</param>
+    /// <param name="desiredContainerSlotId">Name of slot to check item is in e.g. SecuredContainer/Backpack</param>
+    /// <param name="items">Inventory with child parent items to check</param>
+    /// <returns>True when item is in container</returns>
     public bool ItemIsInsideContainer(Item itemToCheck, string desiredContainerSlotId, List<Item> items)
     {
         // Get items parent
@@ -1561,16 +1587,16 @@ public class ItemHelper(
         return ItemIsInsideContainer(parent, desiredContainerSlotId, items);
     }
 
-    /**
-     * Add child items (cartridges) to a magazine
-     * @param magazine Magazine to add child items to
-     * @param magTemplate Db template of magazine
-     * @param staticAmmoDist Cartridge distribution
-     * @param caliber Caliber of cartridge to add to magazine
-     * @param minSizePercent % the magazine must be filled to
-     * @param defaultCartridgeTpl Cartridge to use when none found
-     * @param weapon Weapon the magazine will be used for (if passed in uses Chamber as whitelist)
-     */
+    /// <summary>
+    /// Add child items (cartridges) to a magazine
+    /// </summary>
+    /// <param name="magazine">Magazine to add child items to</param>
+    /// <param name="magTemplate">Db template of magazine</param>
+    /// <param name="staticAmmoDist">Cartridge distribution</param>
+    /// <param name="caliber">Caliber of cartridge to add to magazine</param>
+    /// <param name="minSizePercent">OPTIONAL - % the magazine must be filled to</param>
+    /// <param name="defaultCartridgeTpl">OPTIONAL -Cartridge to use when none found</param>
+    /// <param name="weapon">OPTIONAL -Weapon the magazine will be used for (if passed in uses Chamber as whitelist)</param>
     public void FillMagazineWithRandomCartridge(
         List<Item> magazine,
         TemplateItem magTemplate,
@@ -1582,7 +1608,7 @@ public class ItemHelper(
     {
         var chosenCaliber = caliber ?? GetRandomValidCaliber(magTemplate);
 
-        // Edge case for the Klin pp-9, it has a typo in its ammo caliber
+        // Edge case - Klin pp-9 has a typo in its ammo caliber
         if (chosenCaliber == "Caliber9x18PMM")
         {
             chosenCaliber = "Caliber9x18PM";
@@ -2180,21 +2206,41 @@ public class ItemHelper(
             }
         }
     }
-}
 
-public class ItemSize
-{
-    [JsonPropertyName("width")]
-    public int Width
+    /// <summary>
+    ///     Get a 2D grid of a container's item slots
+    /// </summary>
+    /// <param name="containerTpl">Tpl id of the container</param>
+    public int[][] GetContainerMapping(string containerTpl)
     {
-        get;
-        set;
+        // Get template from db
+        var containerTemplate = GetItem(containerTpl).Value;
+
+        // Get height/width
+        var height = containerTemplate.Properties.Grids[0].Props.CellsV;
+        var width = containerTemplate.Properties.Grids[0].Props.CellsH;
+
+        return GetBlankContainerMap(height.Value, width.Value);
     }
 
-    [JsonPropertyName("height")]
-    public int Height
+    /// <summary>
+    ///     Get a blank two-dimensional representation of a container
+    /// </summary>
+    /// <param name="containerH">Horizontal size of container</param>
+    /// <param name="containerY">Vertical size of container</param>
+    /// <returns>Two-dimensional representation of container</returns>
+    public int[][] GetBlankContainerMap(int containerY, int containerX)
     {
-        get;
-        set;
+        //var x = new int[containerY][];
+        //for (int i = 0; i < containerY; i++)
+        //{
+        //    x[i] = new int[containerH];
+        //}
+
+        //return x;
+
+        return Enumerable.Range(0, containerY)
+            .Select(i => new int[containerX])
+            .ToArray();
     }
 }

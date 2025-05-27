@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Weather;
 using SPTarkov.Server.Core.Models.Enums;
@@ -135,7 +135,9 @@ public class WeatherGenerator(
     /// <param name="timestamp"> Optional, timestamp used </param>
     protected void SetCurrentDateTime(Weather weather, long? timestamp = null)
     {
-        var inRaidTime = _weatherHelper.GetInRaidTime(timestamp);
+        var inRaidTime = timestamp is null
+            ? _weatherHelper.GetInRaidTime()
+            :  _weatherHelper.GetInRaidTime(timestamp.Value);
         var normalTime = GetBsgFormattedTime(inRaidTime);
         var formattedDate = _timeUtil.FormatDate(timestamp.HasValue ? _timeUtil.GetDateTimeFromTimeStamp(timestamp.Value) : DateTime.UtcNow);
         var datetimeBsgFormat = $"{formattedDate} {normalTime}";

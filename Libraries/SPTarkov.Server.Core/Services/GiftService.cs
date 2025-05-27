@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
@@ -132,7 +132,7 @@ public class GiftService(
                 _mailSendService.SendLocalisedNpcMessageToPlayer(
                     playerId,
                     giftData.Trader,
-                    MessageType.MESSAGE_WITH_ITEMS,
+                    MessageType.MessageWithItems,
                     giftData.LocaleTextId,
                     giftData.Items,
                     _timeUtil.GetHoursAsSeconds(giftData.CollectionTimeHours ?? 1)
@@ -143,7 +143,7 @@ public class GiftService(
                 _mailSendService.SendLocalisedNpcMessageToPlayer(
                     playerId,
                     giftData.Trader,
-                    MessageType.MESSAGE_WITH_ITEMS,
+                    MessageType.MessageWithItems,
                     giftData.MessageText,
                     giftData.Items,
                     _timeUtil.GetHoursAsSeconds(giftData.CollectionTimeHours ?? 1)
@@ -212,11 +212,11 @@ public class GiftService(
         switch (giftData.Sender)
         {
             case GiftSenderType.System:
-                return MessageType.SYSTEM_MESSAGE;
+                return MessageType.SystemMessage;
             case GiftSenderType.Trader:
-                return MessageType.NPC_TRADER;
+                return MessageType.NpcTraderMessage;
             case GiftSenderType.User:
-                return MessageType.USER_MESSAGE;
+                return MessageType.UserMessage;
             default:
                 _logger.Error(_localisationService.GetText("gift-unable_to_handle_message_type_command", giftData.Sender));
                 return null;

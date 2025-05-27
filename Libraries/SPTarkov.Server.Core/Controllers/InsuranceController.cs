@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -31,7 +31,6 @@ public class InsuranceController(
     ItemHelper _itemHelper,
     ProfileHelper _profileHelper,
     WeightedRandomHelper _weightedRandomHelper,
-    TraderHelper _traderHelper,
     PaymentService _paymentService,
     InsuranceService _insuranceService,
     DatabaseService _databaseService,
@@ -39,6 +38,7 @@ public class InsuranceController(
     RagfairPriceService _ragfairPriceService,
     LocalisationService _localisationService,
     SaveServer _saveServer,
+    TraderStore _traderStore,
     ConfigServer _configServer,
     ICloner _cloner
 )
@@ -209,9 +209,9 @@ public class InsuranceController(
         }
 
         // Log the number of items marked for deletion, if any
-        if (!toDelete.Any())
+        if (_logger.IsLogEnabled(LogLevel.Debug))
         {
-            if (_logger.IsLogEnabled(LogLevel.Debug))
+            if (toDelete.Any())
             {
                 _logger.Debug($"Marked {toDelete.Count} items for deletion from insurance.");
             }
@@ -582,6 +582,10 @@ public class InsuranceController(
         {
             HandleLabsInsurance(traderDialogMessages, insurance);
         }
+        else if (IsMapLabyrinthAndInsuranceDisabled(insurance))
+        {
+            HandleLabyrinthInsurance(traderDialogMessages, insurance);
+        }
         else if (insurance.Items?.Count == 0)
             // Not labs and no items to return
         {
@@ -595,7 +599,7 @@ public class InsuranceController(
         _mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionId,
             insurance.TraderId,
-            insurance.MessageType ?? MessageType.SYSTEM_MESSAGE,
+            insurance.MessageType ?? MessageType.SystemMessage,
             insurance.MessageTemplateId,
             insurance.Items,
             insurance.MaxStorageTime,
@@ -613,6 +617,18 @@ public class InsuranceController(
     {
         return string.Equals(insurance.SystemData?.Location, labsId, StringComparison.OrdinalIgnoreCase) &&
                !(_databaseService.GetLocation(labsId)?.Base?.Insurance.GetValueOrDefault(false) ?? false);
+    }
+
+    /// <summary>
+    ///     Edge case - labyrinth doesn't allow for insurance returns unless location config is edited
+    /// </summary>
+    /// <param name="insurance">The insured items to process</param>
+    /// <param name="labsId">OPTIONAL - id of labs location</param>
+    /// <returns></returns>
+    protected bool IsMapLabyrinthAndInsuranceDisabled(Insurance insurance, string labyrinthId = "labyrinth")
+    {
+        return string.Equals(insurance.SystemData?.Location, labyrinthId, StringComparison.OrdinalIgnoreCase) &&
+               !(_databaseService.GetLocation(labyrinthId)?.Base?.Insurance.GetValueOrDefault(false) ?? false);
     }
 
     /// <summary>
@@ -634,6 +650,25 @@ public class InsuranceController(
         insurance.Items = [];
     }
 
+    /// <summary>
+    ///     Update IInsurance object with new messageTemplateId and wipe out items array data
+    /// </summary>
+    /// <param name="traderDialogMessages"></param>
+    /// <param name="insurance"></param>
+    protected void HandleLabyrinthInsurance(Dictionary<string, List<string>?>? traderDialogMessages, Insurance insurance)
+    {
+        // Use labs specific messages if available, otherwise use default
+        var responseMessageIds  =
+            traderDialogMessages["insuranceFailedLabyrinth"]?.Count > 0
+                ? traderDialogMessages["insuranceFailedLabyrinth"]
+                : traderDialogMessages["insuranceFailed"];
+
+        insurance.MessageTemplateId = _randomUtil.GetArrayValue(responseMessageIds);
+
+        // Remove all insured items taken into labs
+        insurance.Items = [];
+    }
+
 
     /// <summary>
     ///     Roll for chance of item being 'lost'
@@ -643,7 +678,7 @@ public class InsuranceController(
     /// <returns>Should item be deleted</returns>
     protected bool? RollForDelete(string traderId, Item? insuredItem = null)
     {
-        var trader = _traderHelper.GetTraderById(traderId);
+        var trader = _traderStore.GetTraderById(traderId);
         if (trader is null)
         {
             return null;

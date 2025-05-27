@@ -1,5 +1,5 @@
 using System.Globalization;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
@@ -73,7 +73,21 @@ public class LocaleService(
     /// <returns>A dictionary representing the merged result of database and custom locales.</returns>
     private Dictionary<string, string> CombineDbWithCustomLocales(Dictionary<string, string> dbLocales, Dictionary<string, string> customLocales)
     {
-        return dbLocales.Union(customLocales).ToDictionary(x => x.Key, x => x.Value);
+        try
+        {
+            return dbLocales
+                .Concat(customLocales)
+                .GroupBy(kvp => kvp.Key)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Last().Value
+                );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     /// <summary>
@@ -83,7 +97,7 @@ public class LocaleService(
     /// <returns> Locale e.g en/ge/cz/cn </returns>
     public string GetDesiredGameLocale()
     {
-        if (_localeConfig.GameLocale.ToLower() == "system")
+        if (string.Equals(_localeConfig.GameLocale, "system", StringComparison.OrdinalIgnoreCase))
         {
             return GetPlatformForClientLocale();
         }
@@ -98,7 +112,7 @@ public class LocaleService(
     /// <returns> Locale e.g en/ge/cz/cn </returns>
     public string GetDesiredServerLocale()
     {
-        if (_localeConfig.ServerLocale.ToLower() == "system")
+        if (string.Equals(_localeConfig.ServerLocale, "system", StringComparison.OrdinalIgnoreCase))
         {
             return GetPlatformForServerLocale();
         }
@@ -228,6 +242,11 @@ public class LocaleService(
         AddToDictionary(locale, localeKey, localeValue, customClientLocales);
     }
 
+    public void RemoveCustomClientLocale(string locale, string localeKey)
+    {
+        customClientLocales.Remove(localeKey);
+    }
+
     private void AddToDictionary(string locale, string localeKey, string localeValue,
         Dictionary<string, Dictionary<string, string>> dictionaryToAddTo)
     {
@@ -241,7 +260,7 @@ public class LocaleService(
 
         if (!localeDictToAddTo.TryAdd(localeKey, localeValue))
         {
-            _logger.Error($"Unable to add: {localeKey} {localeValue} to custom locale dictionary: {locale}");
+            localeDictToAddTo[localeKey] = localeValue;
         }
     }
 

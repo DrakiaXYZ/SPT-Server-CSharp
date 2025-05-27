@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
@@ -209,7 +209,7 @@ public class LocationLifecycleService
     /// <param name="locationData"> Maps location base data </param>
     protected void AdjustExtracts(string playerSide, string location, LocationBase locationData)
     {
-        var playerIsScav = playerSide.ToLower() == "savage";
+        var playerIsScav = string.Equals(playerSide, "savage", StringComparison.OrdinalIgnoreCase);
         if (!playerIsScav)
         {
             return;
@@ -225,7 +225,7 @@ public class LocationLifecycleService
         }
 
         // Find only scav extracts and overwrite existing exits with them
-        var scavExtracts = mapExtracts.Where(extract => extract.Side.ToLower() == "scav").ToList();
+        var scavExtracts = mapExtracts.Where(extract => string.Equals(extract.Side, "scav", StringComparison.OrdinalIgnoreCase)).ToList();
         if (scavExtracts.Count > 0)
             // Scav extracts found, use them
         {
@@ -347,7 +347,7 @@ public class LocationLifecycleService
         locationBaseClone.UnixDateTime = _timeUtil.GetTimeStamp();
 
         // Don't generate loot for hideout
-        if (name.ToLower() == "hideout")
+        if (string.Equals(name, "hideout", StringComparison.OrdinalIgnoreCase))
         {
             return locationBaseClone;
         }
@@ -503,17 +503,20 @@ public class LocationLifecycleService
         var mailableLoot = new List<Item>();
 
         var parentId = _hashUtil.Generate();
-        foreach (var item in loot)
+        foreach (var itemAndChildren in loot)
         {
-            item.ParentId = parentId;
-            mailableLoot.Add(item);
+            // Set all root items parent to new id
+            itemAndChildren[0].ParentId = parentId;
         }
+
+        // Flatten
+        mailableLoot.AddRange(loot.SelectMany(x => x));
 
         // Send message from fence giving player reward generated above
         _mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionId,
             Traders.FENCE,
-            MessageType.MESSAGE_WITH_ITEMS,
+            MessageType.MessageWithItems,
             _randomUtil.GetArrayValue(_traderConfig.Fence.CoopExtractGift.MessageLocaleIds),
             mailableLoot,
             _timeUtil.GetHoursAsSeconds(_traderConfig.Fence.CoopExtractGift.GiftExpiryHours)
@@ -905,7 +908,7 @@ public class LocationLifecycleService
     {
         // Exclude completed quests
         var activeQuestIdsInProfile = profileQuests
-            .Where(quest => quest.Status is QuestStatusEnum.AvailableForStart or QuestStatusEnum.Success)
+            .Where(quest => quest.Status is not QuestStatusEnum.AvailableForStart and not QuestStatusEnum.Success)
             .Select(status => status.QId);
 
         // Get db details of quests we found above
@@ -1131,7 +1134,7 @@ public class LocationLifecycleService
         _mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionId,
             traderId,
-            MessageType.BTR_ITEMS_DELIVERY,
+            MessageType.BtrItemsDelivery,
             messageId,
             items,
             messageStoreTime

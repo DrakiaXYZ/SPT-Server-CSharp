@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -110,7 +110,7 @@ public class DurabilityLimitsHelper(
         var roleExistsInConfig = _botConfig.Durability.BotDurabilities.ContainsKey(botRole);
         if (!roleExistsInConfig)
         {
-            _logger.Warning($"{botRole} doesn't exist in bot config durability values, using default fallback");
+            _logger.Debug($"{botRole} doesn't exist in bot config durability values, using default fallback");
 
             return "default";
         }

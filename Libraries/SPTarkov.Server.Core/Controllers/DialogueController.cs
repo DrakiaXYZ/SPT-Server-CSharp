@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Helpers.Dialogue;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
@@ -95,7 +95,7 @@ public class DialogueController(
         };
     }
 
-    protected List<UserDialogInfo> GetActiveChatBots()
+    public List<UserDialogInfo> GetActiveChatBots()
     {
         var activeBots = new List<UserDialogInfo>();
 
@@ -147,7 +147,7 @@ public class DialogueController(
         var result = new DialogueInfo
         {
             Id = dialogueId,
-            Type = dialogue?.Type ?? MessageType.NPC_TRADER,
+            Type = dialogue?.Type ?? MessageType.NpcTraderMessage,
             Message = _dialogueHelper.GetMessagePreview(dialogue),
             New = dialogue?.New,
             AttachmentsNew = dialogue?.AttachmentsNew,
@@ -173,7 +173,7 @@ public class DialogueController(
         var profile = _saveServer.GetProfile(sessionId);
 
         // User to user messages are special in that they need the player to exist in them, add if they don't
-        if (messageType == MessageType.USER_MESSAGE &&
+        if (messageType == MessageType.UserMessage &&
             dialog?.Users is not null &&
             dialog.Users.All(userDialog => userDialog.Id != profile.CharacterData?.PmcData?.SessionId))
         {
@@ -253,7 +253,7 @@ public class DialogueController(
             Type = request.Type
         };
 
-        if (request.Type != MessageType.USER_MESSAGE)
+        if (request.Type != MessageType.UserMessage)
         {
             return profile.DialogueRecords[request.DialogId!];
         }

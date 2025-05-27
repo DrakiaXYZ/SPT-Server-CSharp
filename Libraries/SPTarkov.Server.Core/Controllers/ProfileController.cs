@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Launcher;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
@@ -49,29 +50,29 @@ public class ProfileController(
     /// <summary>
     ///     Handle launcher/profile/info
     /// </summary>
-    /// <param name="sessionID">Session/Player id</param>
+    /// <param name="sessionId">Session/Player id</param>
     /// <returns></returns>
-    public virtual MiniProfile GetMiniProfile(string sessionID)
+    public virtual MiniProfile GetMiniProfile(string sessionId)
     {
-        var profile = _saveServer.GetProfile(sessionID);
+        var profile = _saveServer.GetProfile(sessionId);
         if (profile?.CharacterData == null)
         {
-            throw new Exception($"Unable to find character data for id: {sessionID}. Profile may be corrupt");
+            throw new Exception($"Unable to find character data for id: {sessionId}. Profile may be corrupt");
         }
 
         var pmc = profile.CharacterData.PmcData;
         var maxLvl = _profileHelper.GetMaxLevel();
 
         // Player hasn't completed profile creation process, send defaults
-        var currlvl = pmc?.Info?.Level.GetValueOrDefault(1);
-        var xpToNextLevel = _profileHelper.GetExperience((currlvl ?? 1) + 1);
+        var currentLevel = pmc?.Info?.Level.GetValueOrDefault(1);
+        var xpToNextLevel = _profileHelper.GetExperience((currentLevel ?? 1) + 1);
         if (pmc?.Info?.Level == null)
         {
             return new MiniProfile
             {
                 Username = profile.ProfileInfo?.Username ?? "",
                 Nickname = "unknown",
-                HasPassword = profile.ProfileInfo.Password != "",
+                HasPassword = profile.ProfileInfo?.Password != "",
                 Side = "unknown",
                 CurrentLevel = 0,
                 CurrentExperience = 0,
@@ -86,13 +87,13 @@ public class ProfileController(
 
         return new MiniProfile
         {
-            Username = profile.ProfileInfo.Username,
+            Username = profile.ProfileInfo?.Username,
             Nickname = pmc.Info.Nickname,
-            HasPassword = profile.ProfileInfo.Password != "",
+            HasPassword = profile.ProfileInfo?.Password != "",
             Side = pmc.Info.Side,
             CurrentLevel = pmc.Info.Level,
             CurrentExperience = pmc.Info.Experience ?? 0,
-            PreviousExperience = currlvl == 0 ? 0 : _profileHelper.GetExperience(currlvl.Value),
+            PreviousExperience = currentLevel == 0 ? 0 : _profileHelper.GetExperience(currentLevel.Value),
             NextLevel = xpToNextLevel,
             MaxLevel = maxLvl,
             Edition = profile.ProfileInfo?.Edition ?? "",
@@ -104,54 +105,54 @@ public class ProfileController(
     /// <summary>
     ///     Handle client/game/profile/list
     /// </summary>
-    /// <param name="sessionID">Session/Player id</param>
+    /// <param name="sessionId">Session/Player id</param>
     /// <returns>Return a full profile, scav and pmc profiles + meta data</returns>
-    public virtual List<PmcData> GetCompleteProfile(string sessionID)
+    public virtual List<PmcData> GetCompleteProfile(string sessionId)
     {
-        return _profileHelper.GetCompleteProfile(sessionID);
+        return _profileHelper.GetCompleteProfile(sessionId);
     }
 
     /// <summary>
     ///     Handle client/game/profile/create
     /// </summary>
     /// <param name="request">Create profile request</param>
-    /// <param name="sessionID">Player id</param>
+    /// <param name="sessionId">Player id</param>
     /// <returns>Player id</returns>
-    public virtual string CreateProfile(ProfileCreateRequestData request, string sessionID)
+    public virtual string CreateProfile(ProfileCreateRequestData request, string sessionId)
     {
-        return _createProfileService.CreateProfile(sessionID, request);
+        return _createProfileService.CreateProfile(sessionId, request);
     }
 
     /// <summary>
     ///     Generate a player scav object
     ///     PMC profile MUST exist first before player-scav can be generated
     /// </summary>
-    /// <param name="sessionID">Player id</param>
+    /// <param name="sessionId">Player id</param>
     /// <returns>PmcData</returns>
-    public virtual PmcData GeneratePlayerScav(string sessionID)
+    public virtual PmcData GeneratePlayerScav(string sessionId)
     {
-        return _playerScavGenerator.Generate(sessionID);
+        return _playerScavGenerator.Generate(sessionId);
     }
 
     /// <summary>
     ///     Handle client/game/profile/nickname/validate
     /// </summary>
     /// <param name="request">Validate nickname request</param>
-    /// <param name="sessionID">Session/Player id</param>
+    /// <param name="sessionId">Session/Player id</param>
     /// <returns></returns>
-    public virtual string ValidateNickname(ValidateNicknameRequestData request, string sessionID)
+    public virtual NicknameValidationResult ValidateNickname(ValidateNicknameRequestData request, string sessionId)
     {
-        if (request.Nickname.Length < 3)
+        if (request.Nickname?.Length < 3)
         {
-            return "tooshort";
+            return NicknameValidationResult.Short;
         }
 
-        if (_profileHelper.IsNicknameTaken(request, sessionID))
+        if (_profileHelper.IsNicknameTaken(request, sessionId))
         {
-            return "taken";
+            return NicknameValidationResult.Taken;
         }
 
-        return "OK";
+        return NicknameValidationResult.Valid;
     }
 
     /// <summary>
@@ -159,21 +160,21 @@ public class ProfileController(
     ///     Client allows player to adjust their profile name
     /// </summary>
     /// <param name="request">Change nickname request</param>
-    /// <param name="sessionID">Player id</param>
+    /// <param name="sessionId">Player id</param>
     /// <returns></returns>
-    public virtual string ChangeNickname(ProfileChangeNicknameRequestData request, string sessionID)
+    public virtual NicknameValidationResult ChangeNickname(ProfileChangeNicknameRequestData request, string sessionId)
     {
         var output = ValidateNickname(
             new ValidateNicknameRequestData
             {
                 Nickname = request.Nickname
             },
-            sessionID
+            sessionId
         );
 
-        if (output == "OK")
+        if (output == NicknameValidationResult.Valid)
         {
-            var pmcData = _profileHelper.GetPmcProfile(sessionID);
+            var pmcData = _profileHelper.GetPmcProfile(sessionId);
 
             pmcData.Info.Nickname = request.Nickname;
             pmcData.Info.LowerNickname = request.Nickname.ToLower();

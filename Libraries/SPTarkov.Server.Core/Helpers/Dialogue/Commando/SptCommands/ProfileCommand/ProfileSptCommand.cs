@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando.SptCommands;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
@@ -20,16 +20,15 @@ public class ProfileSptCommand(
     ProfileHelper _profileHelper
 ) : ISptCommand
 {
-    /**
-     * Regex to account for all these cases:
-     * spt profile level 20
-     * spt profile skill metabolism 10
-     */
-    protected Regex _commandRegex = new(
-        @"^spt profile (?<command>level|skill)((?<=.*skill) (?<skill>[\w]+))? (?<quantity>(?!0+)[0-9]+)$"
-    );
+    /// <summary>
+    /// Regex to account for all these cases
+    /// spt profile level 20
+    /// spt profile skill metabolism 10
+    /// </summary>
+    protected static readonly Regex _commandRegex = new(
+        @"^spt profile (?<command>level|skill)((?<=.*skill) (?<skill>[\w]+))? (?<quantity>(?!0+)[0-9]+)$");
 
-    protected Regex _examineRegex = new(@"^spt profile (?<command>examine)");
+    protected static readonly Regex _examineRegex = new(@"^spt profile (?<command>examine)");
 
     public string GetCommand()
     {
@@ -61,9 +60,9 @@ public class ProfileSptCommand(
 
         var result = _commandRegex.Match(request.Text);
 
-        var command = result.Groups["command"].Captures[0].Value;
-        var skill = result.Groups["skill"].Captures[0].Value;
-        var quantity = int.Parse(result.Groups["quantity"].Captures[0].Value);
+        var command = result.Groups["command"].Length > 0 ? result.Groups["command"].Captures[0].Value : null;
+        var skill = result.Groups["skill"].Length > 0 ?  result.Groups["skill"].Captures[0].Value : null;
+        var quantity = int.Parse(result.Groups["quantity"].Length > 0 ? result.Groups["quantity"].Captures[0].Value : "0");
 
         ProfileChangeEvent profileChangeEvent;
         switch (command)
@@ -85,7 +84,7 @@ public class ProfileSptCommand(
                 {
                     var enumSkill = Enum.GetValues<SkillTypes>()
                         .Cast<SkillTypes?>()
-                        .FirstOrDefault(t => t?.ToString().ToLower() == skill
+                        .FirstOrDefault(t => string.Equals(t?.ToString(), skill, StringComparison.OrdinalIgnoreCase)
                         );
 
                     if (enumSkill == null)

@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -167,7 +167,7 @@ public class ProfileFixerService(
         // Iterate over clothing
         var customizationDb = _databaseService.GetTemplates().Customization;
         var customizationDbArray = customizationDb.Values;
-        var playerIsUsec = pmcProfile.Info.Side.ToLower() == "usec";
+        var playerIsUsec = string.Equals(pmcProfile.Info.Side, "usec", StringComparison.OrdinalIgnoreCase);
 
         // Check Head
         if (customizationDb[pmcProfile.Customization.Head] is null)
@@ -666,7 +666,7 @@ public class ProfileFixerService(
 
             foreach (var activeQuest in repeatable.ActiveQuests)
             {
-                if (!_traderHelper.TraderEnumHasValue(activeQuest.TraderId))
+                if (!_traderHelper.TraderExists(activeQuest.TraderId))
                 {
                     _logger.Error(_localisationService.GetText("fixer-trader_found", activeQuest.TraderId));
                     if (_coreConfig.Fixes.RemoveModItemsFromProfile)
@@ -701,7 +701,7 @@ public class ProfileFixerService(
         }
 
         foreach (var TraderPurchaseKvP in fullProfile.TraderPurchases
-                     .Where(TraderPurchase => !_traderHelper.TraderEnumHasValue(TraderPurchase.Key)))
+                     .Where(TraderPurchase => !_traderHelper.TraderExists(TraderPurchase.Key)))
         {
             _logger.Error(_localisationService.GetText("fixer-trader_found", TraderPurchaseKvP.Key));
             if (_coreConfig.Fixes.RemoveModItemsFromProfile)
@@ -872,7 +872,7 @@ public class ProfileFixerService(
     protected Bonus? GetBonusFromProfile(List<Bonus>? profileBonuses, Bonus bonus)
     {
         // match by id first, used by "TextBonus" bonuses
-        if (bonus.Id is null)
+        if (bonus.Id is not null)
         {
             return profileBonuses?.FirstOrDefault(x => x.Id == bonus.Id);
         }
@@ -893,7 +893,7 @@ public class ProfileFixerService(
         foreach (var traderKvP in fullProfile.CharacterData?.PmcData?.TradersInfo)
         {
             var traderId = traderKvP.Key;
-            if (!_traderHelper.TraderEnumHasValue(traderId))
+            if (!_traderHelper.TraderExists(traderId))
             {
                 _logger.Error(_localisationService.GetText("fixer-trader_found", traderId));
                 if (_coreConfig.Fixes.RemoveInvalidTradersFromProfile)
@@ -907,7 +907,7 @@ public class ProfileFixerService(
         foreach (var traderKvP in fullProfile.CharacterData.ScavData?.TradersInfo)
         {
             var traderId = traderKvP.Key;
-            if (!_traderHelper.TraderEnumHasValue(traderId))
+            if (!_traderHelper.TraderExists(traderId))
             {
                 _logger.Error(_localisationService.GetText("fixer-trader_found", traderId));
                 if (_coreConfig.Fixes.RemoveInvalidTradersFromProfile)

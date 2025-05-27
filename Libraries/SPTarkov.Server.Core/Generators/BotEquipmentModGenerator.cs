@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
-using SPTarkov.Common.Annotations;
+using System.Globalization;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -305,7 +306,7 @@ public class BotEquipmentModGenerator(
         var platesFromDb = existingPlateTplPool.Select(plateTpl => _itemHelper.GetItem(plateTpl).Value);
 
         // Filter plates to the chosen level based on its armorClass property
-        var platesOfDesiredLevel = platesFromDb.Where(item => item.Properties.ArmorClass.Value == double.Parse(chosenArmorPlateLevelString));
+        var platesOfDesiredLevel = platesFromDb.Where(item => item.Properties.ArmorClass.Value == double.Parse(chosenArmorPlateLevelString, CultureInfo.InvariantCulture));
         if (platesOfDesiredLevel.Any())
         {
             // Plates found

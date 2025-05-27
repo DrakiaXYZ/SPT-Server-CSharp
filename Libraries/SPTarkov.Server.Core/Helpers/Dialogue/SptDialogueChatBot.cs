@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando;
 using SPTarkov.Server.Core.Helpers.Dialogue.SPTFriend.Commands;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
@@ -47,7 +47,7 @@ public class SptDialogueChatBot(
         var sender = _profileHelper.GetPmcProfile(sessionId);
         var sptFriendUser = GetChatBot();
 
-        if (request.Text?.ToLower() == "help")
+        if (string.Equals(request.Text, "help", StringComparison.OrdinalIgnoreCase))
         {
             return SendPlayerHelpMessage(sessionId, request);
         }

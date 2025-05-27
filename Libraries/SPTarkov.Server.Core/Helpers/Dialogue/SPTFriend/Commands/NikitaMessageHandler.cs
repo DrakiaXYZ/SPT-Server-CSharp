@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Services;
@@ -18,7 +18,7 @@ public class NikitaMessageHandler(
 
     public bool CanHandle(string message)
     {
-        return message.ToLower() == "nikita";
+        return string.Equals(message, "nikita", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Process(string sessionId, UserDialogInfo sptFriendUser, PmcData? sender, object? extraInfo = null)

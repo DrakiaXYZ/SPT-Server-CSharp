@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Ws;
@@ -55,7 +55,7 @@ public class JsonUtil
             new EftEnumConverter<EquipmentSlots>(),
             new EftEnumConverter<BuffType>(),
             new EftEnumConverter<BodyPartColliderType>(),
-
+            new EftEnumConverter<BanType>(),
             new EftEnumConverter<LogLevel>(),
             new EftEnumConverter<LogTextColor>(),
             new EftEnumConverter<LogBackgroundColor>(),

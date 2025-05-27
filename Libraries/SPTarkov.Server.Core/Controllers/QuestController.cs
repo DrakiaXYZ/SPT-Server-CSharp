@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -111,7 +111,7 @@ public class QuestController(
         _mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionID,
             questFromDb.TraderId,
-            MessageType.QUEST_START,
+            MessageType.QuestStart,
             messageId,
             startedQuestRewardItems.ToList(),
             _timeUtil.GetHoursAsSeconds((int) _questHelper.GetMailItemRedeemTimeHoursForProfile(pmcData))

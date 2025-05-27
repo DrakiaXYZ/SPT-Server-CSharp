@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Mod;
@@ -316,7 +316,7 @@ public class BackupService
 
         foreach (var mod in mods)
         {
-            result.Add($"{mod.PackageJson.Author} - {mod.PackageJson.Version ?? ""}");
+            result.Add($"{mod.ModMetadata.Author} - {mod.ModMetadata.Version ?? ""}");
         }
 
         return result;

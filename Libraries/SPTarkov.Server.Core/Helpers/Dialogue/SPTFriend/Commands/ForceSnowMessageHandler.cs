@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
@@ -25,7 +25,7 @@ public class ForceSnowMessageHandler(
 
     public bool CanHandle(string message)
     {
-        return message.ToLower() == "itsonlysnowalan";
+        return string.Equals(message, "itsonlysnowalan", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Process(string sessionId, UserDialogInfo sptFriendUser, PmcData? sender, object? extraInfo = null)

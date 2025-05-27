@@ -18,18 +18,30 @@ namespace SPTarkov.Server.Core.Utils.Json.Converters;
 
 public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteractionRequestData>
 {
+    private static Dictionary<string, Func<string, BaseInteractionRequestData?>> _modHandlers = new();
     public override BaseInteractionRequestData? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         using var jsonDocument = JsonDocument.ParseValue(ref reader);
-        // Need to read the actual JSON text here so we can convert to the correct type
+
+        // Get request as raw JSON
         var jsonText = jsonDocument.RootElement.GetRawText();
-        var value = JsonSerializer.Deserialize<BaseInteractionRequestData>(jsonText);
-        return ConvertToCorrectType(value, jsonText);
+
+        // Get the underlying 'type' of action the client is requesting we do
+        var action = jsonDocument.RootElement.GetProperty("Action").GetString();
+
+        return ConvertToCorrectType(action, jsonDocument.RootElement, jsonText);
     }
 
-    private BaseInteractionRequestData? ConvertToCorrectType(BaseInteractionRequestData? value, string jsonText)
+    /// <summary>
+    /// Handle the players action from received from client
+    /// </summary>
+    /// <param name="action">e.g. "Eat"</param>
+    /// <param name="jsonDocumentRoot">Root json element of client request</param>
+    /// <param name="jsonText">Raw JSON request text</param>
+    /// <returns>BaseInteractionRequestData</returns>
+    private static BaseInteractionRequestData? ConvertToCorrectType(string action, JsonElement jsonDocumentRoot, string jsonText)
     {
-        switch (value.Action)
+        switch (action)
         {
             case ItemEventActions.CUSTOMIZATION_BUY:
                 return JsonSerializer.Deserialize<BuyClothingRequestData>(jsonText);
@@ -82,9 +94,7 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
                 return JsonSerializer.Deserialize<ChangeWishlistItemCategoryRequest>(jsonText);
             case ItemEventActions.TRADING_CONFIRM:
                 {
-                    var json = JsonSerializer.Deserialize<ProcessBaseTradeRequestData>(jsonText);
-
-                    switch (json.Type)
+                    switch (jsonDocumentRoot.GetProperty("type").GetString())
                     {
                         case ItemEventActions.BUY_FROM_TRADER:
                             return JsonSerializer.Deserialize<ProcessBuyTradeRequestData>(jsonText);
@@ -92,7 +102,7 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
                             return JsonSerializer.Deserialize<ProcessSellTradeRequestData>(jsonText);
                         default:
                             throw new Exception(
-                                $"Unhandled action type {value.Action}, make sure the BaseInteractionRequestDataConverter has the deserialization for this action handled."
+                                $"Unhandled action type: {action}, make sure BaseInteractionRequestDataConverter has deserialization for this action."
                             );
                     }
                 }
@@ -168,9 +178,21 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
             case ItemEventActions.PIN_LOCK:
                 return JsonSerializer.Deserialize<PinOrLockItemRequest>(jsonText);
             default:
+                if (_modHandlers.TryGetValue(action, out var handler))
+                {
+                    return handler(jsonText);
+                }
                 throw new Exception(
-                    $"Unhandled action type {value.Action}, make sure the BaseInteractionRequestDataConverter has the deserialization for this action handled."
+                    $"Unhandled action type {action}, make sure the BaseInteractionRequestDataConverter has the deserialization for this action handled."
                 );
+        }
+    }
+
+    public static void RegisterModDataHandler(string action, Func<string, BaseInteractionRequestData?> handler)
+    {
+        if (!_modHandlers.TryAdd(action, handler))
+        {
+            throw new Exception($"Unable to register action {action} to BaseInteractionRequestDataConverter as it already exists.");
         }
     }
 

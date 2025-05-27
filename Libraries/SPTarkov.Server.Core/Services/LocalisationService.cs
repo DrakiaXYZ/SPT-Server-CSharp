@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
@@ -84,9 +84,14 @@ public class LocalisationService
     /// <returns> Locale text </returns>
     public string GetRandomTextThatMatchesPartialKey(string partialKey)
     {
-        var values = _localeService.GetLocaleKeysThatStartsWithValue(partialKey);
-        var chosenKey = _randomUtil.GetArrayValue(values);
+        var matchingKeys = GetKeys().Where(x => x.Contains(partialKey)).ToList();
+        if (!matchingKeys.Any())
+        {
+            _logger.Warning($"No locale keys found for: {partialKey}");
 
-        return GetText(chosenKey);
+            return string.Empty;
+        }
+
+        return GetText(_randomUtil.GetArrayValue(matchingKeys));
     }
 }

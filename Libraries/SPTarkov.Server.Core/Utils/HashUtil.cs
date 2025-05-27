@@ -2,7 +2,7 @@ using System.IO.Hashing;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.Server.Core.Utils;
 
@@ -28,7 +28,7 @@ public partial class HashUtil(RandomUtil _randomUtil)
         objectId[3] = (byte) timestamp;
 
         // Random value (5 bytes)
-        _randomUtil.Random.NextBytes(objectId.Slice(4, 5));
+        _randomUtil.NextBytes(objectId.Slice(4, 5));
 
         // Incrementing counter (3 bytes)
         // 24-bit counter

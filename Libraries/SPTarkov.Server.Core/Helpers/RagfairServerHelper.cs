@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -130,7 +130,7 @@ public class RagfairServerHelper(
         mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionID,
             Traders.RAGMAN,
-            MessageType.MESSAGE_WITH_ITEMS,
+            MessageType.MessageWithItems,
             goodsReturnedTemplate,
             returnedItems,
             timeUtil.GetHoursAsSeconds((int) databaseService.GetGlobals().Configuration.RagFair.YourOfferDidNotSellMaxStorageTimeInHour)

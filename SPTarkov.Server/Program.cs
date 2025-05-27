@@ -21,25 +21,25 @@ public static class Program
         // Initialize the program variables
         ProgramStatics.Initialize();
 
-        // Search for mod dlls
-        var mods = ModDllLoader.LoadAllMods();
-
         // Create web builder and logger
         var builder = CreateNewHostBuilder(args);
 
-        // validate and sort mods, this will also discard any mods that are invalid
-        var sortedLoadedMods = ValidateMods(mods);
-        // for harmony, we use the original list, as some mods may only be bepinex patches only
-        HarmonyBootstrapper.LoadAllPatches(mods.SelectMany(asm => asm.Assemblies).ToList());
-
+        var diHandler = new DependencyInjectionHandler(builder.Services);
         // register SPT components
-        DependencyInjectionRegistrator.RegisterSptComponents(typeof(Program).Assembly, typeof(App).Assembly, builder.Services);
+        diHandler.AddInjectableTypesFromTypeAssembly(typeof(Program));
+        diHandler.AddInjectableTypesFromTypeAssembly(typeof(App));
 
+        List<SptMod> loadedMods = null;
         if (ProgramStatics.MODS())
         {
-            // register mod components from the filtered list
-            DependencyInjectionRegistrator.RegisterModOverrideComponents(builder.Services, sortedLoadedMods.SelectMany(a => a.Assemblies).ToList());
+            // Search for mod dlls
+            loadedMods = ModDllLoader.LoadAllMods();
+            // validate and sort mods, this will also discard any mods that are invalid
+            var sortedLoadedMods = ValidateMods(loadedMods);
+
+            diHandler.AddInjectableTypesFromAssemblies(sortedLoadedMods.SelectMany(a => a.Assemblies));
         }
+        diHandler.InjectAll();
 
         var serviceProvider = builder.Services.BuildServiceProvider();
         var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger("Server");
@@ -53,15 +53,18 @@ public static class Program
             var appContext = serviceProvider.GetService<ApplicationContext>();
             appContext?.AddValue(ContextVariableType.SERVICE_PROVIDER, serviceProvider);
 
-            // Initialize PreSptMods
-            var preSptLoadMods = serviceProvider.GetServices<IPreSptLoadMod>();
-            foreach (var preSptLoadMod in preSptLoadMods)
+            if (ProgramStatics.MODS())
             {
-                preSptLoadMod.PreSptLoad();
+                // Initialize PreSptMods
+                var preSptLoadMods = serviceProvider.GetServices<IPreSptLoadMod>();
+                foreach (var preSptLoadMod in preSptLoadMods)
+                {
+                    preSptLoadMod.PreSptLoad();
+                }
             }
 
             // Add the Loaded Mod Assemblies for later
-            appContext?.AddValue(ContextVariableType.LOADED_MOD_ASSEMBLIES, mods);
+            appContext?.AddValue(ContextVariableType.LOADED_MOD_ASSEMBLIES, loadedMods);
 
             // This is the builder that will get use by the HttpServer to start up the web application
             appContext?.AddValue(ContextVariableType.APP_BUILDER, builder);
@@ -115,7 +118,10 @@ public static class Program
         // So we create a disposable web application that we will throw away after getting the mods to load
         var builder = CreateNewHostBuilder();
         // register SPT components
-        DependencyInjectionRegistrator.RegisterSptComponents(typeof(Program).Assembly, typeof(App).Assembly, builder.Services);
+        var diHandler = new DependencyInjectionHandler(builder.Services);
+        diHandler.AddInjectableTypesFromAssembly(typeof(Program).Assembly);
+        diHandler.AddInjectableTypesFromAssembly(typeof(App).Assembly);
+        diHandler.InjectAll();
         // register the mod validator components
         var provider = builder.Services
             .AddScoped(typeof(ISptLogger<ModValidator>), typeof(SptLogger<ModValidator>))

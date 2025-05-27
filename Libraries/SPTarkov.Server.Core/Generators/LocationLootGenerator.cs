@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -420,7 +420,7 @@ public class LocationLootGenerator(
         containerClone.Template.Root = parentId;
         containerClone.Template.Items[0].Id = parentId;
 
-        var containerMap = GetContainerMapping(containerTpl);
+        var containerMap = _itemHelper.GetContainerMapping(containerTpl);
 
         // Choose count of items to add to container
         var itemCountToAdd = GetWeightedCountOfContainerItems(containerTpl, staticLootDist, locationName);
@@ -463,16 +463,18 @@ public class LocationLootGenerator(
                 continue;
             }
 
+            if (tplToAdd == "5bf3e0490db83400196199af")
+            {
+                Console.WriteLine("yo");
+            }
+
             // Check if item should have children removed
             var items = _locationConfig.TplsToStripChildItemsFrom.Contains(tplToAdd)
                 ? [chosenItemWithChildren.Items[0]] // Strip children from parent
                 : chosenItemWithChildren.Items;
-            var itemSize = GetItemSize(items);
-            var itemWidth = itemSize.Width;
-            var itemHeight = itemSize.Height;
 
             // look for open slot to put chosen item into
-            var result = _containerHelper.FindSlotForItem(containerMap, itemWidth, itemHeight);
+            var result = _containerHelper.FindSlotForItem(containerMap, chosenItemWithChildren.Width, chosenItemWithChildren.Height);
             if (!result.Success.GetValueOrDefault(false))
             {
                 if (failedToFitAttemptCount > _locationConfig.FitLootIntoContainerAttempts)
@@ -492,8 +494,8 @@ public class LocationLootGenerator(
                 containerMap,
                 result.X.Value,
                 result.Y.Value,
-                itemWidth,
-                itemHeight,
+                chosenItemWithChildren.Width,
+                chosenItemWithChildren.Height,
                 result.Rotation.GetValueOrDefault(false)
             );
 
@@ -511,58 +513,6 @@ public class LocationLootGenerator(
         }
 
         return containerClone;
-    }
-
-    /// <summary>
-    ///     Get the height/width of an item including its children
-    /// </summary>
-    /// <param name="items"></param>
-    /// <returns></returns>
-    protected ItemSize? GetItemSize(List<Item>? items)
-    {
-        var rootItem = items[0];
-        if (items.Count == 1)
-        {
-            var itemTemplate = _itemHelper.GetItem(rootItem.Template).Value;
-            if (itemTemplate.Properties is null)
-            {
-                _logger.Error($"Unable to process item: {rootItem.Template}. it lacks _props");
-
-                return null;
-            }
-
-            // Single item, get items properties
-            return new ItemSize
-            {
-                Width = itemTemplate.Properties.Width.Value,
-                Height = itemTemplate.Properties.Height.Value
-            };
-        }
-
-
-        // Multi-mod-item, use helper to get size of item + attached mods
-        var result = _inventoryHelper.GetItemSize(rootItem.Template, rootItem.Id, items);
-        return new ItemSize
-        {
-            Width = result[0],
-            Height = result[1]
-        };
-    }
-
-    /// <summary>
-    ///     Get a 2D grid of a container's item slots
-    /// </summary>
-    /// <param name="containerTpl">Tpl id of the container</param>
-    protected int[][] GetContainerMapping(string containerTpl)
-    {
-        // Get template from db
-        var containerTemplate = _itemHelper.GetItem(containerTpl).Value;
-
-        // Get height/width
-        var height = containerTemplate.Properties.Grids[0].Props.CellsV;
-        var width = containerTemplate.Properties.Grids[0].Props.CellsH;
-
-        return _inventoryHelper.GetBlankContainerMap(height.Value, width.Value);
     }
 
     /// <summary>
@@ -1368,14 +1318,14 @@ public class ContainerItem
     }
 
     [JsonPropertyName("width")]
-    public double? Width
+    public int? Width
     {
         get;
         set;
     }
 
     [JsonPropertyName("height")]
-    public double? Height
+    public int? Height
     {
         get;
         set;

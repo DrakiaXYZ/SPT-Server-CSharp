@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -135,7 +135,7 @@ public class CreateProfileService(
             var achievementsDb = _databaseService.GetTemplates().Achievements;
             var achievementRewardItemsToSend = new List<Item>();
 
-            foreach (var (achievementId, achievement) in profileDetails.CharacterData.PmcData.Achievements)
+            foreach (var (achievementId, _) in profileDetails.CharacterData.PmcData.Achievements)
             {
                 var rewards = achievementsDb.FirstOrDefault(achievementDb => achievementDb.Id == achievementId)?.Rewards;
 
@@ -524,7 +524,7 @@ public class CreateProfileService(
             _mailSendService.SendLocalisedNpcMessageToPlayer(
                 sessionID,
                 questFromDb.TraderId,
-                MessageType.QUEST_START,
+                MessageType.QuestStart,
                 messageId,
                 itemRewards,
                 _timeUtil.GetHoursAsSeconds(100)

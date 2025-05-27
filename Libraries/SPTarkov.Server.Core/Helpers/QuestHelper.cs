@@ -1,5 +1,6 @@
-using SPTarkov.Common.Annotations;
+using System.Globalization;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
@@ -67,7 +68,7 @@ public class QuestHelper(
             return true;
         }
 
-        var conditionValue = double.Parse(condition.Value.ToString());
+        var conditionValue = double.Parse(condition.Value.ToString(), CultureInfo.InvariantCulture);
         switch (condition.CompareMethod)
         {
             case ">=":
@@ -735,7 +736,7 @@ public class QuestHelper(
                 _mailSendService.SendLocalisedNpcMessageToPlayer(
                     sessionID,
                     quest?.TraderId ?? matchingRepeatableQuest?.TraderId,
-                    MessageType.QUEST_FAIL,
+                    MessageType.QuestFail,
                     quest.FailMessageText,
                     questRewards.ToList(),
                     _timeUtil.GetHoursAsSeconds((int) GetMailItemRedeemTimeHoursForProfile(pmcData))
@@ -1366,7 +1367,7 @@ public class QuestHelper(
         _mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionID,
             quest.TraderId,
-            MessageType.QUEST_SUCCESS,
+            MessageType.QuestSuccess,
             quest.SuccessMessageText,
             questRewards,
             _timeUtil.GetHoursAsSeconds((int) GetMailItemRedeemTimeHoursForProfile(pmcData))

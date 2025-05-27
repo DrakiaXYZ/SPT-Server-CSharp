@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
@@ -11,7 +11,7 @@ namespace SPTarkov.Server.Core.Helpers;
 
 [Injectable]
 public class NotificationSendHelper(
-    IEnumerable<IWebSocketConnectionHandler> _sptWebSocketConnectionHandler,
+    SptWebSocketConnectionHandler _sptWebSocketConnectionHandler,
     HashUtil _hashUtil,
     SaveServer _saveServer,
     NotificationService _notificationService,
@@ -25,13 +25,9 @@ public class NotificationSendHelper(
     /// <param name="notificationMessage"></param>
     public void SendMessage(string sessionID, WsNotificationEvent notificationMessage)
     {
-        var sptWebSocketConnectionHandler = _sptWebSocketConnectionHandler
-            .OfType<SptWebSocketConnectionHandler>()
-            .FirstOrDefault(wsh => wsh.GetHookUrl() == "/notifierServer/getwebsocket/");
-
-        if (sptWebSocketConnectionHandler.IsWebSocketConnected(sessionID))
+        if (_sptWebSocketConnectionHandler.IsWebSocketConnected(sessionID))
         {
-            sptWebSocketConnectionHandler.SendMessage(sessionID, notificationMessage);
+            _sptWebSocketConnectionHandler.SendMessage(sessionID, notificationMessage);
         }
         else
         {
