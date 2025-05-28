@@ -13,12 +13,13 @@ public class RagfairLinkedItemService(
     ISptLogger<RagfairLinkedItemService> logger
 )
 {
-    protected Dictionary<string, HashSet<string>> linkedItemsCache = new();
+    protected readonly Dictionary<string, HashSet<string>> linkedItemsCache = new();
 
     public HashSet<string> GetLinkedItems(string linkedSearchId)
     {
         if (!linkedItemsCache.TryGetValue(linkedSearchId, out var set))
         {
+            // Regenerate cache
             BuildLinkedItemTable();
 
             return linkedItemsCache[linkedSearchId];
@@ -28,7 +29,7 @@ public class RagfairLinkedItemService(
     }
 
     /// <summary>
-    ///     Use ragfair linked item service to get an list of items that can fit on or in designated itemtpl
+    ///     Use ragfair linked item service to get a list of items that can fit on or in designated itemTpl
     /// </summary>
     /// <param name="itemTpl"> Item to get sub-items for </param>
     /// <returns> TemplateItem list </returns>
@@ -63,13 +64,38 @@ public class RagfairLinkedItemService(
 
         foreach (var item in databaseService.GetItems().Values)
         {
-            var itemLinkedSet = GetLinkedItems(linkedItems, item.Id);
+            // Ensure hashset exists for item
+            linkedItems.TryAdd(item.Id, []);
+            var itemLinkedSet = linkedItems[item.Id];
 
-            ApplyLinkedItems(GetSlotFilters(item), item, itemLinkedSet);
-            ApplyLinkedItems(GetChamberFilters(item), item, itemLinkedSet);
-            ApplyLinkedItems(GetCartridgeFilters(item), item, itemLinkedSet);
+            // Slots
+            foreach (var linkedItemId in GetSlotFilters(item)) {
+                itemLinkedSet.Add(linkedItemId);
 
-            // Edge case, ensure ammo for revolves is included
+                linkedItems.TryAdd(linkedItemId, []);
+                linkedItems[linkedItemId].Add(item.Id);
+            }
+
+            // Chambers
+            foreach (var linkedItemId in GetChamberFilters(item))
+            {
+                itemLinkedSet.Add(linkedItemId);
+
+                linkedItems.TryAdd(linkedItemId, []);
+                linkedItems[linkedItemId].Add(item.Id);
+            }
+
+            // Cartridges
+            foreach (var linkedItemId in GetCartridgeFilters(item))
+            {
+                
+                itemLinkedSet.Add(linkedItemId);
+
+                linkedItems.TryAdd(linkedItemId, []);
+                linkedItems[linkedItemId].Add(item.Id);
+            }
+
+            // Edge case, ensure ammo for revolvers is included
             if (item.Parent == BaseClasses.REVOLVER)
                 // Find magazine for revolver
             {
@@ -77,19 +103,22 @@ public class RagfairLinkedItemService(
             }
         }
 
-        linkedItemsCache = linkedItems;
+        // We have our linked item pool generated, add to class property
+        foreach (var item in linkedItems)
+        {
+            linkedItemsCache.Add(item.Key, item.Value);
+        }
     }
 
-    protected void ApplyLinkedItems(HashSet<string> items, TemplateItem item, HashSet<string> itemLinkedSet)
+    protected void ApplyLinkedItems(HashSet<string> items, TemplateItem item, ref HashSet<string> itemLinkedSet)
     {
         itemLinkedSet.UnionWith(items);
-    }
 
-    protected HashSet<string> GetLinkedItems(Dictionary<string, HashSet<string>> linkedItems, string id)
-    {
-        linkedItems.TryAdd(id, []);
-
-        return linkedItems[id];
+        foreach (var linkedItemId in items)
+        {
+            GetLinkedItems(linkedItemId).Add(item.Id);
+        }
+        
     }
 
     /// <summary>
@@ -100,32 +129,52 @@ public class RagfairLinkedItemService(
     protected void AddRevolverCylinderAmmoToLinkedItems(TemplateItem cylinder, HashSet<string> itemLinkedSet)
     {
         var cylinderMod = cylinder.Properties.Slots?.FirstOrDefault(x => x.Name == "mod_magazine");
-        if (cylinderMod != null)
+        if (cylinderMod == null)
         {
-            // Get the first cylinder filter tpl
-            var cylinderTpl = cylinderMod.Props?.Filters?[0].Filter?.FirstOrDefault();
-            if (!string.IsNullOrEmpty(cylinderTpl))
-            {
-                // Get db data for cylinder tpl, add found slots info (camora_xxx) to linked items on revolver weapon
-                var cylinderTemplate = itemHelper.GetItem(cylinderTpl).Value;
-                ApplyLinkedItems(GetSlotFilters(cylinderTemplate), cylinder, itemLinkedSet);
-            }
+            return;
         }
+
+        // Get the first cylinder filter tpl
+        var cylinderTpl = cylinderMod.Props?.Filters?[0].Filter?.FirstOrDefault();
+        if (string.IsNullOrEmpty(cylinderTpl))
+        {
+            // No cylinder, nothing to do
+            return;
+        }
+
+        // Get db data for cylinder tpl, add found slots info (camora_xxx) to linked items on revolver weapon
+        var cylinderTemplate = itemHelper.GetItem(cylinderTpl).Value;
+        itemLinkedSet.UnionWith(GetSlotFilters(cylinderTemplate));
     }
 
+    /// <summary>
+    /// Get a set of unique tpls from an items Slot 'filter' array
+    /// </summary>
+    /// <param name="item">Db item to get tpls from</param>
+    /// <returns>Set of tpls</returns>
     protected HashSet<string> GetSlotFilters(TemplateItem item)
     {
         var result = new HashSet<string>();
 
         var slots = item.Properties?.Slots;
-        if (slots is null)
+        if (slots is null || slots.Count == 0)
         {
+            // No slots, skip
             return result;
         }
 
+        // Check each slot and merge contents together into result set
         foreach (var slot in slots)
         {
-            result.UnionWith(slot.Props?.Filters?.FirstOrDefault()?.Filter);
+            if (slot.Props?.Filters is null)
+            {
+                continue;
+            }
+
+            foreach (var slotFilters in slot.Props.Filters)
+            {
+                result.UnionWith(slotFilters.Filter);
+            }
         }
 
         return result;
@@ -136,14 +185,22 @@ public class RagfairLinkedItemService(
         var result = new HashSet<string>();
 
         var chambers = item.Properties?.Chambers;
-        if (chambers is null)
+        if (chambers is null || chambers.Count == 0)
         {
             return result;
         }
 
         foreach (var chamber in chambers)
         {
-            result.UnionWith(chamber.Props?.Filters?.FirstOrDefault()?.Filter);
+            if (chamber.Props?.Filters is null)
+            {
+                continue;
+            }
+
+            foreach (var slotFilters in chamber.Props.Filters)
+            {
+                result.UnionWith(slotFilters.Filter);
+            }
         }
 
         return result;
@@ -154,14 +211,22 @@ public class RagfairLinkedItemService(
         var result = new HashSet<string>();
 
         var cartridges = item.Properties?.Cartridges;
-        if (cartridges is null)
+        if (cartridges is null || cartridges.Count == 0)
         {
             return result;
         }
 
         foreach (var cartridge in cartridges)
         {
-            result.UnionWith(cartridge.Props?.Filters?.FirstOrDefault()?.Filter);
+            if (cartridge.Props?.Filters is null)
+            {
+                continue;
+            }
+
+            foreach (var slotFilters in cartridge.Props.Filters)
+            {
+                result.UnionWith(slotFilters.Filter);
+            }
         }
 
         return result;
