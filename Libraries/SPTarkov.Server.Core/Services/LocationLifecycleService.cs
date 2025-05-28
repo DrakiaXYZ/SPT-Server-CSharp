@@ -462,7 +462,7 @@ public class LocationLifecycleService
 
         if (!isPmc)
         {
-            HandlePostRaidPlayerScav(sessionId, pmcProfile, scavProfile, isDead, isTransfer, request);
+            HandlePostRaidPlayerScav(sessionId, pmcProfile, scavProfile, isDead, isTransfer, isSurvived, request);
 
             return;
         }
@@ -649,20 +649,31 @@ public class LocationLifecycleService
         return _inRaidConfig.CoopExtracts.Contains(extractName.Trim());
     }
 
+    /// <summary>
+    /// Perform post-raid profile changes
+    /// </summary>
+    /// <param name="sessionId">Player id</param>
+    /// <param name="pmcProfile">Players PMC profile</param>
+    /// <param name="scavProfile">Players scav profile</param>
+    /// <param name="isDead">Did player die</param>
+    /// <param name="isTransfer">Did player transfer to new map</param>
+    /// <param name="isSurvived">DId player get 'survived' exit status</param>
+    /// <param name="request">End raid request</param>
     protected void HandlePostRaidPlayerScav(
         string sessionId,
         PmcData pmcProfile,
         PmcData scavProfile,
         bool isDead,
         bool isTransfer,
+        bool isSurvived,
         EndLocalRaidRequestData request)
     {
         var postRaidProfile = request.Results.Profile;
-
-        if (isTransfer)
+        if (isTransfer || request.Results.Result == ExitStatus.RUNNER)
         {
             // We want scav inventory to persist into next raid when pscav is moving between maps
-            _inRaidHelper.SetInventory(sessionId, scavProfile, postRaidProfile, true, isTransfer);
+            // May have been run through, set gear to non-FiR
+            _inRaidHelper.SetInventory(sessionId, scavProfile, postRaidProfile, isSurvived, isTransfer);
         }
 
         scavProfile.Info.Level = request.Results.Profile.Info.Level;
