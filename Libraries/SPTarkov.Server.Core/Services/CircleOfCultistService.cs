@@ -884,9 +884,7 @@ public class CircleOfCultistService(
 
     protected string CreateSacrificeCacheKey(IEnumerable<string> requiredItems)
     {
-        requiredItems.OrderBy(item => item);
-        var concat = string.Join(",", requiredItems);
-
+        var concat = string.Join(",", requiredItems.OrderBy(item => item));
         return _hashUtil.GenerateMd5ForData(concat);
     }
 
