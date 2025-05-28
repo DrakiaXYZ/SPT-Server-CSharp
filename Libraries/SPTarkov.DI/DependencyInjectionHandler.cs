@@ -12,7 +12,7 @@ public class DependencyInjectionHandler
     private readonly IServiceCollection _serviceCollection;
 
     private readonly Dictionary<string, object> _injectedValues = new();
-    private readonly object _injectedValuesLock = new();
+    private readonly Lock _injectedValuesLock = new();
 
     private bool _oneTimeUseFlag;
 
