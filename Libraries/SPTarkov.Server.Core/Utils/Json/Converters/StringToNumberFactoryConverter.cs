@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -19,15 +20,15 @@ public class StringToNumberFactoryConverter : JsonConverterFactory
 
     private class StringToNumberConverter<T> : JsonConverter<T>
     {
-        private static readonly MethodInfo? stringParseMethod;
+        private static readonly MethodInfo? _stringParseMethod;
 
         static StringToNumberConverter()
         {
             // Do reflection only once to get parse
-            if (stringParseMethod == null)
+            if (_stringParseMethod == null)
             {
                 var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-                stringParseMethod = underlyingType.GetMethod("Parse", [typeof(string)]);
+                _stringParseMethod = underlyingType.GetMethod("Parse", [typeof(string), typeof(IFormatProvider)]);
             }
         }
 
@@ -46,9 +47,9 @@ public class StringToNumberFactoryConverter : JsonConverterFactory
                 {
                     var underlyingType = Nullable.GetUnderlyingType(typeToConvert) ?? typeToConvert;
 
-                    if (stringParseMethod != null)
+                    if (_stringParseMethod != null)
                     {
-                        return (T) stringParseMethod.Invoke(null, [value]);
+                        return (T) _stringParseMethod.Invoke(null, [value, CultureInfo.CreateSpecificCulture("en-US")]);
                     }
                 }
                 catch (Exception ex)

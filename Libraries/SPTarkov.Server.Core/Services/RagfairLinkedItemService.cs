@@ -110,17 +110,6 @@ public class RagfairLinkedItemService(
         }
     }
 
-    protected void ApplyLinkedItems(HashSet<string> items, TemplateItem item, ref HashSet<string> itemLinkedSet)
-    {
-        itemLinkedSet.UnionWith(items);
-
-        foreach (var linkedItemId in items)
-        {
-            GetLinkedItems(linkedItemId).Add(item.Id);
-        }
-        
-    }
-
     /// <summary>
     ///     Add ammo to revolvers linked item dictionary
     /// </summary>

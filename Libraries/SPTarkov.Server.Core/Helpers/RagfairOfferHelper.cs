@@ -167,8 +167,9 @@ public class RagfairOfferHelper(
     /// <returns>Matching RagfairOffer objects</returns>
     public List<RagfairOffer> GetOffersThatRequireItem(SearchRequestData searchRequest, PmcData pmcData)
     {
-        // Get all offers that require the desired item and filter out offers from non traders if player below ragifar unlock
+        // Get all offers that require the desired item and filter out offers from non traders if player below ragfair unlock
         var requiredOffers = _ragfairRequiredItemsService.GetRequiredItemsById(searchRequest.NeededSearchId);
+
         var tieredFlea = _ragfairConfig.TieredFlea;
         var tieredFleaLimitTypes = tieredFlea.UnlocksType;
         return requiredOffers.Where(offer =>
