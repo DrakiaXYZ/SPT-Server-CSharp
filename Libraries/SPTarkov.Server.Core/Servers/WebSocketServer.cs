@@ -34,6 +34,8 @@ public class WebSocketServer(
             return;
         }
 
+        var sessionIdContext = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+
         foreach (var wsh in socketHandlers)
         {
             if (webSocket.State == WebSocketState.Open)
@@ -44,7 +46,7 @@ public class WebSocketServer(
                 }
             }
 
-            await wsh.OnConnection(webSocket, context);
+            await wsh.OnConnection(webSocket, context, sessionIdContext);
         }
 
         // Discard this task, we dont need to await it.
@@ -79,7 +81,7 @@ public class WebSocketServer(
         foreach (var wsh in socketHandlers)
         {
             await cts.CancelAsync();
-            await wsh.OnClose(webSocket, context);
+            await wsh.OnClose(webSocket, context, sessionIdContext);
         }
     }
 }
