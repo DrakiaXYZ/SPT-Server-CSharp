@@ -26,9 +26,9 @@ public class PMCLootGenerator
     private Dictionary<string, double>? _pocketLootPool;
     private Dictionary<string, double>? _vestLootPool;
 
-    protected Lock BackpackLock = new();
-    protected Lock PocketLock = new();
-    protected Lock VestLock = new();
+    protected readonly Lock BackpackLock = new();
+    protected readonly Lock PocketLock = new();
+    protected readonly Lock VestLock = new();
 
     public PMCLootGenerator(
         ISptLogger<PMCLootGenerator> logger,
