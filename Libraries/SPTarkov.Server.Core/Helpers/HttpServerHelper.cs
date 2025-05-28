@@ -54,6 +54,28 @@ public class HttpServerHelper(ConfigServer configServer)
         return $"wss://{BuildUrl()}";
     }
 
+    /// <summary>
+    /// Method to determine if another version of the server is already running
+    /// </summary>
+    /// <returns>bool isAlreadyRunning</returns>
+    public async Task<bool> IsAlreadyRunning()
+    {
+        try
+        {
+            var handler = new HttpClientHandler()
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+            var http = new HttpClient(handler);
+            var res = await http.PostAsync($"{GetBackendUrl()}/launcher/ping", null);
+            return res.IsSuccessStatusCode;
+        }
+        catch (Exception )
+        {
+            return false;
+        }
+    }
+
     public void SendTextJson(HttpResponse resp, object output)
     {
         resp.Headers.Append("Content-Type", mime["json"]);

@@ -1,5 +1,6 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
+using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
@@ -17,6 +18,7 @@ public class App
     protected DatabaseService _databaseService;
     protected EncodingUtil _encodingUtil;
     protected HttpServer _httpServer;
+    protected HttpServerHelper _httpServerHelper;
     protected LocalisationService _localisationService;
 
     protected ISptLogger<App> _logger;
@@ -36,7 +38,8 @@ public class App
         HttpServer httpServer,
         DatabaseService databaseService,
         IEnumerable<IOnLoad> onLoadComponents,
-        IEnumerable<IOnUpdate> onUpdateComponents
+        IEnumerable<IOnUpdate> onUpdateComponents,
+        HttpServerHelper httpServerHelper
     )
     {
         _logger = logger;
@@ -46,6 +49,7 @@ public class App
         _configServer = configServer;
         _encodingUtil = encodingUtil;
         _httpServer = httpServer;
+        _httpServerHelper = httpServerHelper;
         _databaseService = databaseService;
         _onLoad = onLoadComponents;
         _onUpdate = onUpdateComponents;
@@ -57,6 +61,13 @@ public class App
     {
         // execute onLoad callbacks
         _logger.Info(_localisationService.GetText("executing_startup_callbacks"));
+
+        var isAlreadyRunning = await _httpServerHelper.IsAlreadyRunning();
+        if (isAlreadyRunning)
+        {
+            _logger.Critical(_localisationService.GetText("webserver_already_running"));
+            await Task.Delay(Timeout.Infinite);
+        }
 
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
