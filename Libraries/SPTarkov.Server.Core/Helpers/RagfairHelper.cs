@@ -59,22 +59,16 @@ public class RagfairHelper(
         if (!string.IsNullOrEmpty(request.LinkedSearchId))
         {
             var data = ragfairLinkedItemService.GetLinkedItems(request.LinkedSearchId);
-            result = data == null ? [] : [..data];
+            result = [..data];
         }
 
         // Case: category
         if (!string.IsNullOrEmpty(request.HandbookId))
         {
             var handbook = GetCategoryList(request.HandbookId);
-
-            if (result.Count != null && result.Count > 0)
-            {
-                result = utilityHelper.ArrayIntersect(result, handbook);
-            }
-            else
-            {
-                result = handbook;
-            }
+            result = result?.Count > 0
+                ? utilityHelper.ArrayIntersect(result, handbook)
+                : handbook;
         }
 
         return result;

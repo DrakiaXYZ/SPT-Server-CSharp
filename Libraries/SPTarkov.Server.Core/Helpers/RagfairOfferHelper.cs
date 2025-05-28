@@ -346,7 +346,7 @@ public class RagfairOfferHelper(
         bool playerIsFleaBanned = false)
     {
         var offerRootItem = offer.Items[0];
-        /** Currency offer is sold for */
+        // Currency offer is sold for
         var moneyTypeTpl = offer.Requirements[0].Template;
         var isTraderOffer = _databaseService.GetTraders().ContainsKey(offer.User.Id);
 
