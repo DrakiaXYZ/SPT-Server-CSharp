@@ -660,8 +660,8 @@ public class LocationLifecycleService
         var postRaidProfile = request.Results.Profile;
 
         if (isTransfer)
-            // We want scav inventory to persist into next raid when pscav is moving between maps
         {
+            // We want scav inventory to persist into next raid when pscav is moving between maps
             _inRaidHelper.SetInventory(sessionId, scavProfile, postRaidProfile, true, isTransfer);
         }
 
@@ -672,7 +672,7 @@ public class LocationLifecycleService
         scavProfile.TaskConditionCounters = request.Results.Profile.TaskConditionCounters;
         scavProfile.SurvivorClass = request.Results.Profile.SurvivorClass;
 
-        // Scavs dont have achievements, but copy anyway
+        // Scavs don't have achievements, but copy anyway
         scavProfile.Achievements = request.Results.Profile.Achievements;
 
         scavProfile.Info.Experience = request.Results.Profile.Info.Experience;
