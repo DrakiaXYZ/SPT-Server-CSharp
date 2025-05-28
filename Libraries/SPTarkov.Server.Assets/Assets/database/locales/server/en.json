@@ -730,5 +730,6 @@
     "chatbot-forced_event_enabled": "%s event has been enabled, restart your game client before starting a raid",
     "chatbot-added_stash_rows_please_restart": "Added 2 rows to stash, please restart your game to see them",
     "chatbot-snow_enabled": "Snow is enabled for all subsequent raids until the server is restarted",
-    "chatbot-summer_enabled": "Summer has been enabled for all subsequent raids until the server is restarted"
+    "chatbot-summer_enabled": "Summer has been enabled for all subsequent raids until the server is restarted",
+    "webserver_already_running": "Another copy of the webserver is already running. Please shut it down before starting a new one."
 }

@@ -66,6 +66,7 @@ public class App
         if (isAlreadyRunning)
         {
             _logger.Critical(_localisationService.GetText("webserver_already_running"));
+            await Task.Delay(3600 * 60);
             Environment.Exit(1);
         }
 
