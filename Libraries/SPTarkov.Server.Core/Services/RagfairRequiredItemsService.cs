@@ -12,11 +12,14 @@ public class RagfairRequiredItemsService(
 {
     protected ConcurrentDictionary<string, List<RagfairOffer>> _requiredItemsCache = new();
 
-    public List<RagfairOffer>? GetRequiredItemsById(string searchId)
+    public List<RagfairOffer> GetRequiredItemsById(string searchId)
     {
-        _requiredItemsCache.TryGetValue(searchId, out var list);
+        if (_requiredItemsCache.TryGetValue(searchId, out var list))
+        {
+            return list;
+        }
 
-        return list;
+        return [];
     }
 
     public void BuildRequiredItemTable()
