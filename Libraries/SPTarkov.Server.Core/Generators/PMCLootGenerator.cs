@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -23,9 +22,13 @@ public class PMCLootGenerator
     private readonly SeasonalEventService _seasonalEventService;
     private readonly WeightedRandomHelper _weightedRandomHelper;
 
-    private ConcurrentDictionary<string, double>? _backpackLootPool;
-    private ConcurrentDictionary<string, double>? _pocketLootPool;
-    private ConcurrentDictionary<string, double>? _vestLootPool;
+    private Dictionary<string, double>? _backpackLootPool;
+    private Dictionary<string, double>? _pocketLootPool;
+    private Dictionary<string, double>? _vestLootPool;
+
+    protected object BackpackLock = new();
+    protected object PocketLock = new();
+    protected object VestLock = new();
 
     public PMCLootGenerator(
         ISptLogger<PMCLootGenerator> logger,
@@ -55,12 +58,17 @@ public class PMCLootGenerator
     /// </summary>
     /// <param name="botRole"></param>
     /// <returns>Dictionary of string and number</returns>
-    public ConcurrentDictionary<string, double> GeneratePMCPocketLootPool(string botRole)
+    public Dictionary<string, double> GeneratePMCPocketLootPool(string botRole)
     {
-        // Hydrate loot dictionary if empty
-        if (_pocketLootPool is null)
+        lock (PocketLock)
         {
-            _pocketLootPool = new ConcurrentDictionary<string, double>();
+            // Hydrate loot dictionary if empty
+            if (_pocketLootPool is not null)
+            {
+                return _pocketLootPool;
+            }
+
+            _pocketLootPool = new Dictionary<string, double>();
             var items = _databaseService.GetItems();
             var pmcPriceOverrides =
                 _databaseService.GetBots().Types[string.Equals(botRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
@@ -102,9 +110,10 @@ public class PMCLootGenerator
             }
 
             _weightedRandomHelper.ReduceWeightValues(_pocketLootPool);
-        }
 
-        return _pocketLootPool;
+            return _pocketLootPool;
+
+        }
     }
 
     protected HashSet<string> GetLootBlacklist()
@@ -124,12 +133,17 @@ public class PMCLootGenerator
     /// </summary>
     /// <param name="botRole"></param>
     /// <returns>Dictionary of string and number</returns>
-    public ConcurrentDictionary<string, double> GeneratePMCVestLootPool(string botRole)
+    public Dictionary<string, double> GeneratePMCVestLootPool(string botRole)
     {
-        // Hydrate loot dictionary if empty
-        if (_vestLootPool is null)
+        lock (VestLock)
         {
-            _vestLootPool = new ConcurrentDictionary<string, double>();
+            // Hydrate loot dictionary if empty
+            if (_vestLootPool is not null)
+            {
+                return _vestLootPool;
+            }
+
+            _vestLootPool = new Dictionary<string, double>();
             var items = _databaseService.GetItems();
             var pmcPriceOverrides =
                 _databaseService.GetBots().Types[string.Equals(botRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
@@ -171,9 +185,9 @@ public class PMCLootGenerator
             }
 
             _weightedRandomHelper.ReduceWeightValues(_vestLootPool);
-        }
 
-        return _vestLootPool;
+            return _vestLootPool;
+        }
     }
 
     /// <summary>
@@ -207,12 +221,17 @@ public class PMCLootGenerator
     /// </summary>
     /// <param name="botRole"></param>
     /// <returns>Dictionary of string and number</returns>
-    public ConcurrentDictionary<string, double> GeneratePMCBackpackLootPool(string botRole)
+    public Dictionary<string, double> GeneratePMCBackpackLootPool(string botRole)
     {
-        // Hydrate loot dictionary if empty
-        if (_backpackLootPool is null)
+        lock (BackpackLock)
         {
-            _backpackLootPool = new ConcurrentDictionary<string, double>();
+            // Hydrate loot dictionary if empty
+            if (_backpackLootPool is not null)
+            {
+                return _backpackLootPool;
+            }
+
+            _backpackLootPool = new Dictionary<string, double>();
             var items = _databaseService.GetItems();
             var pmcPriceOverrides =
                 _databaseService.GetBots().Types[string.Equals(botRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
@@ -253,8 +272,8 @@ public class PMCLootGenerator
             }
 
             _weightedRandomHelper.ReduceWeightValues(_backpackLootPool);
-        }
 
-        return _backpackLootPool;
+            return _backpackLootPool;
+        }
     }
 }
