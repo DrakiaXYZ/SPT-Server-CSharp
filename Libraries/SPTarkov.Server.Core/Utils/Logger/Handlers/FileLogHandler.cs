@@ -7,7 +7,7 @@ namespace SPTarkov.Server.Core.Utils.Logger.Handlers;
 [Injectable(InjectionType.Singleton)]
 public class FileLogHandler : BaseLogHandler
 {
-    private static ConcurrentDictionary<string, object> _fileLocks = new();
+    private static ConcurrentDictionary<string, Lock> _fileLocks = new();
 
     public override LoggerType LoggerType => LoggerType.File;
 
@@ -17,7 +17,7 @@ public class FileLogHandler : BaseLogHandler
 
         if (!_fileLocks.TryGetValue(config.FilePath, out var lockObject))
         {
-            lockObject = new object();
+            lockObject = new Lock();
             while (!_fileLocks.TryAdd(config.FilePath, lockObject)) ;
         }
 
