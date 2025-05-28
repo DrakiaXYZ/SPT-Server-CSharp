@@ -696,8 +696,12 @@ public class LocationLifecycleService
         // Clamp fence standing within -7 to 15 range
         var fenceMax = _traderConfig.Fence.PlayerRepMax; // 15
         var fenceMin = _traderConfig.Fence.PlayerRepMin; //-7
-        var currentFenceStanding = request.Results.Profile.TradersInfo[Traders.FENCE].Standing;
-        scavProfile.TradersInfo[Traders.FENCE].Standing = Math.Min(Math.Max((double) currentFenceStanding, fenceMin), fenceMax);
+        if (!request.Results.Profile.TradersInfo.TryGetValue(Traders.FENCE, out var postRaidFenceData))
+        {
+            _logger.Error($"post raid fence data not found for: {sessionId}");
+        }
+        
+        scavProfile.TradersInfo[Traders.FENCE].Standing = Math.Min(Math.Max(postRaidFenceData.Standing.Value, fenceMin), fenceMax);
 
         // Successful extract as scav, give some rep
         if (IsPlayerSurvived(request.Results) && scavProfile.TradersInfo[Traders.FENCE].Standing < fenceMax)
