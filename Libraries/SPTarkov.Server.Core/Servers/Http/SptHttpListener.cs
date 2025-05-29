@@ -14,13 +14,13 @@ namespace SPTarkov.Server.Core.Servers.Http;
 
 [Injectable]
 public class SptHttpListener(
-    HttpRouter httpRouter,
-    IEnumerable<ISerializer> serializers,
-    ISptLogger<SptHttpListener> logger,
-    ISptLogger<RequestLogger> requestsLogger,
-    JsonUtil jsonUtil,
-    HttpResponseUtil httpResponseUtil,
-    LocalisationService localisationService
+    HttpRouter _httpRouter,
+    IEnumerable<ISerializer> _serializers,
+    ISptLogger<SptHttpListener> _logger,
+    ISptLogger<RequestLogger> _requestsLogger,
+    JsonUtil _jsonUtil,
+    HttpResponseUtil _httpResponseUtil,
+    LocalisationService _localisationService
     ) : IHttpListener
 {
     // We want to read 1KB at a time, for most request this is already big enough
@@ -29,8 +29,8 @@ public class SptHttpListener(
     private static readonly ImmutableHashSet<string> SupportedMethods = ["GET", "PUT", "POST"];
 
 
-    protected readonly HttpRouter _router = httpRouter;
-    protected readonly IEnumerable<ISerializer> _serializers = serializers;
+    protected readonly HttpRouter _router = _httpRouter;
+    protected readonly IEnumerable<ISerializer> _serializers = _serializers;
 
     public bool CanHandle(string _, HttpRequest req)
     {
@@ -92,9 +92,9 @@ public class SptHttpListener(
 
                     if (!requestIsCompressed)
                     {
-                        if (logger.IsLogEnabled(LogLevel.Debug))
+                        if (_logger.IsLogEnabled(LogLevel.Debug))
                         {
-                            logger.Debug(body);
+                            _logger.Debug(body);
                         }
                     }
 
@@ -105,7 +105,7 @@ public class SptHttpListener(
 
             default:
                 {
-                    logger.Warning($"{localisationService.GetText("unknown_request")}: {req.Method}");
+                    _logger.Warning($"{_localisationService.GetText("unknown_request")}: {req.Method}");
                     break;
                 }
         }
@@ -132,15 +132,15 @@ public class SptHttpListener(
             body = new object();
         }
 
-        var bodyInfo = jsonUtil.Serialize(body);
+        var bodyInfo = _jsonUtil.Serialize(body);
 
         if (IsDebugRequest(req))
         {
             // Send only raw response without transformation
             await SendJson(resp, output, sessionID);
-            if (logger.IsLogEnabled(LogLevel.Debug))
+            if (_logger.IsLogEnabled(LogLevel.Debug))
             {
-                logger.Debug($"Response: {output}");
+                _logger.Debug($"Response: {output}");
             }
 
             LogRequest(req, output);
@@ -182,7 +182,7 @@ public class SptHttpListener(
         if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
         {
             var log = new Response(req.Method, output);
-            requestsLogger.Info($"RESPONSE={jsonUtil.Serialize(log)}");
+            _requestsLogger.Info($"RESPONSE={_jsonUtil.Serialize(log)}");
         }
     }
 
@@ -192,16 +192,16 @@ public class SptHttpListener(
         /* route doesn't exist or response is not properly set up */
         if (string.IsNullOrEmpty(output))
         {
-            logger.Error(localisationService.GetText("unhandled_response", req.Path.ToString()));
-            logger.Info(jsonUtil.Serialize(deserializedObject));
-            output = httpResponseUtil.GetBody<object?>(null, BackendErrorCodes.HTTPNotFound, $"UNHANDLED RESPONSE: {req.Path.ToString()}");
+            _logger.Error(_localisationService.GetText("unhandled_response", req.Path.ToString()));
+            _logger.Info(_jsonUtil.Serialize(deserializedObject));
+            output = _httpResponseUtil.GetBody<object?>(null, BackendErrorCodes.HTTPNotFound, $"UNHANDLED RESPONSE: {req.Path.ToString()}");
         }
 
         if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
         {
             // Parse quest info into object
             var log = new Request(req.Method, new RequestData(req.Path, req.Headers, deserializedObject));
-            requestsLogger.Info($"REQUEST={jsonUtil.Serialize(log)}");
+            _requestsLogger.Info($"REQUEST={_jsonUtil.Serialize(log)}");
         }
 
         return output;
