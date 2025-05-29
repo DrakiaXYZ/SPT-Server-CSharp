@@ -13,57 +13,43 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 namespace SPTarkov.Server.Core.Servers.Http;
 
 [Injectable]
-public class SptHttpListener : IHttpListener
+public class SptHttpListener(
+    HttpRouter httpRouter,
+    IEnumerable<ISerializer> serializers,
+    ISptLogger<SptHttpListener> logger,
+    ISptLogger<RequestLogger> requestsLogger,
+    JsonUtil jsonUtil,
+    HttpResponseUtil httpHttpResponseUtil,
+    LocalisationService localisationService
+    ) : IHttpListener
 {
-    // we want to reserve on the list 512KB capacity before it needs to expand, should be enough for most requests
-    private const int InitialCapacityForListBuffer = 1024 * 512;
-
     // We want to read 1KB at a time, for most request this is already big enough
     private const int BodyReadBufferSize = 1024 * 1;
 
     private static readonly ImmutableHashSet<string> SupportedMethods = ["GET", "PUT", "POST"];
-    protected readonly HttpResponseUtil _httpResponseUtil;
-    protected readonly JsonUtil _jsonUtil;
-    protected readonly LocalisationService _localisationService;
-    protected readonly ISptLogger<SptHttpListener> _logger;
-    protected readonly ISptLogger<RequestLogger> _requestLogger;
+    protected readonly HttpResponseUtil _httpResponseUtil = httpHttpResponseUtil;
+    protected readonly JsonUtil _jsonUtil = jsonUtil;
+    protected readonly LocalisationService _localisationService = localisationService;
+    protected readonly ISptLogger<SptHttpListener> _logger = logger;
+    protected readonly ISptLogger<RequestLogger> _requestLogger = requestsLogger;
 
 
-    protected readonly HttpRouter _router;
-    protected readonly IEnumerable<ISerializer> _serializers;
-
-    public SptHttpListener(
-        HttpRouter httpRouter,
-        IEnumerable<ISerializer> serializers,
-        ISptLogger<SptHttpListener> logger,
-        ISptLogger<RequestLogger> requestsLogger,
-        JsonUtil jsonUtil,
-        HttpResponseUtil httpHttpResponseUtil,
-        LocalisationService localisationService
-    )
-    {
-        _router = httpRouter;
-        _serializers = serializers;
-        _logger = logger;
-        _requestLogger = requestsLogger;
-        _httpResponseUtil = httpHttpResponseUtil;
-        _localisationService = localisationService;
-        _jsonUtil = jsonUtil;
-    }
+    protected readonly HttpRouter _router = httpRouter;
+    protected readonly IEnumerable<ISerializer> _serializers = serializers;
 
     public bool CanHandle(string _, HttpRequest req)
     {
         return SupportedMethods.Contains(req.Method);
     }
 
-    public void Handle(string sessionId, HttpRequest req, HttpResponse resp)
+    public async Task Handle(string sessionId, HttpRequest req, HttpResponse resp)
     {
         switch (req.Method)
         {
             case "GET":
                 {
                     var response = GetResponse(sessionId, req, null);
-                    SendResponse(sessionId, req, resp, null, response);
+                    await SendResponse(sessionId, req, resp, null, response);
                     break;
                 }
             // these are handled almost identically.
@@ -75,49 +61,50 @@ public class SptHttpListener : IHttpListener
                     // debug = 1 are as well. This should be fixed.
                     // let compressed = req.headers["content-encoding"] === "deflate";
                     var requestIsCompressed = !req.Headers.TryGetValue("requestcompressed", out var compressHeader) ||
-                                              compressHeader != "0";
+                      compressHeader != "0";
                     var requestCompressed = req.Method == "PUT" || requestIsCompressed;
 
-                    // reserve some capacity to avoid having the list to resize
-                    var totalRead = new List<byte>(InitialCapacityForListBuffer);
-                    // read 1KB at a time
-                    var memory = new Memory<byte>(new byte[BodyReadBufferSize]);
-                    var readTask = req.Body.ReadAsync(memory).AsTask();
-                    readTask.Wait();
-                    var readBytes = 0;
-                    while (readTask.Result != 0)
+                    var body = string.Empty;
+                    using MemoryStream bufferStream = new();
+
+                    var buffer = new byte[BodyReadBufferSize];
+                    int bytesRead;
+
+                    while ((bytesRead = await req.Body.ReadAsync(buffer)) > 0)
                     {
-                        readBytes += readTask.Result;
-                        totalRead.AddRange(memory[..readTask.Result].ToArray());
-                        memory = new Memory<byte>(new byte[BodyReadBufferSize]);
-                        readTask = req.Body.ReadAsync(memory).AsTask();
-                        readTask.Wait();
+                        await bufferStream.WriteAsync(buffer.AsMemory(0, bytesRead));
                     }
 
-                    string value;
+                    bufferStream.Position = 0;
+
                     if (requestCompressed)
                     {
-                        using var uncompressedDataStream = new MemoryStream();
-                        using var compressedDataStream = new MemoryStream(totalRead[..readBytes].ToArray());
-                        using var deflateStream = new ZLibStream(compressedDataStream, CompressionMode.Decompress, true);
-                        deflateStream.CopyTo(uncompressedDataStream);
-                        value = Encoding.UTF8.GetString(uncompressedDataStream.ToArray());
+                        using var deflateStream = new ZLibStream(bufferStream, CompressionMode.Decompress);
+                        using var decompressedStream = new MemoryStream();
+                        await deflateStream.CopyToAsync(decompressedStream);
+                        decompressedStream.Position = 0;
+
+                        using var reader = new StreamReader(decompressedStream, Encoding.UTF8);
+                        body = await reader.ReadToEndAsync();
                     }
                     else
                     {
-                        value = Encoding.UTF8.GetString(totalRead[..readBytes].ToArray());
+                        // No decompression needed, decode directly from the bufferStream's buffer
+                        bufferStream.Position = 0;
+                        using var reader = new StreamReader(bufferStream, Encoding.UTF8);
+                        body = await reader.ReadToEndAsync();
                     }
 
                     if (!requestIsCompressed)
                     {
                         if (_logger.IsLogEnabled(LogLevel.Debug))
                         {
-                            _logger.Debug(value);
+                            _logger.Debug(body);
                         }
                     }
 
-                    var response = GetResponse(sessionId, req, value);
-                    SendResponse(sessionId, req, resp, value, response);
+                    var response = GetResponse(sessionId, req, body);
+                    await SendResponse(sessionId, req, resp, body, response);
                     break;
                 }
 
@@ -137,7 +124,7 @@ public class SptHttpListener : IHttpListener
     /// <param name="resp"> Outgoing response </param>
     /// <param name="body"> Buffer </param>
     /// <param name="output"> Server generated response data</param>
-    public void SendResponse(
+    public async Task SendResponse(
         string sessionID,
         HttpRequest req,
         HttpResponse resp,
@@ -155,7 +142,7 @@ public class SptHttpListener : IHttpListener
         if (IsDebugRequest(req))
         {
             // Send only raw response without transformation
-            SendJson(resp, output, sessionID);
+            await SendJson(resp, output, sessionID);
             if (_logger.IsLogEnabled(LogLevel.Debug))
             {
                 _logger.Debug($"Response: {output}");
@@ -169,12 +156,12 @@ public class SptHttpListener : IHttpListener
         var serialiser = _serializers.FirstOrDefault(x => x.CanHandle(output));
         if (serialiser != null)
         {
-            serialiser.Serialize(sessionID, req, resp, bodyInfo);
+            await serialiser.Serialize(sessionID, req, resp, bodyInfo);
         }
         else
             // No serializer can handle the request (majority of requests dont), zlib the output and send response back
         {
-            SendZlibJson(resp, output, sessionID);
+            await SendZlibJson(resp, output, sessionID);
         }
 
         LogRequest(req, output);
@@ -225,35 +212,35 @@ public class SptHttpListener : IHttpListener
         return output;
     }
 
-    public void SendJson(HttpResponse resp, string? output, string sessionID)
+    public async Task SendJson(HttpResponse resp, string? output, string sessionID)
     {
         resp.StatusCode = 200;
         resp.ContentType = "application/json";
         resp.Headers.Append("Set-Cookie", $"PHPSESSID={sessionID}");
         if (!string.IsNullOrEmpty(output))
         {
-            resp.Body.WriteAsync(Encoding.UTF8.GetBytes(output)).AsTask().Wait();
+            await resp.Body.WriteAsync(Encoding.UTF8.GetBytes(output));
         }
 
-        resp.StartAsync().Wait();
-        resp.CompleteAsync().Wait();
+        await resp.StartAsync();
+        await resp.CompleteAsync();
     }
 
-    public void SendZlibJson(HttpResponse resp, string? output, string sessionID)
+    public async Task SendZlibJson(HttpResponse resp, string? output, string sessionID)
     {
         using (var ms = new MemoryStream())
         {
             using (var deflateStream = new ZLibStream(ms, CompressionLevel.SmallestSize))
             {
-                deflateStream.WriteAsync(Encoding.UTF8.GetBytes(output)).AsTask().Wait();
+                await deflateStream.WriteAsync(Encoding.UTF8.GetBytes(output));
             }
 
             var bytes = ms.ToArray();
-            resp.Body.WriteAsync(bytes, 0, bytes.Length).Wait();
+            await resp.Body.WriteAsync(bytes);
         }
 
-        resp.StartAsync().Wait();
-        resp.CompleteAsync().Wait();
+        await resp.StartAsync();
+        await resp.CompleteAsync();
     }
 
     private record Response(string Method, string jsonData);

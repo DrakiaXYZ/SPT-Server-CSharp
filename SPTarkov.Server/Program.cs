@@ -8,6 +8,7 @@ using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.External;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Logger;
 using SPTarkov.Server.Logger;
@@ -17,7 +18,7 @@ namespace SPTarkov.Server;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         // Initialize the program variables
         ProgramStatics.Initialize();
@@ -30,7 +31,7 @@ public static class Program
         diHandler.AddInjectableTypesFromTypeAssembly(typeof(Program));
         diHandler.AddInjectableTypesFromTypeAssembly(typeof(App));
 
-        List<SptMod> loadedMods = null;
+        List<SptMod> loadedMods = [];
         if (ProgramStatics.MODS())
         {
             // Search for mod dlls
@@ -61,28 +62,25 @@ public static class Program
             if (ProgramStatics.MODS())
             {
                 // Initialize PreSptMods
-                var preSptLoadMods = serviceProvider.GetServices<IPreSptLoadMod>();
+                var preSptLoadMods = serviceProvider.GetServices<IPreSptLoadModAsync>();
                 foreach (var preSptLoadMod in preSptLoadMods)
                 {
-                    preSptLoadMod.PreSptLoad();
+                    await preSptLoadMod.PreSptLoadAsync();
                 }
             }
 
             // Get the Built app and run it
             var app = serviceProvider.GetService<App>();
-            app?.Run().Wait();
 
-            // Run garbage collection now the server is ready to start
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
-
-
-            var httpServerHelper = serviceProvider.GetService<HttpServerHelper>();
-            // When the application is started by the HttpServer it will be added into the AppContext of the WebApplication
-            // object, which we can use here to start the webapp.
-            if (httpServerHelper != null)
+            if (app != null)
             {
-                appContext?.GetLatestValue(ContextVariableType.WEB_APPLICATION)?.GetValue<WebApplication>().Run();
+                await app.InitializeAsync();
+
+                // Run garbage collection now the server is ready to start
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
+
+                await app.StartAsync();
             }
         }
         catch (Exception ex)
