@@ -67,7 +67,7 @@ public record TemplateItem
         }
         set
         {
-            _type = string.Intern(value);
+            _type = value != null ? string.Intern(value) : null;
         }
     }
 
