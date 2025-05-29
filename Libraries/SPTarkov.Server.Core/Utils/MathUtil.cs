@@ -16,6 +16,12 @@ public class MathUtil
         return values.Sum();
     }
 
+    public float ListSum(List<float> values)
+    {
+        // Sum the list starting with an initial value of 0
+        return values.Sum();
+    }
+
     /// <summary>
     ///     Helper to create the cumulative sum of all list elements
     ///     ListCumSum([1, 2, 3, 4]) = [1, 3, 6, 10]
