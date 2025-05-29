@@ -79,8 +79,8 @@ public class SptHttpListener(
 
                     if (requestCompressed)
                     {
-                        using var deflateStream = new ZLibStream(bufferStream, CompressionMode.Decompress);
-                        using var decompressedStream = new MemoryStream();
+                        await using var deflateStream = new ZLibStream(bufferStream, CompressionMode.Decompress);
+                        await using var decompressedStream = new MemoryStream();
                         await deflateStream.CopyToAsync(decompressedStream);
                         decompressedStream.Position = 0;
 
