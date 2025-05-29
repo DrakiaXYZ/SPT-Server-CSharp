@@ -174,7 +174,7 @@ public class DependencyInjectionHandler
                 _serviceCollection.AddScoped(registrableInterface, implementationType);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(injectionType), "unknown injection type");
+                throw new ArgumentOutOfRangeException(nameof(injectionType), $"Unknown injection type on {implementationType.Namespace}.{implementationType.Name}");
         }
     }
 
