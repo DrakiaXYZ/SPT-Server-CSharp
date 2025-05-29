@@ -17,8 +17,5 @@ public enum ContextVariableType
 
     // Data returned from client request object from endLocalRaid()
     TRANSIT_INFO = 5,
-    APP_BUILDER = 6,
-    LOADED_MOD_ASSEMBLIES = 7,
-    WEB_APPLICATION = 8,
     SERVICE_PROVIDER = 9
 }

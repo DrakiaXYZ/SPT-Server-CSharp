@@ -22,6 +22,7 @@ namespace SPTarkov.Server.Core.Controllers;
 [Injectable]
 public class GameController(
     ISptLogger<GameController> _logger,
+    IReadOnlyList<SptMod> _loadedMods,
     ConfigServer _configServer,
     DatabaseService _databaseService,
     TimeUtil _timeUtil,
@@ -472,13 +473,8 @@ public class GameController(
     protected void SaveActiveModsToProfile(SptProfile fullProfile)
     {
         fullProfile.SptData!.Mods ??= [];
-        var mods = _applicationContext?.GetLatestValue(ContextVariableType.LOADED_MOD_ASSEMBLIES)?.GetValue<List<SptMod>>();
-        if (mods == null)
-        {
-            return;
-        }
 
-        foreach (var mod in mods)
+        foreach (var mod in _loadedMods)
         {
             if (
                 fullProfile.SptData.Mods.Any(m =>

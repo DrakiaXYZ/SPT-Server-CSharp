@@ -42,6 +42,8 @@ public static class Program
         }
         diHandler.InjectAll();
 
+        builder.Services.AddSingleton(builder);
+        builder.Services.AddSingleton<IReadOnlyList<SptMod>>(loadedMods);
         var serviceProvider = builder.Services.BuildServiceProvider();
         var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger("Server");
 
@@ -65,12 +67,6 @@ public static class Program
                     preSptLoadMod.PreSptLoad();
                 }
             }
-
-            // Add the Loaded Mod Assemblies for later
-            appContext?.AddValue(ContextVariableType.LOADED_MOD_ASSEMBLIES, loadedMods);
-
-            // This is the builder that will get use by the HttpServer to start up the web application
-            appContext?.AddValue(ContextVariableType.APP_BUILDER, builder);
 
             // Get the Built app and run it
             var app = serviceProvider.GetService<App>();
