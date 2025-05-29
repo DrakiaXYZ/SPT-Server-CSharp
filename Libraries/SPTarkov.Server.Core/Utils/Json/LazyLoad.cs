@@ -26,7 +26,10 @@ public class LazyLoad<T>(Func<T> deserialize)
                 OnLazyLoadEventArgs<T> args = new(_result);
                 OnLazyLoad?.Invoke(this, args);
 
-                _result = args.Value;
+                if (args.Value != null)
+                {
+                    _result = args.Value;
+                }
 
                 autoCleanerTimeout = new Timer(
                     _ =>
