@@ -39,7 +39,6 @@ public class QuestController(
     ICloner _cloner
 )
 {
-    protected static readonly List<string> _questTypes = ["PickUp", "Exploration", "Elimination"];
     protected QuestConfig _questConfig = _configServer.GetConfig<QuestConfig>();
 
     /// <summary>
@@ -97,7 +96,7 @@ public class QuestController(
                 pmcData,
                 acceptedQuest.QuestId);
         }
-        
+
 
         // Get messageId of text to send to player as text message in game
         var messageId = _questHelper.GetMessageIdForQuestStart(
@@ -167,81 +166,6 @@ public class QuestController(
                     break;
             }
         }
-    }
-
-    /// <summary>
-    ///     TODO: Move this code into RepeatableQuestController
-    ///     Handle the client accepting a repeatable quest and starting it
-    ///     Send starting rewards if any to player and
-    ///     Send start notification if any to player
-    /// </summary>
-    /// <param name="pmcData">Players PMC profile</param>
-    /// <param name="acceptedQuest">Repeatable quest accepted</param>
-    /// <param name="sessionID">Session/Player id</param>
-    /// <returns>ItemEventRouterResponse</returns>
-    public ItemEventRouterResponse AcceptRepeatableQuest(PmcData pmcData, AcceptQuestRequestData acceptedQuest, string sessionID)
-    {
-        // Create and store quest status object inside player profile
-        var newRepeatableQuest = _questHelper.GetQuestReadyForProfile(
-            pmcData,
-            QuestStatusEnum.Started,
-            acceptedQuest
-        );
-        pmcData.Quests.Add(newRepeatableQuest);
-
-        // Look for the generated quest cache in profile.RepeatableQuests
-        var repeatableQuestProfile = GetRepeatableQuestFromProfile(pmcData, acceptedQuest.QuestId);
-        if (repeatableQuestProfile is null)
-        {
-            _logger.Error(
-                _localisationService.GetText(
-                    "repeatable-accepted_repeatable_quest_not_found_in_active_quests",
-                    acceptedQuest.QuestId
-                )
-            );
-
-            throw new Exception(_localisationService.GetText("repeatable-unable_to_accept_quest_see_log"));
-        }
-
-        // Some scav quests need to be added to scav profile for them to show up in-raid
-        if (repeatableQuestProfile.Side == "Scav" && _questTypes.Contains(repeatableQuestProfile.Type.ToString()))
-        {
-            var fullProfile = _profileHelper.GetFullProfile(sessionID);
-
-            fullProfile.CharacterData.ScavData.Quests ??= [];
-            fullProfile.CharacterData.ScavData.Quests.Add(newRepeatableQuest);
-        }
-
-        var response = _eventOutputHolder.GetOutput(sessionID);
-
-        return response;
-    }
-
-    /// <summary>
-    ///     Look for an accepted quest inside player profile, return quest that matches
-    /// </summary>
-    /// <param name="pmcData">Players PMC profile</param>
-    /// <param name="questId">Quest id to return</param>
-    /// <returns>RepeatableQuest</returns>
-    protected RepeatableQuest GetRepeatableQuestFromProfile(PmcData pmcData, string questId)
-    {
-        foreach (var repeatableQuest in pmcData.RepeatableQuests)
-        {
-            var matchingQuest = repeatableQuest.ActiveQuests.FirstOrDefault(x => x.Id == questId);
-            if (matchingQuest is not null)
-            {
-                if (_logger.IsLogEnabled(LogLevel.Debug))
-                {
-                    _logger.Debug($"Accepted repeatable quest: {questId} from: {repeatableQuest.Name}");
-                }
-
-                matchingQuest.SptRepatableGroupName = repeatableQuest.Name;
-
-                return matchingQuest;
-            }
-        }
-
-        return null;
     }
 
     /// <summary>

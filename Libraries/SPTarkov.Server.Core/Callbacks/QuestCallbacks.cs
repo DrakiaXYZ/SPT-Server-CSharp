@@ -37,7 +37,7 @@ public class QuestCallbacks(
     {
         if (info.Type == "repeatable")
         {
-            return _questController.AcceptRepeatableQuest(pmcData, info, sessionID);
+            return _repeatableQuestController.AcceptRepeatableQuest(pmcData, info, sessionID);
         }
 
         return _questController.AcceptQuest(pmcData, info, sessionID);
