@@ -546,58 +546,15 @@ public class QuestHelper(
         return GetQuestsWithOnlyLevelRequirementStartCondition(quests);
     }
 
-    /**
-     * Sets the item stack to new value, or delete the item if value
-     * <
-     * =
-     * 0
-     * /
-     * /
-     * TODO
-     * maybe
-     * merge
-     * this
-     * function
-     * and
-     * the
-     * one
-     * from
-     * customization
-     * @
-     * param
-     * pmcData
-     * Profile
-     * @
-     * param
-     * itemId
-     * id
-     * of
-     * item
-     * to
-     * adjust
-     * stack
-     * size
-     * of
-     * @
-     * param
-     * newStackSize
-     * Stack
-     * size
-     * to
-     * adjust
-     * to
-     * @
-     * param
-     * sessionID
-     * Session
-     * id
-     * @
-     * param
-     * output
-     * ItemEvent
-     * router
-     * response
-     */
+    /// <summary>
+    /// Sets the item stack to new value, or delete the item if value <= 0
+    /// TODO: maybe merge this function and the one from customization
+    /// </summary>
+    /// <param name="pmcData">Profile</param>
+    /// <param name="itemId">Id of item to adjust stack size of</param>
+    /// <param name="newStackSize">Stack size to adjust to</param>
+    /// <param name="sessionID">Session id</param>
+    /// <param name="output">ItemEvent router response</param>
     public void ChangeItemStack(
         PmcData pmcData,
         string itemId,
