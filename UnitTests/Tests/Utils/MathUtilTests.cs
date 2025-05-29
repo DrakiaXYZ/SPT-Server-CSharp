@@ -10,7 +10,7 @@ public class MathUtilTests
     [TestMethod]
     public void ListSumTest()
     {
-        var test = new List<double>
+        var test = new List<float>
         {
             1.1f,
             2.1f,
