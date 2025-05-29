@@ -28,9 +28,10 @@ public class WebSocketServer(
         var wsToken = cts.Token;
 
         var message = $"Socket connection received for url {context.Request.Path.Value}, but there is no websocket handler configured for it!";
-        _logger.Debug(message);
+        
         if (socketHandlers.Count == 0)
         {
+            _logger.Debug(message);
             await webSocket.CloseAsync(WebSocketCloseStatus.ProtocolError, message, CancellationToken.None);
             return;
         }

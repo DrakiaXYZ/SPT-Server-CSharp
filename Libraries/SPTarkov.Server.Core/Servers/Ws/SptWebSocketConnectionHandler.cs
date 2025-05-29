@@ -12,52 +12,16 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 namespace SPTarkov.Server.Core.Servers.Ws;
 
 [Injectable(InjectionType.Singleton)]
-public class SptWebSocketConnectionHandler : IWebSocketConnectionHandler
+public class SptWebSocketConnectionHandler(
+    ISptLogger<SptWebSocketConnectionHandler> _logger,
+    LocalisationService _localisationService,
+    JsonUtil _jsonUtil,
+    ProfileHelper _profileHelper,
+    IEnumerable<ISptWebSocketMessageHandler> _messageHandlers)
+    : IWebSocketConnectionHandler
 {
     protected Dictionary<string, Dictionary<string, WebSocket>> _sockets = new();
     protected Lock _socketsLock = new();
-    protected ISptLogger<SptWebSocketConnectionHandler> _logger;
-    protected LocalisationService _localisationService;
-    protected JsonUtil _jsonUtil;
-    protected ProfileHelper _profileHelper;
-    protected IEnumerable<ISptWebSocketMessageHandler> _messageHandlers;
-    protected Task _monitor;
-
-    public SptWebSocketConnectionHandler(
-        ISptLogger<SptWebSocketConnectionHandler> logger,
-        LocalisationService localisationService,
-        JsonUtil jsonUtil,
-        ProfileHelper profileHelper,
-        IEnumerable<ISptWebSocketMessageHandler> messageHandlers
-    )
-    {
-        _logger = logger;
-        _localisationService = localisationService;
-        _jsonUtil = jsonUtil;
-        _profileHelper = profileHelper;
-        _messageHandlers = messageHandlers;
-        StartMonitorThread();
-    }
-
-    private void StartMonitorThread()
-    {
-        if (_logger.IsLogEnabled(LogLevel.Debug))
-        {
-            if (_monitor == null)
-            {
-                _monitor = Task.Factory.StartNew(() =>
-                {
-                    _logger.Debug("Websocket monitor started");
-                    while (true)
-                    {
-                        // This is a temporary debug line, its horrible I know, its gonna be removed when we figure out the WS issue
-                        _logger.Debug($"Sockets: {string.Join(',', _sockets.Select(kp => $"SESSID={kp.Key},SOCK=[{string.Join(',', kp.Value.Select(sess => $"CTX={sess.Key},WS={sess.Value.State}"))}]"))}");
-                        Thread.Sleep(10000);
-                    }
-                }, TaskCreationOptions.LongRunning);
-            }
-        }
-    }
 
     public string GetHookUrl()
     {
@@ -82,30 +46,15 @@ public class SptWebSocketConnectionHandler : IWebSocketConnectionHandler
 
         lock (_socketsLock)
         {
-            if (_sockets.TryGetValue(sessionID, out var sessionSockets) && sessionSockets.Any())
+            if (_sockets.TryGetValue(sessionID, out var sessionSockets))
             {
-                if (_logger.IsLogEnabled(LogLevel.Debug))
-                {
-                    _logger.Debug(_localisationService.GetText("websocket-player_reconnect", playerInfoText));
-                }
-
-                foreach (var oldSocket in sessionSockets)
+                if (sessionSockets.Any())
                 {
                     if (_logger.IsLogEnabled(LogLevel.Debug))
                     {
-                        _logger.Debug($"[WS] Removing websocket reference {oldSocket.Key} for session {sessionID}");
-                    }
-
-                    oldSocket.Value.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None)
-                        .Wait();
-                    if (_logger.IsLogEnabled(LogLevel.Debug))
-                    {
-                        _logger.Debug(
-                            $"[WS] Web socket connection for reference {oldSocket.Key} for session {sessionID} closed");
+                        _logger.Debug(_localisationService.GetText("websocket-player_reconnect", new {sessionId = playerInfoText, contextId = sessionIdContext }));
                     }
                 }
-
-                sessionSockets.Clear();
             }
             else
             {
@@ -116,7 +65,7 @@ public class SptWebSocketConnectionHandler : IWebSocketConnectionHandler
             sessionSockets.Add(sessionIdContext, ws);
             if (_logger.IsLogEnabled(LogLevel.Info))
             {
-                _logger.Info(_localisationService.GetText("websocket-player_connected", playerInfoText));
+                _logger.Info(_localisationService.GetText("websocket-player_connected", new { sessionId = playerInfoText, contextId = sessionIdContext }));
             }
 
             return Task.CompletedTask;
@@ -166,7 +115,7 @@ public class SptWebSocketConnectionHandler : IWebSocketConnectionHandler
                 if (!sessionSockets.TryGetValue(sessionIdContext, out _) && _logger.IsLogEnabled(LogLevel.Info))
                 {
                     _logger.Info(
-                        $"[ws] The websocket session {sessionID} with reference {sessionIdContext} has already been removed or reconnected");
+                        $"[ws] The websocket session {sessionID} with reference: {sessionIdContext} has already been removed or reconnected");
                 }
                 else
                 {
@@ -175,7 +124,7 @@ public class SptWebSocketConnectionHandler : IWebSocketConnectionHandler
                     {
                         var playerProfile = _profileHelper.GetFullProfile(sessionID);
                         var playerInfoText = $"{playerProfile.ProfileInfo.Username} ({sessionID})";
-                        _logger.Info($"[ws] player: {playerInfoText} has disconnected");
+                        _logger.Info($"[ws] player: {playerInfoText} {sessionIdContext} has disconnected");
                     }
                 }
             }
