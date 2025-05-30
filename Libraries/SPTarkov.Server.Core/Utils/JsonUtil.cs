@@ -79,6 +79,23 @@ public class JsonUtil
     }
 
     /// <summary>
+    ///     Convert JSON into an object from a file asynchronously
+    /// </summary>
+    /// <param name="file">The JSON File to read</param>
+    /// <returns>T</returns>
+    public async Task<T?> DeserializeFromFileAsync<T>(string file)
+    {
+        if (!File.Exists(file))
+        {
+            return default;
+        }
+
+        await using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+
+        return await JsonSerializer.DeserializeAsync<T>(fs, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
     ///     Convert JSON into an object from a file
     /// </summary>
     /// <param name="file">The JSON File to read</param>
@@ -98,6 +115,24 @@ public class JsonUtil
     }
 
     /// <summary>
+    ///     Convert JSON into an object from a file asynchronously
+    /// </summary>
+    /// <param name="file">The JSON File to read</param>
+    /// <param name="type">The type of the object to deserialize to</param>
+    /// <returns>object</returns>
+    public async Task<object?> DeserializeFromFileAsync(string file, Type type)
+    {
+        if (!File.Exists(file))
+        {
+            return default;
+        }
+
+        await using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+
+        return await JsonSerializer.DeserializeAsync(fs, type, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
     ///     Convert JSON into an object from a FileStream
     /// </summary>
     /// <param name="fs">The file stream to deserialize</param>
@@ -106,6 +141,17 @@ public class JsonUtil
     public object? DeserializeFromFileStream(FileStream fs, Type type)
     {
         return JsonSerializer.Deserialize(fs, type, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
+    ///     Convert JSON into an object from a FileStream asynchronously
+    /// </summary>
+    /// <param name="fs">The file stream to deserialize</param>
+    /// <param name="type">The type of the object to deserialize to</param>
+    /// <returns></returns>
+    public async Task<object?> DeserializeFromFileStreamAsync(FileStream fs, Type type)
+    {
+        return await JsonSerializer.DeserializeAsync(fs, type, jsonSerializerOptionsNoIndent);
     }
 
     /// <summary>

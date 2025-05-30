@@ -97,31 +97,28 @@ public class ImporterUtil
     {
         try
         {
-            using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+            onReadCallback?.Invoke(file);
+
+            // Get the set method to update the object
+            var setMethod = GetSetMethod(
+                _fileUtil.StripExtension(file).ToLower(),
+                loadedType,
+                out var propertyType,
+                out var isDictionary
+            );
+
+            var fileDeserialized = await DeserializeFileAsync(file, propertyType);
+
+            onObjectDeserialized?.Invoke(file, fileDeserialized);
+
+            lock (dictionaryLock)
             {
-                onReadCallback?.Invoke(file);
-
-                // Get the set method to update the object
-                var setMethod = GetSetMethod(
-                    _fileUtil.StripExtension(file).ToLower(),
-                    loadedType,
-                    out var propertyType,
-                    out var isDictionary
+                setMethod.Invoke(
+                    result,
+                    isDictionary
+                        ? [_fileUtil.StripExtension(file), fileDeserialized]
+                        : new[] { fileDeserialized }
                 );
-
-                var fileDeserialized = await DeserializeFileAsync(fs, file, propertyType);
-
-                onObjectDeserialized?.Invoke(file, fileDeserialized);
-
-                lock (dictionaryLock)
-                {
-                    setMethod.Invoke(
-                        result,
-                        isDictionary
-                            ? [_fileUtil.StripExtension(file), fileDeserialized]
-                            : new[] { fileDeserialized }
-                    );
-                }
             }
         }
         catch (Exception ex)
@@ -159,14 +156,14 @@ public class ImporterUtil
         }
     }
 
-    private async Task<object> DeserializeFileAsync(FileStream fs, string file, Type propertyType)
+    private async Task<object> DeserializeFileAsync(string file, Type propertyType)
     {
         if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(LazyLoad<>))
         {
             return CreateLazyLoadDeserialization(file, propertyType);
         }
 
-        return await Task.Run(() => _jsonUtil.DeserializeFromFileStream(fs, propertyType));
+        return await _jsonUtil.DeserializeFromFileAsync(file, propertyType);
     }
 
     private object CreateLazyLoadDeserialization(string file, Type propertyType)
