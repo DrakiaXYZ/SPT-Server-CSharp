@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 using SPTarkov.DI.Annotations;
@@ -8,43 +7,33 @@ using SPTarkov.Server.Core.Utils.Json;
 namespace SPTarkov.Server.Core.Utils;
 
 [Injectable(InjectionType.Singleton)]
-public class ImporterUtil
+public class ImporterUtil(ISptLogger<ImporterUtil> _logger, FileUtil _fileUtil, JsonUtil _jsonUtil)
 {
-    protected readonly ConcurrentDictionary<Type, Delegate> lazyLoadDeserializationCache = [];
-    protected FileUtil _fileUtil;
-    protected JsonUtil _jsonUtil;
-    protected ISptLogger<ImporterUtil> _logger;
     protected HashSet<string> directoriesToIgnore = ["./Assets/database/locales/server"];
 
     protected HashSet<string> filesToIgnore = ["bearsuits.json", "usecsuits.json", "archivedquests.json"];
 
-    public ImporterUtil(ISptLogger<ImporterUtil> logger, FileUtil fileUtil, JsonUtil jsonUtil)
-    {
-        _logger = logger;
-        _fileUtil = fileUtil;
-        _jsonUtil = jsonUtil;
-    }
-
-    public Task<T> LoadRecursiveAsync<T>(
-        string filepath,
+    public async Task<T> LoadRecursiveAsync<T>(
+        string filePath,
         Action<string>? onReadCallback = null,
         Action<string, object>? onObjectDeserialized = null
     )
     {
-        return LoadRecursiveAsync(filepath, typeof(T), onReadCallback, onObjectDeserialized)
-            .ContinueWith(res => (T) res.Result);
+        var result = await LoadRecursiveAsync(filePath, typeof(T), onReadCallback, onObjectDeserialized);
+
+        return (T) result;
     }
 
     /// <summary>
     ///     Load files into objects recursively (asynchronous)
     /// </summary>
-    /// <param name="filepath">Path to folder with files</param>
+    /// <param name="filePath">Path to folder with files</param>
     /// <param name="loadedType"></param>
     /// <param name="onReadCallback"></param>
     /// <param name="onObjectDeserialized"></param>
     /// <returns>Task</returns>
     protected async Task<object> LoadRecursiveAsync(
-        string filepath,
+        string filePath,
         Type loadedType,
         Action<string>? onReadCallback = null,
         Action<string, object>? onObjectDeserialized = null
@@ -55,8 +44,8 @@ public class ImporterUtil
         var result = Activator.CreateInstance(loadedType);
 
         // get all filepaths
-        var files = _fileUtil.GetFiles(filepath);
-        var directories = _fileUtil.GetDirectories(filepath);
+        var files = _fileUtil.GetFiles(filePath);
+        var directories = _fileUtil.GetDirectories(filePath);
 
         // Process files
         foreach (var file in files)
