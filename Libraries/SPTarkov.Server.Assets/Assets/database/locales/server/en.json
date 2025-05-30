@@ -202,6 +202,7 @@
   "modloader-invalid_sptVersion_field": "Mod: %s contains an invalid semver string in the sptVersion field. Examples of valid values: https://github.com/npm/node-semver#versions",
   "modloader-invalid_version_property": "Mod: %s package.json contains an invalid version string",
   "modloader-is_client_mod": "Mod (%s) is a client mod and should be placed in the following folder: /spt/bepinex/plugins",
+  "modloader-is-old-js-mod": "Mod (%s) is a pre-4.0.0 server mod. Please find the appropriate version or wait for an update.",
   "modloader-load_order_conflict": "`{{modOneName}}` and `{{modTwoName}}` have conflicting load order requirements, the server is unable to start until this is fixed and will shut down",
   "modloader-loaded_mod": "Mod: {{name}} version: {{version}} by: {{author}} loaded",
   "modloader-loading_mods": "ModLoader: loading: %s server mods...",

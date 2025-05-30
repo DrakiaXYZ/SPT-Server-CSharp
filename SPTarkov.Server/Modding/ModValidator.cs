@@ -396,8 +396,7 @@ public class ModValidator(
 
         if (containsJs || containsTs)
         {
-            // TODO: needs new localisation!
-            logger.Error("The mod is an old server mod, JS/TS files detected");
+            logger.Error(localisationService.GetText("modloader-is-old-js-mod", modName));
             return false;
         }
 
