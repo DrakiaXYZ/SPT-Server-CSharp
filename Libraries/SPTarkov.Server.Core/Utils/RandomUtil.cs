@@ -105,7 +105,7 @@ public class RandomUtil(ISptLogger<RandomUtil> _logger, ICloner _cloner)
     {
         chancePercent = Math.Clamp(chancePercent ?? 0, 0D, 100D);
 
-        return GetInt(0, 100) <= chancePercent;
+        return GetInt(1, 100) <= chancePercent;
     }
 
     /// <summary>
