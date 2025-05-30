@@ -11,6 +11,7 @@ public class JsonUtil
 {
     private static JsonSerializerOptions? jsonSerializerOptionsNoIndent;
     private static JsonSerializerOptions? jsonSerializerOptionsIndented;
+    private static readonly Lock _lock = new();
 
     public JsonUtil(
         IEnumerable<IJsonConverterRegistrator> registrators
@@ -28,14 +29,20 @@ public class JsonUtil
         {
             foreach (var converter in registrator.GetJsonConverters())
             {
-                jsonSerializerOptionsNoIndent.Converters.Add(converter);
+                lock (_lock)
+                {
+                    jsonSerializerOptionsNoIndent.Converters.Add(converter);
+                }
             }
         }
 
-        jsonSerializerOptionsIndented = new JsonSerializerOptions(jsonSerializerOptionsNoIndent)
+        lock (_lock)
         {
-            WriteIndented = true
-        };
+            jsonSerializerOptionsIndented = new JsonSerializerOptions(jsonSerializerOptionsNoIndent)
+            {
+                WriteIndented = true
+            };
+        }
     }
 
     /// <summary>

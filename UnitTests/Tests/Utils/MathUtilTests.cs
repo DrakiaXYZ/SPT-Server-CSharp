@@ -5,7 +5,13 @@ namespace UnitTests.Tests.Utils;
 [TestClass]
 public class MathUtilTests
 {
-    protected MathUtil _mathUtil = new();
+    private MathUtil _mathUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _mathUtil = DI.GetService<MathUtil>();
+    }
 
     [TestMethod]
     public void ListSumTest()

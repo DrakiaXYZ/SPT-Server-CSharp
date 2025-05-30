@@ -1,16 +1,19 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Core.Utils.Cloners;
-using SPTarkov.Server.Core.Utils.Json.Converters;
-using UnitTests.Mock;
 
 namespace UnitTests.Tests.Utils;
 
 [TestClass]
 public class HashUtilTests
 {
-    protected HashUtil _hashUtil = new(new RandomUtil(new MockLogger<RandomUtil>(), new JsonCloner(new JsonUtil([ new SptJsonConverterRegistrator() ]))));
+    private HashUtil _hashUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _hashUtil = DI.GetService<HashUtil>();
+    }
 
     [TestMethod]
     public void GenerateTest()
