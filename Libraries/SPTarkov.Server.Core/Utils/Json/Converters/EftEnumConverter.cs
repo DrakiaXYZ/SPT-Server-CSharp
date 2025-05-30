@@ -85,3 +85,10 @@ public class EftEnumConverter<T> : JsonConverter<T>
         writer.WritePropertyName(propertyValue.ToString());
     }
 }
+
+/// <summary>
+/// This attribute should be applied to enums which should be added as a converter to the json converter
+/// </summary>
+[AttributeUsage(AttributeTargets.Enum)]
+public class EftEnumConverterAttribute : Attribute
+{ }

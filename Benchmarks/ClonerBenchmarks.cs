@@ -3,6 +3,7 @@ using Benchmarks.Mock;
 using SPTarkov.Server.Core.Models.Spt.Templates;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Utils.Json.Converters;
 
 namespace Benchmarks;
 
@@ -19,7 +20,7 @@ public class ClonerBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var jsonUtil = new JsonUtil();
+        var jsonUtil = new JsonUtil([ new SptJsonConverterRegistrator() ]);
         var importer = new ImporterUtil(new MockLogger<ImporterUtil>(), new FileUtil(),
             jsonUtil);
         var loadTask = importer.LoadRecursiveAsync<Templates>("./Assets/database/templates/");

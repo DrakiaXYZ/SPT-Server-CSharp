@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using SPTarkov.Server.Core.Utils.Json.Converters;
 using UnitTests.Mock;
 
 namespace UnitTests.Tests.Utils;
@@ -9,7 +10,7 @@ namespace UnitTests.Tests.Utils;
 [TestClass]
 public class HashUtilTests
 {
-    protected HashUtil _hashUtil = new(new RandomUtil(new MockLogger<RandomUtil>(), new JsonCloner(new JsonUtil())));
+    protected HashUtil _hashUtil = new(new RandomUtil(new MockLogger<RandomUtil>(), new JsonCloner(new JsonUtil([ new SptJsonConverterRegistrator() ]))));
 
     [TestMethod]
     public void GenerateTest()

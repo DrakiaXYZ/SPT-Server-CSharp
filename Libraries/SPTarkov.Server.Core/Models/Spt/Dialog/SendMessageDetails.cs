@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Utils.Json.Converters;
 
 namespace SPTarkov.Server.Core.Models.Spt.Dialog;
 
@@ -176,6 +177,7 @@ public record ProfileChangeEvent
     }
 }
 
+[EftEnumConverter]
 public enum ProfileChangeEventType
 {
     TraderSalesSum,

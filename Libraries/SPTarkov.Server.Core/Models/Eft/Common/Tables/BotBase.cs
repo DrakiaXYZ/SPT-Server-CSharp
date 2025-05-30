@@ -616,6 +616,7 @@ public record Ban
     }
 }
 
+[EftEnumConverter]
 public enum BanType
 {
     Chat,
