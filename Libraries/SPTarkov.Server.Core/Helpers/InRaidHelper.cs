@@ -124,24 +124,20 @@ public class InRaidHelper(
     /// </summary>
     /// <param name="itemsToAdd">Items we want to add</param>
     /// <param name="serverInventoryItems">Location to add items to</param>
-    protected void AddItemsToInventory(List<Item> itemsToAdd, List<Item> serverInventoryItems)
+    protected void AddItemsToInventory(IEnumerable<Item> itemsToAdd, List<Item> serverInventoryItems)
     {
         foreach (var itemToAdd in itemsToAdd)
         {
             // Try to find index of item to determine if we should add or replace
-            var existingItemIndex = serverInventoryItems.FindIndex(inventoryItem => inventoryItem.Id == itemToAdd.Id
-            );
+            var existingItemIndex = serverInventoryItems.FindIndex(inventoryItem => inventoryItem.Id == itemToAdd.Id);
             if (existingItemIndex != -1)
             {
-                // Replace item with one from client
+                // Replace existing item
                 serverInventoryItems.RemoveAt(existingItemIndex);
-                serverInventoryItems.Add(itemToAdd);
             }
-            else
-            {
-                // Not found, add
-                serverInventoryItems.Add(itemToAdd);
-            }
+
+            // Add new item
+            serverInventoryItems.Add(itemToAdd);
         }
     }
 
