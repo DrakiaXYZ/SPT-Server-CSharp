@@ -131,15 +131,15 @@ public class InRaidHelper(
             // Try to find index of item to determine if we should add or replace
             var existingItemIndex = serverInventoryItems.FindIndex(inventoryItem => inventoryItem.Id == itemToAdd.Id
             );
-            if (existingItemIndex == -1)
+            if (existingItemIndex != -1)
             {
-                // Not found, add
+                // Replace item with one from client
+                serverInventoryItems.RemoveAt(existingItemIndex);
                 serverInventoryItems.Add(itemToAdd);
             }
             else
             {
-                // Replace item with one from client
-                serverInventoryItems.RemoveAt(existingItemIndex);
+                // Not found, add
                 serverInventoryItems.Add(itemToAdd);
             }
         }
@@ -190,12 +190,9 @@ public class InRaidHelper(
             }
         }
 
-        foreach (var item in itemsInsideContainer)
+        foreach (var item in itemsInsideContainer.Where(item => item.Upd?.SpawnedInSession ?? false))
         {
-            if (item.Upd.SpawnedInSession ?? false)
-            {
-                item.Upd.SpawnedInSession = false;
-            }
+            item.Upd.SpawnedInSession = false;
         }
     }
 
