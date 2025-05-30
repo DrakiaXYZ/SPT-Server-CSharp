@@ -1,5 +1,8 @@
-﻿namespace SPTarkov.Server.Core.Models.Logging;
+﻿using SPTarkov.Server.Core.Utils.Json.Converters;
 
+namespace SPTarkov.Server.Core.Models.Logging;
+
+[EftEnumConverter]
 public enum LogTextColor
 {
     Black = 30,

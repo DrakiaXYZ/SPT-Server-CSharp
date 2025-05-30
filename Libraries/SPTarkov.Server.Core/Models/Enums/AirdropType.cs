@@ -1,3 +1,5 @@
+using SPTarkov.Server.Core.Utils.Json.Converters;
+
 namespace SPTarkov.Server.Core.Models.Enums;
 
 public enum AirdropTypeEnum
@@ -8,6 +10,7 @@ public enum AirdropTypeEnum
     Weapon
 }
 
+[EftEnumConverter]
 public enum SptAirdropTypeEnum
 {
     mixed,
