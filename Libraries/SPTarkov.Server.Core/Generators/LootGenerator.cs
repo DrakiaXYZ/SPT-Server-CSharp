@@ -232,6 +232,7 @@ public class LootGenerator(
             // Get all items that match the blacklisted types and fold into item blacklist
             var itemTypeBlacklist = _itemFilterService.GetItemRewardBaseTypeBlacklist();
             var itemsMatchingTypeBlacklist = itemsDb
+                .Where(templateItem => !string.IsNullOrEmpty(templateItem.Parent)) // Ignore items without parents
                 .Where(templateItem => _itemHelper.IsOfBaseclasses(templateItem.Parent, itemTypeBlacklist))
                 .Select(templateItem => templateItem.Id);
 
