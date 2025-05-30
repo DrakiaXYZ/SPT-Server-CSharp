@@ -77,7 +77,7 @@ public class InRaidHelper(
         // Do after above filtering code to reduce work done
         if (!isSurvived && !isTransfer && !_inRaidConfig.AlwaysKeepFoundInRaidOnRaidEnd)
         {
-            RemoveFiRStatusFromCertainItems(postRaidProfile.Inventory.Items);
+            RemoveFiRStatusFromItems(postRaidProfile.Inventory.Items);
         }
 
         // Add items from client profile into server profile
@@ -94,7 +94,7 @@ public class InRaidHelper(
     ///     Remove FiR status from items.
     /// </summary>
     /// <param name="items">Items to process</param>
-    protected void RemoveFiRStatusFromCertainItems(List<Item> items)
+    protected void RemoveFiRStatusFromItems(List<Item> items)
     {
         var dbItems = _databaseService.GetItems();
 
