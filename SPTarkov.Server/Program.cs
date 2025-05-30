@@ -3,9 +3,6 @@ using System.Runtime.InteropServices;
 using SPTarkov.Common.Semver;
 using SPTarkov.Common.Semver.Implementations;
 using SPTarkov.DI;
-using SPTarkov.Server.Core.Context;
-using SPTarkov.Server.Core.Helpers;
-using SPTarkov.Server.Core.Models.External;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
@@ -51,9 +48,6 @@ public static class Program
         try
         {
             SetConsoleOutputMode();
-
-            var appContext = serviceProvider.GetService<ApplicationContext>();
-            appContext?.AddValue(ContextVariableType.SERVICE_PROVIDER, serviceProvider);
 
             // Get the Built app and run it
             var app = serviceProvider.GetService<App>();

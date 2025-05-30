@@ -1,5 +1,4 @@
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -21,7 +20,7 @@ namespace SPTarkov.Server.Core.Services;
 [Injectable(InjectionType.Singleton)]
 public class LocationLifecycleService
 {
-    protected ApplicationContext _applicationContext;
+    protected ProfileActivityService _profileActivityService;
     protected BotGenerationCacheService _botGenerationCacheService;
     protected BotLootCacheService _botLootCacheService;
     protected BotNameService _botNameService;
@@ -64,7 +63,7 @@ public class LocationLifecycleService
         DatabaseService databaseService,
         ProfileHelper profileHelper,
         HashUtil hashUtil,
-        ApplicationContext applicationContext,
+        ProfileActivityService profileActivityService,
         BotGenerationCacheService botGenerationCacheService,
         BotNameService botNameService,
         ICloner cloner,
@@ -94,7 +93,7 @@ public class LocationLifecycleService
         _databaseService = databaseService;
         _profileHelper = profileHelper;
         _hashUtil = hashUtil;
-        _applicationContext = applicationContext;
+        _profileActivityService = profileActivityService;
         _botGenerationCacheService = botGenerationCacheService;
         _botNameService = botNameService;
         _cloner = cloner;
@@ -150,7 +149,7 @@ public class LocationLifecycleService
             {
                 InsuredItems = playerProfile.CharacterData.PmcData.InsuredItems
             },
-            LocationLoot = GenerateLocationAndLoot(request.Location, !request.ShouldSkipLootGeneration ?? true),
+            LocationLoot = GenerateLocationAndLoot(sessionId, request.Location, !request.ShouldSkipLootGeneration ?? true),
             TransitionType = TransitionType.NONE,
             Transition = new Transition
             {
@@ -169,9 +168,7 @@ public class LocationLifecycleService
         }
 
         // Get data stored at end of previous raid (if any)
-        var transitionData = _applicationContext
-            .GetLatestValue(ContextVariableType.TRANSIT_INFO)
-            ?.GetValue<LocationTransit>();
+        var transitionData = _profileActivityService.GetProfileActivityRaidData(sessionId)?.LocationTransit;
 
         if (transitionData is not null)
         {
@@ -184,7 +181,7 @@ public class LocationLifecycleService
             result.Transition.VisitedLocations.Add(transitionData.SptLastVisitedLocation);
 
             // Complete, clean up as no longer needed
-            _applicationContext.ClearValues(ContextVariableType.TRANSIT_INFO);
+            _profileActivityService.GetProfileActivityRaidData(sessionId).LocationTransit = null;
         }
 
         // Apply changes from pmcConfig to bot hostility values
@@ -338,7 +335,7 @@ public class LocationLifecycleService
     /// </summary>
     /// Generate a maps base location (cloned) and loot
     /// <summary>
-    public virtual LocationBase GenerateLocationAndLoot(string name, bool generateLoot = true)
+    public virtual LocationBase GenerateLocationAndLoot(string sessionId, string name, bool generateLoot = true)
     {
         var location = _databaseService.GetLocation(name);
         var locationBaseClone = _cloner.Clone(location.Base);
@@ -363,9 +360,7 @@ public class LocationLifecycleService
 
         // Adjust raid based on whether this is a scav run
         LocationConfig? locationConfigClone = null;
-        var raidAdjustments = _applicationContext
-            .GetLatestValue(ContextVariableType.RAID_ADJUSTMENTS)
-            ?.GetValue<RaidChanges>();
+        var raidAdjustments = _profileActivityService.GetProfileActivityRaidData(sessionId).RaidAdjustments;
         if (raidAdjustments is not null)
         {
             locationConfigClone = _cloner.Clone(_locationConfig); // Clone values so they can be used to reset originals later
@@ -405,7 +400,7 @@ public class LocationLifecycleService
             _locationConfig.StaticLootMultiplier = locationConfigClone.StaticLootMultiplier;
             _locationConfig.LooseLootMultiplier = locationConfigClone.LooseLootMultiplier;
 
-            _applicationContext.ClearValues(ContextVariableType.RAID_ADJUSTMENTS);
+            _profileActivityService.GetProfileActivityRaidData(sessionId).RaidAdjustments = null;
         }
 
         return locationBaseClone;
@@ -457,7 +452,7 @@ public class LocationLifecycleService
             // TODO - Persist each players last visited location history over multiple transits, e.g using InMemoryCacheService, need to take care to not let data get stored forever
             // Store transfer data for later use in `startLocalRaid()` when next raid starts
             request.LocationTransit.SptExitName = request.Results.ExitName;
-            _applicationContext.AddValue(ContextVariableType.TRANSIT_INFO, request.LocationTransit);
+            _profileActivityService.GetProfileActivityRaidData(sessionId).LocationTransit = request.LocationTransit;
         }
 
         if (!isPmc)

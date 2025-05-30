@@ -1,5 +1,4 @@
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Game;
@@ -42,7 +41,6 @@ public class GameController(
     RaidTimeAdjustmentService _raidTimeAdjustmentService,
     ProfileActivityService _profileActivityService,
     CreateProfileService _createProfileService,
-    ApplicationContext _applicationContext,
     ICloner _cloner
 )
 {
@@ -61,8 +59,7 @@ public class GameController(
     /// <param name="startTimeStampMs"></param>
     public void GameStart(string url, string? sessionId, long startTimeStampMs)
     {
-        // Store client start time in app context
-        _applicationContext.AddValue(ContextVariableType.CLIENT_START_TIMESTAMP, $"{sessionId}_{startTimeStampMs}");
+        _profileActivityService.AddActiveProfile(sessionId, startTimeStampMs);
 
         if (sessionId is null)
         {

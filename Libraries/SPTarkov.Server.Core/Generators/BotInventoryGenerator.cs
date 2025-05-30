@@ -1,6 +1,5 @@
 using System.Collections.Frozen;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Match;
@@ -21,7 +20,7 @@ public class BotInventoryGenerator(
     HashUtil _hashUtil,
     RandomUtil _randomUtil,
     DatabaseService _databaseService,
-    ApplicationContext _applicationContext,
+    ProfileActivityService _profileActivityService,
     BotWeaponGenerator _botWeaponGenerator,
     BotLootGenerator _botLootGenerator,
     BotGeneratorHelper _botGeneratorHelper,
@@ -75,9 +74,7 @@ public class BotInventoryGenerator(
         var botInventory = GenerateInventoryBase();
 
         // Get generated raid details bot will be spawned in
-        var raidConfig = _applicationContext
-            .GetLatestValue(ContextVariableType.RAID_CONFIGURATION)
-            ?.GetValue<GetRaidConfigurationRequestData>();
+        var raidConfig = _profileActivityService.GetProfileActivityRaidData(sessionId).RaidConfiguration;
 
         GenerateAndAddEquipmentToBot(
             sessionId,

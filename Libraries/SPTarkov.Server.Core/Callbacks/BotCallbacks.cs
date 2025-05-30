@@ -1,5 +1,4 @@
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Eft.Bot;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -11,8 +10,7 @@ namespace SPTarkov.Server.Core.Callbacks;
 [Injectable]
 public class BotCallbacks(
     BotController _botController,
-    HttpResponseUtil _httpResponseUtil,
-    ApplicationContext _applicationContext
+    HttpResponseUtil _httpResponseUtil
 )
 {
     /// <summary>
@@ -41,10 +39,7 @@ public class BotCallbacks(
             return _httpResponseUtil.NoBody(_botController.GetBotCoreDifficulty());
         }
 
-        var raidConfig = _applicationContext.GetLatestValue(ContextVariableType.RAID_CONFIGURATION)
-            ?.GetValue<GetRaidConfigurationRequestData>();
-
-        return _httpResponseUtil.NoBody(_botController.GetBotDifficulty(type, difficulty, raidConfig));
+        return _httpResponseUtil.NoBody(_botController.GetBotDifficulty(sessionID, type, difficulty));
     }
 
     /// <summary>
