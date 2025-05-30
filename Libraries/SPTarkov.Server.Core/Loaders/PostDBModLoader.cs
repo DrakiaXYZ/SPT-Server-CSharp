@@ -9,7 +9,7 @@ namespace SPTarkov.Server.Core.Loaders;
 [Injectable(TypePriority = OnLoadOrder.PostDBModLoader)]
 public class PostDBModLoader(
     ISptLogger<PostDBModLoader> _logger,
-    IEnumerable<IPostDBLoadMod> _postDbLoadMods
+    IEnumerable<IPostDBLoadModAsync> _postDbLoadMods
 ) : IOnLoad
 {
     public async Task OnLoad()
@@ -19,7 +19,7 @@ public class PostDBModLoader(
             _logger.Info("Loading PostDBMods...");
             foreach (var postDbLoadMod in _postDbLoadMods)
             {
-                postDbLoadMod.PostDBLoad();
+                await postDbLoadMod.PostDBLoadAsync();
             }
 
             _logger.Info("Finished loading PostDBMods...");

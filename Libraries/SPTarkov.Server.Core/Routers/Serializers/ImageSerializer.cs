@@ -13,9 +13,9 @@ public class ImageSerializer : ISerializer
         _imageRouter = imageRouter;
     }
 
-    public void Serialize(string sessionID, HttpRequest req, HttpResponse resp, object? body)
+    public async Task Serialize(string sessionID, HttpRequest req, HttpResponse resp, object? body)
     {
-        _imageRouter.SendImage(sessionID, req, resp, body);
+        await _imageRouter.SendImage(sessionID, req, resp, body);
     }
 
     public bool CanHandle(string route)

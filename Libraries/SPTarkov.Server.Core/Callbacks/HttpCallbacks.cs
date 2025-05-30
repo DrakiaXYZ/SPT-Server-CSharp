@@ -4,14 +4,12 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Servers;
 
 namespace SPTarkov.Server.Core.Callbacks;
-
 [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.HttpCallbacks)]
-public class HttpCallbacks(HttpServer _httpServer, ApplicationContext _applicationContext) : IOnLoad
+public class HttpCallbacks(HttpServer _httpServer) : IOnLoad
 {
     public Task OnLoad()
     {
-        _httpServer.Load(_applicationContext.GetLatestValue(ContextVariableType.APP_BUILDER)?.GetValue<WebApplicationBuilder>());
-        _applicationContext.ClearValues(ContextVariableType.APP_BUILDER);
+        _httpServer.Load();
 
         return Task.CompletedTask;
     }

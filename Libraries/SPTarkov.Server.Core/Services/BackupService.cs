@@ -24,9 +24,11 @@ public class BackupService
     protected JsonUtil _jsonUtil;
     protected ISptLogger<BackupService> _logger;
     protected TimeUtil _timeUtil;
+    protected IReadOnlyList<SptMod> _loadedMods;
 
     public BackupService(
         ISptLogger<BackupService> logger,
+        IReadOnlyList<SptMod> loadedMods,
         JsonUtil jsonUtil,
         TimeUtil timeUtil,
         ConfigServer configServer,
@@ -39,6 +41,7 @@ public class BackupService
         _timeUtil = timeUtil;
         _fileUtil = fileUtil;
         _applicationContext = applicationContext;
+        _loadedMods = loadedMods;
 
         _activeServerMods = GetActiveServerMods();
         _backupConfig = configServer.GetConfig<BackupConfig>();
@@ -306,15 +309,9 @@ public class BackupService
     /// <returns> A List of mod names. </returns>
     protected List<string> GetActiveServerMods()
     {
-        var mods = _applicationContext?.GetLatestValue(ContextVariableType.LOADED_MOD_ASSEMBLIES)?.GetValue<List<SptMod>>();
-        if (mods == null)
-        {
-            return [];
-        }
-
         List<string> result = [];
 
-        foreach (var mod in mods)
+        foreach (var mod in _loadedMods)
         {
             result.Add($"{mod.ModMetadata.Author} - {mod.ModMetadata.Version ?? ""}");
         }

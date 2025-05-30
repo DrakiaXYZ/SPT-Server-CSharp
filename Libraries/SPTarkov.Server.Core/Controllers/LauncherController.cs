@@ -18,6 +18,7 @@ namespace SPTarkov.Server.Core.Controllers;
 [Injectable]
 public class LauncherController(
     ISptLogger<LauncherController> _logger,
+    IReadOnlyList<SptMod> _loadedMods,
     HashUtil _hashUtil,
     TimeUtil _timeUtil,
     RandomUtil _randomUtil,
@@ -242,13 +243,7 @@ public class LauncherController(
     /// <returns>Dictionary of mod name and mod details</returns>
     public Dictionary<string, AbstractModMetadata> GetLoadedServerMods()
     {
-        var mods = _applicationContext?.GetLatestValue(ContextVariableType.LOADED_MOD_ASSEMBLIES)?.GetValue<List<SptMod>>();
-        if (mods == null)
-        {
-            return [];
-        }
-
-        return mods.ToDictionary(sptMod => sptMod.ModMetadata?.Name ?? "UNKNOWN MOD", sptMod => sptMod.ModMetadata);
+        return _loadedMods.ToDictionary(sptMod => sptMod.ModMetadata?.Name ?? "UNKNOWN MOD", sptMod => sptMod.ModMetadata);
     }
 
     /// <summary>

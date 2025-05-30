@@ -57,7 +57,7 @@ public class App
         _coreConfig = configServer.GetConfig<CoreConfig>();
     }
 
-    public async Task Run()
+    public async Task InitializeAsync()
     {
         // execute onLoad callbacks
         _logger.Info(_localisationService.GetText("executing_startup_callbacks"));
@@ -96,14 +96,19 @@ public class App
         }
 
         _timer = new Timer(_ => Update(_onUpdate), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(5000));
+    }
 
-        if (_httpServer.IsStarted())
+    public async Task StartAsync()
+    {
+        if(!_httpServer.IsStarted())
         {
             _logger.Success(_localisationService.GetText("started_webserver_success", _httpServer.ListeningUrl()));
             _logger.Success(_localisationService.GetText("websocket-started", _httpServer.ListeningUrl().Replace("https://", "wss://")));
         }
 
         _logger.Success(GetRandomisedStartMessage());
+
+       await _httpServer.StartAsync();
     }
 
     protected string GetRandomisedStartMessage()

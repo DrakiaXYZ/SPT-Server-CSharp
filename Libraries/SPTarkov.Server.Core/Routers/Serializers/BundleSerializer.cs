@@ -13,7 +13,7 @@ public class BundleSerializer(
     HttpFileUtil httpFileUtil
 ) : ISerializer
 {
-    public void Serialize(string sessionID, HttpRequest req, HttpResponse resp, object? body)
+    public async Task Serialize(string sessionID, HttpRequest req, HttpResponse resp, object? body)
     {
         var key = req.Path.Value.Split("/bundle/")[1];
         var bundle = bundleLoader.GetBundle(key);
@@ -30,7 +30,7 @@ public class BundleSerializer(
         }
 
         var bundlePath = Path.Join(bundle.ModPath, "/bundles/", bundle.FileName);
-        httpFileUtil.SendFile(resp, bundlePath);
+        await httpFileUtil.SendFile(resp, bundlePath);
     }
 
     public bool CanHandle(string route)

@@ -17,6 +17,7 @@ namespace SPTarkov.Server.Core.Controllers;
 [Injectable]
 public class LauncherV2Controller(
     ISptLogger<LauncherV2Controller> _logger,
+    IReadOnlyList<SptMod> _loadedMods,
     HashUtil _hashUtil,
     TimeUtil _timeUtil,
     RandomUtil _randomUtil,
@@ -158,10 +159,9 @@ public class LauncherV2Controller(
     /// <returns></returns>
     public Dictionary<string, AbstractModMetadata> LoadedMods()
     {
-        var mods = _applicationContext?.GetLatestValue(ContextVariableType.LOADED_MOD_ASSEMBLIES).GetValue<List<SptMod>>();
         var result = new Dictionary<string, AbstractModMetadata>();
 
-        foreach (var sptMod in mods)
+        foreach (var sptMod in _loadedMods)
         {
             result.Add(sptMod.ModMetadata.Name, sptMod.ModMetadata);
         }
