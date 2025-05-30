@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Constants;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
@@ -33,7 +32,7 @@ public class BotController(
     MatchBotDetailsCacheService _matchBotDetailsCacheService,
     ProfileHelper _profileHelper,
     ConfigServer _configServer,
-    ApplicationContext _applicationContext,
+    ProfileActivityService _profileActivityService,
     RandomUtil _randomUtil,
     ICloner _cloner
 )
@@ -73,14 +72,17 @@ public class BotController(
     ///     Get bot difficulty settings
     ///     Adjust PMC settings to ensure they engage the correct bot types
     /// </summary>
+    /// <param name="sessionId">Which user is requesting his bot settings</param>
     /// <param name="type">what bot the server is requesting settings for</param>
     /// <param name="diffLevel">difficulty level server requested settings for</param>
     /// <param name="raidConfig">OPTIONAL - applicationContext Data stored at start of raid</param>
     /// <param name="ignoreRaidSettings">OPTIONAL - should raid settings chosen pre-raid be ignored</param>
     /// <returns>Difficulty object</returns>
-    public DifficultyCategories GetBotDifficulty(string type, string diffLevel, GetRaidConfigurationRequestData? raidConfig, bool ignoreRaidSettings = false)
+    public DifficultyCategories GetBotDifficulty(string sessionId, string type, string diffLevel, bool ignoreRaidSettings = false)
     {
         var difficulty = diffLevel.ToLower();
+
+        var raidConfig = _profileActivityService.GetProfileActivityRaidData(sessionId)?.RaidConfiguration;
 
         if (!(raidConfig != null || ignoreRaidSettings))
         {
@@ -152,7 +154,7 @@ public class BotController(
                 }
 
                 // Store all difficulty values in dict keyed by difficulty type e.g. easy/normal/impossible
-                result[botNameKey].Add(difficultyName, GetBotDifficulty(botNameKey, difficultyName, null, true));
+                result[botNameKey].Add(difficultyName, GetBotDifficulty(string.Empty, botNameKey, difficultyName, true));
             }
         }
 
@@ -182,7 +184,7 @@ public class BotController(
     protected List<BotBase> GenerateBotWaves(GenerateBotsRequestData request, PmcData? pmcProfile, string sessionId)
     {
         var generatedBotList = new List<BotBase>();
-        var raidSettings = GetMostRecentRaidSettings();
+        var raidSettings = GetMostRecentRaidSettings(sessionId);
         var allPmcsHaveSameNameAsPlayer = _randomUtil.GetChance100(
             _pmcConfig.AllPMCsHavePlayerNameWithRandomPrefixChance
         );
@@ -287,18 +289,16 @@ public class BotController(
     ///     Pull raid settings from Application context
     /// </summary>
     /// <returns>GetRaidConfigurationRequestData if it exists</returns>
-    protected GetRaidConfigurationRequestData? GetMostRecentRaidSettings()
+    protected GetRaidConfigurationRequestData? GetMostRecentRaidSettings(string sessionId)
     {
-        var raidSettings = _applicationContext
-            .GetLatestValue(ContextVariableType.RAID_CONFIGURATION)
-            ?.GetValue<GetRaidConfigurationRequestData>();
+        var raidConfiguration = _profileActivityService.GetProfileActivityRaidData(sessionId)?.RaidConfiguration;
 
-        if (raidSettings is null)
+        if (raidConfiguration is null)
         {
             _logger.Warning(_localisationService.GetText("bot-unable_to_load_raid_settings_from_appcontext"));
         }
 
-        return raidSettings;
+        return raidConfiguration;
     }
 
     /// <summary>

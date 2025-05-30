@@ -1,6 +1,5 @@
 using SPTarkov.Common.Extensions;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -25,8 +24,7 @@ public class LauncherV2Controller(
     DatabaseService _databaseService,
     LocalisationService _localisationService,
     ConfigServer _configServer,
-    Watermark _watermark,
-    ApplicationContext _applicationContext
+    Watermark _watermark
 )
 {
     protected CoreConfig _coreConfig = _configServer.GetConfig<CoreConfig>();

@@ -1,5 +1,4 @@
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.InRaid;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -12,7 +11,7 @@ namespace SPTarkov.Server.Core.Controllers;
 public class InRaidController(
     ISptLogger<InRaidController> _logger,
     ProfileHelper _profileHelper,
-    ApplicationContext _applicationContext,
+    //ApplicationContext _applicationContext,
     ConfigServer _configServer
 )
 {
@@ -26,7 +25,7 @@ public class InRaidController(
     /// <param name="info">Register player request</param>
     public void AddPlayer(string sessionId, RegisterPlayerRequestData info)
     {
-        _applicationContext.AddValue(ContextVariableType.REGISTER_PLAYER_REQUEST, info);
+       // _applicationContext.AddValue(ContextVariableType.REGISTER_PLAYER_REQUEST, info);
     }
 
     /// <summary>

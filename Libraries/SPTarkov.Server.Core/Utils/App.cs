@@ -11,6 +11,7 @@ namespace SPTarkov.Server.Core.Utils;
 
 [Injectable(InjectionType.Singleton)]
 public class App(
+    IServiceProvider _serviceProvider,
     ISptLogger<App> _logger,
     TimeUtil _timeUtil,
     RandomUtil _randomUtil,
@@ -30,6 +31,8 @@ public class App(
 
     public async Task InitializeAsync()
     {
+        ServiceLocator.SetServiceProvider(_serviceProvider);
+
         // execute onLoad callbacks
         _logger.Info(_localisationService.GetText("executing_startup_callbacks"));
 

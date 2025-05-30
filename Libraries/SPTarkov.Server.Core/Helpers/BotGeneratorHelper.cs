@@ -1,7 +1,6 @@
 using System.Collections.Frozen;
 using SPTarkov.Server.Core.Constants;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Context;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Match;
@@ -24,7 +23,7 @@ public class BotGeneratorHelper(
     ItemHelper _itemHelper,
     InventoryHelper _inventoryHelper,
     ContainerHelper _containerHelper,
-    ApplicationContext _applicationContext,
+    ProfileActivityService _profileActivityService,
     LocalisationService _localisationService,
     ConfigServer _configServer
     ) : IOnLoad
@@ -59,9 +58,7 @@ public class BotGeneratorHelper(
     public Upd GenerateExtraPropertiesForItem(TemplateItem? itemTemplate, string? botRole = null)
     {
         // Get raid settings, if no raid, default to day
-        var raidSettings = _applicationContext
-            .GetLatestValue(ContextVariableType.RAID_CONFIGURATION)
-            ?.GetValue<GetRaidConfigurationRequestData>();
+        var raidSettings = _profileActivityService.GetFirstProfileActivityRaidData()?.RaidConfiguration;
 
         RandomisedResourceDetails randomisationSettings = null;
         if (botRole is not null)
