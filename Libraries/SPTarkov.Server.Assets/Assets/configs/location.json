@@ -130,7 +130,10 @@
             "66c0b39ca1f68fcc1d0c0cc3",
             "66a0e523e749756c920d02d0",
             "593a87af86f774122f54a951"
-        ]
+        ],
+        "labyrinth": [
+            "679b992329acd1f2f60985a5"
+		]
     },
     "rogueLighthouseSpawnTimeSettings": {
         "enabled": false,
