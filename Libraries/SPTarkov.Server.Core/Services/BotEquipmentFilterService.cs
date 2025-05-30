@@ -51,11 +51,14 @@ public class BotEquipmentFilterService
         var botWeightingAdjustments = GetBotWeightingAdjustments(botRole, botLevel);
         var botWeightingAdjustmentsByPlayerLevel = GetBotWeightingAdjustmentsByPlayerLevel(
             botRole,
-            pmcProfile?.Info?.Level ?? 0
+            pmcProfile?.Info?.Level ?? 1
         );
 
-        _botEquipmentConfig.TryGetValue(botRole.ToLower(), out var botEquipConfig);
-        var randomisationDetails = _botHelper.GetBotRandomizationDetails(botLevel, botEquipConfig);
+        RandomisationDetails? randomisationDetails = null;
+        if (_botEquipmentConfig.TryGetValue(botRole.ToLower(), out var botEquipmentConfig))
+        {
+            randomisationDetails = _botHelper.GetBotRandomizationDetails(botLevel, botEquipmentConfig);
+        }
 
         if (botEquipmentBlacklist is not null || botEquipmentWhitelist is not null)
         {
@@ -67,7 +70,7 @@ public class BotEquipmentFilterService
         {
             AdjustWeighting(botWeightingAdjustments.Equipment, baseBotNode.BotInventory.Equipment);
             AdjustWeighting(botWeightingAdjustments.Ammo, baseBotNode.BotInventory.Ammo);
-            // Dont warn when edited item not found, we're editing usec/bear clothing and they dont have each others clothing
+            // Don't warn when edited item not found, we're editing usec/bear clothing and they dont have each others clothing
             AdjustWeighting(botWeightingAdjustments?.Clothing, baseBotNode.BotAppearance, false);
         }
 
@@ -202,14 +205,14 @@ public class BotEquipmentFilterService
     ///     Retrieve item weighting adjustments from bot.json config based on player level
     /// </summary>
     /// <param name="botRole">Bot type to get adjustments for</param>
-    /// <param name="playerlevel">Level of bot</param>
+    /// <param name="playerLevel">Level of bot</param>
     /// <returns>Weighting adjustments for bot items</returns>
-    protected WeightingAdjustmentDetails? GetBotWeightingAdjustmentsByPlayerLevel(string botRole, int playerlevel)
+    protected WeightingAdjustmentDetails? GetBotWeightingAdjustmentsByPlayerLevel(string botRole, int playerLevel)
     {
         var weightingDetailsForBot = _botEquipmentConfig.GetValueOrDefault(botRole, null);
 
         return (weightingDetailsForBot?.WeightingAdjustmentsByBotLevel ?? []).FirstOrDefault(x =>
-            playerlevel >= x.LevelRange.Min && playerlevel <= x.LevelRange.Max
+            playerLevel >= x.LevelRange.Min && playerLevel <= x.LevelRange.Max
         );
     }
 
