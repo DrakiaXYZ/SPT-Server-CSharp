@@ -400,7 +400,7 @@ public class RandomUtil(ISptLogger<RandomUtil> _logger, ICloner _cloner)
 
         while (currentIndex != 0)
         {
-            var randomIndex = GetInt(0, currentIndex);
+            var randomIndex = GetInt(0, currentIndex, true);
             currentIndex--;
 
             // Swap it with the current element.

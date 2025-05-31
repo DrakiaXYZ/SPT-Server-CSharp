@@ -1,13 +1,18 @@
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Core.Utils.Json.Converters;
 
 namespace UnitTests.Tests.Utils;
 
 [TestClass]
 public class JsonUtilTests
 {
-    protected JsonUtil _jsonUtil = new([ new SptJsonConverterRegistrator() ]);
+    private JsonUtil _jsonUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _jsonUtil = DI.GetService<JsonUtil>();
+    }
 
     [TestMethod]
     public void SerializeAndDeserialize_WithDictionaryOfETFEnum_ExpectCorrectParsing()

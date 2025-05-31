@@ -1,14 +1,17 @@
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Core.Utils.Cloners;
-using SPTarkov.Server.Core.Utils.Json.Converters;
-using UnitTests.Mock;
 
 namespace UnitTests.Tests.Utils;
 
 [TestClass]
 public sealed class RandomUtilTests
 {
-    private readonly RandomUtil _randomUtil = new(new MockLogger<RandomUtil>(), new JsonCloner(new JsonUtil([ new SptJsonConverterRegistrator() ])));
+    private RandomUtil _randomUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _randomUtil = DI.GetService<RandomUtil>();
+    }
 
     [TestMethod]
     public void GetIntTest()
