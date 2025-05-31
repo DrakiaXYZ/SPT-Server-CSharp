@@ -43,7 +43,7 @@ public class SptHttpListener(
         {
             case "GET":
                 {
-                    var response = GetResponse(sessionId, req, null);
+                    var response = await GetResponse(sessionId, req, null);
                     await SendResponse(sessionId, req, resp, null, response);
                     break;
                 }
@@ -98,7 +98,7 @@ public class SptHttpListener(
                         }
                     }
 
-                    var response = GetResponse(sessionId, req, body);
+                    var response = await GetResponse(sessionId, req, body);
                     await SendResponse(sessionId, req, resp, body, response);
                     break;
                 }
@@ -154,7 +154,7 @@ public class SptHttpListener(
             await serialiser.Serialize(sessionID, req, resp, bodyInfo);
         }
         else
-            // No serializer can handle the request (majority of requests dont), zlib the output and send response back
+        // No serializer can handle the request (majority of requests dont), zlib the output and send response back
         {
             await SendZlibJson(resp, output, sessionID);
         }
@@ -186,21 +186,20 @@ public class SptHttpListener(
         }
     }
 
-    public string GetResponse(string sessionID, HttpRequest req, string? body)
+    public async ValueTask<string> GetResponse(string sessionID, HttpRequest req, string? body)
     {
-        var output = _router.GetResponse(req, sessionID, body, out var deserializedObject);
+        var output = await _router.GetResponse(req, sessionID, body);
         /* route doesn't exist or response is not properly set up */
         if (string.IsNullOrEmpty(output))
         {
             _logger.Error(_localisationService.GetText("unhandled_response", req.Path.ToString()));
-            _logger.Info(_jsonUtil.Serialize(deserializedObject));
             output = _httpResponseUtil.GetBody<object?>(null, BackendErrorCodes.HTTPNotFound, $"UNHANDLED RESPONSE: {req.Path.ToString()}");
         }
 
         if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
         {
             // Parse quest info into object
-            var log = new Request(req.Method, new RequestData(req.Path, req.Headers, deserializedObject));
+            var log = new Request(req.Method, new RequestData(req.Path, req.Headers));
             _requestsLogger.Info($"REQUEST={_jsonUtil.Serialize(log)}");
         }
 
@@ -242,5 +241,5 @@ public class SptHttpListener(
 
     private record Request(string Method, object output);
 
-    private record RequestData(string Url, object Headers, object Data);
+    private record RequestData(string Url, object Headers);
 }
