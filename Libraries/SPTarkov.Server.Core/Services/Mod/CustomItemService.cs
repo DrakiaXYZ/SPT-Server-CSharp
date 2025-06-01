@@ -1,4 +1,4 @@
-﻿using SPTarkov.Common.Extensions;
+﻿using System.Reflection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
