@@ -73,7 +73,7 @@ public class RewardHelper(
                     _profileHelper.AddSkillPointsToPlayer(
                         profileData,
                         Enum.Parse<SkillTypes>(reward.Target),
-                        reward.Value as double?
+                        reward.Value
                     );
                     break;
                 case RewardType.Experience:
