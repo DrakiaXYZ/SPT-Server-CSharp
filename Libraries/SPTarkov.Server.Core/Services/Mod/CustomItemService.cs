@@ -7,6 +7,7 @@ using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using System.Reflection;
 
 namespace SPTarkov.Server.Core.Services.Mod;
 
