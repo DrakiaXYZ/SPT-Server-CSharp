@@ -88,7 +88,7 @@ public class RewardHelper(
                     _traderHelper.AddStandingToTrader(
                         sessionId,
                         reward.Target,
-                        double.Parse(reward.Value.ToString(), CultureInfo.InvariantCulture)
+                        reward.Value.Value
                     );
                     break;
                 case RewardType.TraderUnlock:
