@@ -135,20 +135,56 @@ public class CustomItemService(
 
     /// <summary>
     ///     Iterates through supplied properties and updates the cloned items properties with them
-    ///     Complex objects cannot have overrides, they must be fully hydrated with values if they are to be used
     /// </summary>
     /// <param name="overrideProperties"> New properties to apply </param>
     /// <param name="itemClone"> Item to update </param>
     protected void UpdateBaseItemPropertiesWithOverrides(Props? overrideProperties, TemplateItem itemClone)
     {
-        if (overrideProperties is null)
-        {
-            return;
-        }
+        if (overrideProperties is null || itemClone?.Properties is null) return;
 
-        foreach (var propKey in overrideProperties.GetAllPropsAsDict())
+        var target = itemClone.Properties;
+        var targetType = target.GetType();
+
+        foreach (var member in overrideProperties.GetType().GetMembers())
         {
-            itemClone.Properties.GetAllPropsAsDict()[propKey.Key] = overrideProperties.GetAllPropsAsDict()[propKey.Key];
+            var value = member.MemberType switch
+            {
+                MemberTypes.Property => ((PropertyInfo)member).GetValue(overrideProperties),
+                MemberTypes.Field => ((FieldInfo)member).GetValue(overrideProperties),
+                _ => null
+            };
+
+            if (value is null)
+            {
+                continue;
+            }
+
+            var targetMember = targetType.GetMember(member.Name).FirstOrDefault();
+            if (targetMember is null)
+            {
+                continue;
+            }
+
+            switch (targetMember.MemberType)
+            {
+                case MemberTypes.Property:
+                    var prop = (PropertyInfo)targetMember;
+                    if (prop.CanWrite)
+                    {
+                        prop.SetValue(target, value);
+                    }
+
+                    break;
+
+                case MemberTypes.Field:
+                    var field = (FieldInfo)targetMember;
+                    if (!field.IsInitOnly)
+                    {
+                        field.SetValue(target, value);
+                    }
+
+                    break;
+            }
         }
     }
 
