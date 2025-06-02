@@ -28,6 +28,8 @@ public class BotLootCacheService(
     private readonly Lock _currencyLock = new();
     private readonly Lock _stimLock = new();
     private readonly Lock _grenadeLock = new();
+    private readonly Lock _specialLock = new();
+    private readonly Lock _healingLock = new();
 
     /// <summary>
     ///     Remove cached bot loot data
@@ -44,7 +46,9 @@ public class BotLootCacheService(
     /// <param name="isPmc">is the bot a pmc</param>
     /// <param name="lootType">what type of loot is needed (backpack/pocket/stim/vest etc)</param>
     /// <param name="botJsonTemplate">Base json db file for the bot having its loot generated</param>
-    /// <returns>Dictionary<string, int></returns>
+    /// <param name="itemPriceMinMax">OPTIONAL - item price min and max value filter</param>
+    /// <remarks>THIS IS NOT A THREAD SAFE METHOD</remarks>
+    /// <returns>dictionary</returns>
     public Dictionary<string, double> GetLootFromCache(
         string botRole,
         bool isPmc,
@@ -238,7 +242,10 @@ public class BotLootCacheService(
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
                 if (!(IsBulletOrGrenade(itemTemplate.Properties) || IsMagazine(itemTemplate.Properties)))
                 {
-                    specialLootItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_specialLock)
+                    {
+                        specialLootItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
         }
@@ -259,7 +266,10 @@ public class BotLootCacheService(
                     itemTemplate.Parent != BaseClasses.DRUGS
                 )
                 {
-                    healingItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_healingLock)
+                    {
+                        healingItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
         }

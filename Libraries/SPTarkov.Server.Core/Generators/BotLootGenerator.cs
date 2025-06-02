@@ -62,7 +62,7 @@ public class BotLootGenerator(
     ///     Add loot to bots containers
     /// </summary>
     /// <param name="sessionId">Session id</param>
-    /// <param name="botJsonTemplate">Base json db file for the bot having its loot generated</param>
+    /// <param name="botJsonTemplate">Clone of Base JSON db file for the bot having its loot generated</param>
     /// <param name="isPmc">Will bot be a pmc</param>
     /// <param name="botRole">Role of bot, e.g. asssult</param>
     /// <param name="botInventory">Inventory to add loot to</param>
@@ -371,12 +371,12 @@ public class BotLootGenerator(
     {
         HashSet<EquipmentSlots> result = [EquipmentSlots.Pockets];
 
-        if ((botInventory.Items ?? []).Any(item => item.SlotId == EquipmentSlots.TacticalVest.ToString()))
+        if ((botInventory.Items ?? []).Any(item => item.SlotId == nameof(EquipmentSlots.TacticalVest)))
         {
             result.Add(EquipmentSlots.TacticalVest);
         }
 
-        if ((botInventory.Items ?? []).Any(item => item.SlotId == EquipmentSlots.Backpack.ToString()))
+        if ((botInventory.Items ?? []).Any(item => item.SlotId == nameof(EquipmentSlots.Backpack)))
         {
             result.Add(EquipmentSlots.Backpack);
         }
