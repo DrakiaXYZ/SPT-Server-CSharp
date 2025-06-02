@@ -418,7 +418,7 @@ public class BotLootCacheService(
                 continue;
             }
 
-            filteredBackpackItems[itemKvP.Key] = itemKvP.Value;
+            filteredBackpackItems.TryAdd(itemKvP.Key, itemKvP.Value);
         }
 
         // Get pocket loot (excluding magazines, bullets, grenades, drink, food medical and healing/stim items)
@@ -447,7 +447,7 @@ public class BotLootCacheService(
                 continue;
             }
 
-            filteredPocketItems[itemKvP.Key] = itemKvP.Value;
+            filteredPocketItems.TryAdd(itemKvP.Key, itemKvP.Value);
         }
 
         // Get vest loot (excluding magazines, bullets, grenades, medical and healing/stim items)
@@ -474,7 +474,7 @@ public class BotLootCacheService(
                 continue;
             }
 
-            filteredVestItems[itemKvP.Key] = itemKvP.Value;
+            filteredVestItems.TryAdd(itemKvP.Key, itemKvP.Value);
         }
 
         // Get secure loot (excluding magazines, bullets)
@@ -493,7 +493,7 @@ public class BotLootCacheService(
                 continue;
             }
 
-            filteredSecureLoot[itemKvP.Key] = itemKvP.Value;
+            filteredSecureLoot.TryAdd(itemKvP.Key, itemKvP.Value);
         }
 
         var cacheForRole = _lootCache[botRole];
@@ -521,7 +521,7 @@ public class BotLootCacheService(
                 continue;
             }
 
-            poolToAddTo[tpl.Key] = poolOfItemsToAdd[tpl.Key];
+            poolToAddTo.TryAdd(tpl.Key, poolOfItemsToAdd[tpl.Key]);
         }
     }
 
