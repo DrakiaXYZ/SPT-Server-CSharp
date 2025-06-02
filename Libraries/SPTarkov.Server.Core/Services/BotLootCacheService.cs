@@ -235,9 +235,10 @@ public class BotLootCacheService(
                     break;
             }
 
-            // Add all items (if any) to combined pool (excluding secure)
-            if (itemPool.Count > 0 && containerType.Equals("securedcontainer", StringComparison.OrdinalIgnoreCase))
+            // If pool has items and items were going into a non-secure container pool, add to combined
+            if (itemPool.Count > 0 && !containerType.Equals("securedcontainer", StringComparison.OrdinalIgnoreCase))
             {
+                // fill up 'combined' pool of all loot
                 AddItemsToPool(combinedLootPool, itemPool);
             }
         }
