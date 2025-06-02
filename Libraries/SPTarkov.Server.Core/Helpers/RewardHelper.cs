@@ -125,7 +125,7 @@ public class RewardHelper(
                     _logger.Error(
                         _localisationService.GetText(
                             "reward-type_not_handled",
-                            new { rewardType = reward.Type, rewardSourceId }
+                            new { rewardType = reward.Type, questId = rewardSourceId }
                         )
                     );
                     break;
