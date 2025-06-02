@@ -121,6 +121,10 @@ public class RewardHelper(
                 case RewardType.CustomizationDirect:
                     _profileHelper.AddHideoutCustomisationUnlock(fullProfile, reward, source);
                     break;
+                case RewardType.NotificationPopup:
+                    // TODO: Wire up to notification system
+                    _logger.Error("Unhandled: RewardType.NotificationPopup");
+                    break;
                 default:
                     _logger.Error(
                         _localisationService.GetText(
