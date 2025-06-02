@@ -602,7 +602,7 @@ public class BotGenerator(
         {
             double? hpTotal = 0;
 
-            foreach (var prop in props)
+            foreach (var prop in props.Where(property => !property.Name.Equals("extensiondata", StringComparison.OrdinalIgnoreCase)))
             {
                 var value = (MinMax<double>) prop.GetValue(bodyPart);
                 hpTotal += value.Max;
