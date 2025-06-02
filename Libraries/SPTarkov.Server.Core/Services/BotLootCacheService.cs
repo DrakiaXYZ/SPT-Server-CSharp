@@ -227,12 +227,9 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted special items to bot if any exist
-        var specialLootItems =
-            botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist?.Count > 0
-                ? botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist
-                : new Dictionary<string, double>();
+        var specialLootItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist);
 
-        // no whitelist, find and assign from combined item pool
+        // No whitelist, find and assign from combined item pool
         if (!specialLootItems.Any())
             // key = tpl, value = weight
         {
@@ -247,10 +244,7 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted healing items to bot if any exist
-        var healingItems =
-            botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist?.Count > 0
-                ? botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist
-                : new Dictionary<string, double>();
+        var healingItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist);
 
         // No whitelist, find and assign from combined item pool
         if (!healingItems.Any())
@@ -271,7 +265,8 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted drugs to bot if any exist
-        var drugItems = botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist ?? new Dictionary<string, double>();
+        var drugItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist);
+
         // no drugs whitelist, find and assign from combined item pool
         if (!drugItems.Any())
         {
@@ -292,7 +287,7 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted food to bot if any exist
-        var foodItems = botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist ?? new Dictionary<string, double>();
+        var foodItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
         // No food whitelist, find and assign from combined item pool
         if (!foodItems.Any())
         {
@@ -313,7 +308,8 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted drink to bot if any exist
-        var drinkItems = botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist ?? new Dictionary<string, double>();
+        var drinkItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
+
         // No drink whitelist, find and assign from combined item pool
         if (!drinkItems.Any())
         {
@@ -334,7 +330,8 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted currency to bot if any exist
-        var currencyItems = botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist ?? new Dictionary<string, double>();
+        var currencyItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist);
+
         // No currency whitelist, find and assign from combined item pool
         if (!currencyItems.Any())
         {
@@ -354,7 +351,7 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted stims to bot if any exist
-        var stimItems = botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist ?? new Dictionary<string, double>();
+        var stimItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist);
         // No whitelist, find and assign from combined item pool
         if (!stimItems.Any())
         {
@@ -374,7 +371,7 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted grenades to bot if any exist
-        var grenadeItems = botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist ?? new Dictionary<string, double>();
+        var grenadeItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist);
         // no whitelist, find and assign from combined item pool
         if (!grenadeItems.Any())
         {
@@ -511,6 +508,16 @@ public class BotLootCacheService(
         cacheForRole.SecureLoot = filteredSecureLoot;
     }
 
+    /// <summary>
+    /// Return provided weights or an empty dictionary
+    /// </summary>
+    /// <param name="weights">Weights to return</param>
+    /// <returns>Dictionary</returns>
+    protected static Dictionary<string, double> GetGenerationWeights(Dictionary<string, double>? weights)
+    {
+        return weights ?? [];
+    }
+
     protected void AddItemsToPool(Dictionary<string, double> poolToAddTo, Dictionary<string, double> poolOfItemsToAdd)
     {
         foreach (var tpl in poolOfItemsToAdd)
@@ -627,7 +634,7 @@ public class BotLootCacheService(
     }
 
     /// <summary>
-    ///     Compares two item prices by their flea (or handbook if that doesnt exist) price
+    ///     Compares two item prices by their flea (or handbook if that doesn't exist) price
     /// </summary>
     /// <param name="itemAPrice"></param>
     /// <param name="itemBPrice"></param>
