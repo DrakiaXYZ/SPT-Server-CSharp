@@ -241,7 +241,7 @@ public class BotLootCacheService(
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
                 if (!(IsBulletOrGrenade(itemTemplate.Properties) || IsMagazine(itemTemplate.Properties)))
                 {
-                    specialLootItems[itemKvP.Key] = itemKvP.Value;
+                    specialLootItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -265,7 +265,7 @@ public class BotLootCacheService(
                     itemTemplate.Parent != BaseClasses.DRUGS
                 )
                 {
-                    healingItems[itemKvP.Key] = itemKvP.Value;
+                    healingItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -286,7 +286,7 @@ public class BotLootCacheService(
 
                 lock (_drugLock)
                 {
-                    drugItems[itemKvP.Key] = itemKvP.Value;
+                    drugItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -307,7 +307,7 @@ public class BotLootCacheService(
 
                 lock (_foodLock)
                 {
-                    foodItems[itemKvP.Key] = itemKvP.Value;
+                    foodItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -328,7 +328,7 @@ public class BotLootCacheService(
 
                 lock (_drinkLock)
                 {
-                    drinkItems[itemKvP.Key] = itemKvP.Value;
+                    drinkItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -348,7 +348,7 @@ public class BotLootCacheService(
 
                 lock (_currencyLock)
                 {
-                    currencyItems[itemKvP.Key] = itemKvP.Value;
+                    currencyItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -368,7 +368,7 @@ public class BotLootCacheService(
 
                 lock (_stimLock)
                 {
-                    stimItems[itemKvP.Key] = itemKvP.Value;
+                    stimItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
@@ -388,7 +388,7 @@ public class BotLootCacheService(
 
                 lock (_grenadeLock)
                 {
-                    grenadeItems[itemKvP.Key] = itemKvP.Value;
+                    grenadeItems.TryAdd(itemKvP.Key, itemKvP.Value);
                 }
             }
         }
