@@ -22,6 +22,12 @@ public class BotLootCacheService(
 )
 {
     protected ConcurrentDictionary<string, BotLootCache> _lootCache = new();
+    private readonly Lock _drugLock = new();
+    private readonly Lock _foodLock = new();
+    private readonly Lock _drinkLock = new();
+    private readonly Lock _currencyLock = new();
+    private readonly Lock _stimLock = new();
+    private readonly Lock _grenadeLock = new();
 
     /// <summary>
     ///     Remove cached bot loot data
@@ -272,7 +278,13 @@ public class BotLootCacheService(
             foreach (var itemKvP in combinedLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (IsMedicalItem(itemTemplate.Properties) && itemTemplate.Parent == BaseClasses.DRUGS)
+                if (!IsMedicalItem(itemTemplate.Properties) || itemTemplate.Parent != BaseClasses.DRUGS)
+                {
+                    // Not a drug/medical item, skip
+                    continue;
+                }
+
+                lock (_drugLock)
                 {
                     drugItems[itemKvP.Key] = itemKvP.Value;
                 }
@@ -287,7 +299,13 @@ public class BotLootCacheService(
             foreach (var itemKvP in combinedLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.FOOD))
+                if (!_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.FOOD))
+                {
+                    // Not food, skip
+                    continue;
+                }
+
+                lock (_foodLock)
                 {
                     foodItems[itemKvP.Key] = itemKvP.Value;
                 }
@@ -302,7 +320,13 @@ public class BotLootCacheService(
             foreach (var itemKvP in combinedLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.DRINK))
+                if (!_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.DRINK))
+                {
+                    // Not a drink, skip
+                    continue;
+                }
+
+                lock (_drinkLock)
                 {
                     drinkItems[itemKvP.Key] = itemKvP.Value;
                 }
@@ -317,7 +341,12 @@ public class BotLootCacheService(
             foreach (var itemKvP in combinedLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.MONEY))
+                if (!_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.MONEY))
+                {
+                    continue;
+                }
+
+                lock (_currencyLock)
                 {
                     currencyItems[itemKvP.Key] = itemKvP.Value;
                 }
@@ -332,7 +361,12 @@ public class BotLootCacheService(
             foreach (var itemKvP in combinedLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (IsMedicalItem(itemTemplate.Properties) && itemTemplate.Parent == BaseClasses.STIMULATOR)
+                if (!IsMedicalItem(itemTemplate.Properties) || itemTemplate.Parent != BaseClasses.STIMULATOR)
+                {
+                    continue;
+                }
+
+                lock (_stimLock)
                 {
                     stimItems[itemKvP.Key] = itemKvP.Value;
                 }
@@ -347,7 +381,12 @@ public class BotLootCacheService(
             foreach (var itemKvP in combinedLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (IsGrenade(itemTemplate.Properties))
+                if (!IsGrenade(itemTemplate.Properties))
+                {
+                    continue;
+                }
+
+                lock (_grenadeLock)
                 {
                     grenadeItems[itemKvP.Key] = itemKvP.Value;
                 }
