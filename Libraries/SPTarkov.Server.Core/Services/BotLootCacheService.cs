@@ -8,7 +8,6 @@ using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
-using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Services;
 
@@ -244,12 +243,10 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted special items to bot if any exist
-        var specialLootItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist);
-
-        // No whitelist, find and assign from combined item pool
-        if (!specialLootItems.Any())
-            // key = tpl, value = weight
+        var (specialLootItems, addSpecialLootItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist);
+        if (addSpecialLootItems) // key = tpl, value = weight
         {
+            // No whitelist, find and assign from combined item pool
             foreach (var itemKvP in specialLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
@@ -263,26 +260,13 @@ public class BotLootCacheService(
             }
         }
 
-        var healingItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist);
-        var addHealingItems = !healingItemsInWhitelist.Any(); // Nothing found in whitelist, we need to add items from combinedLootPool
-
-        var drugItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist);
-        var addDrugItems = !drugItemsInWhitelist.Any();
-
-        var foodItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
-        var foodItems = !foodItemsInWhitelist.Any();
-
-        var drinkItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
-        var addDrinkItems = !drinkItemsInWhitelist.Any();
-
-        var currencyItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist);
-        var addCurrencyItems = !currencyItemsInWhitelist.Any();
-
-        var stimItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist);
-        var addStimItems = !stimItemsInWhitelist.Any();
-
-        var grenadeItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist);
-        var addGrenadeItems = !grenadeItemsInWhitelist.Any();
+        var (healingItemsInWhitelist, addHealingItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist);
+        var (drugItemsInWhitelist, addDrugItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist);
+        var (foodItemsInWhitelist, addFoodItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
+        var (drinkItemsInWhitelist, addDrinkItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
+        var (currencyItemsInWhitelist, addCurrencyItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist);
+        var (stimItemsInWhitelist, addStimItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist);
+        var (grenadeItemsInWhitelist, addGrenadeItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist);
 
         foreach (var itemKvP in combinedLootPool)
         {
@@ -319,7 +303,7 @@ public class BotLootCacheService(
                 }
             }
 
-            if (foodItems)
+            if (addFoodItems)
             {
                 if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.FOOD))
                 {
@@ -450,12 +434,18 @@ public class BotLootCacheService(
         cacheForRole.SecureLoot = filteredSecureLoot;
     }
 
+    /// <summary>
+    /// Helper function - Filter out items from passed in pool based on a passed in delegate
+    /// </summary>
+    /// <param name="lootPool">Pool to filter</param>
+    /// <param name="shouldBeSkipped">Delegate to filter pool by</param>
+    /// <returns></returns>
     protected Dictionary<string, double> FilterItemPool(Dictionary<string, double> lootPool, Func<TemplateItem, bool> shouldBeSkipped)
     {
         var filteredItems = new Dictionary<string, double>();
-        foreach (var itemKvP in lootPool)
+        foreach (var (itemTpl, itemWeight) in lootPool)
         {
-            var (isValidItem, itemTemplate) = _itemHelper.GetItem(itemKvP.Key);
+            var (isValidItem, itemTemplate) = _itemHelper.GetItem(itemTpl);
             if (!isValidItem)
             {
                 continue;
@@ -466,7 +456,7 @@ public class BotLootCacheService(
                 continue;
             }
 
-            filteredItems.TryAdd(itemKvP.Key, itemKvP.Value);
+            filteredItems.TryAdd(itemTpl, itemWeight);
         }
 
         return filteredItems;
@@ -476,23 +466,25 @@ public class BotLootCacheService(
     /// Return provided weights or an empty dictionary
     /// </summary>
     /// <param name="weights">Weights to return</param>
-    /// <returns>Dictionary</returns>
-    protected static Dictionary<string, double> GetGenerationWeights(Dictionary<string, double>? weights)
+    /// <returns>Dictionary and should pool be hydrated by items in combined loot pool</returns>
+    protected static (Dictionary<string, double>, bool populateFromCombinedPool) GetGenerationWeights(Dictionary<string, double>? weights)
     {
-        return weights ?? [];
+        var result = weights ?? [];
+        return (result, !result.Any()); // empty dict = should be populated from combined pool
     }
 
+    /// <summary>
+    /// merge item tpls + weightings to passed in dictionary
+    /// If exits already, skip
+    /// </summary>
+    /// <param name="poolToAddTo">Dictionary to add item to</param>
+    /// <param name="poolOfItemsToAdd">Dictionary of items to add</param>
     protected void AddItemsToPool(Dictionary<string, double> poolToAddTo, Dictionary<string, double> poolOfItemsToAdd)
     {
-        foreach (var tpl in poolOfItemsToAdd)
+        foreach (var (tpl, weight) in poolOfItemsToAdd)
         {
             // Skip adding items that already exist
-            if (poolToAddTo.ContainsKey(tpl.Key))
-            {
-                continue;
-            }
-
-            poolToAddTo.TryAdd(tpl.Key, poolOfItemsToAdd[tpl.Key]);
+            poolToAddTo.TryAdd(tpl, weight);
         }
     }
 
@@ -567,34 +559,24 @@ public class BotLootCacheService(
     /// <param name="botRole">Bot role to hydrate</param>
     protected void InitCacheForBotRole(string botRole)
     {
-        if (
-            !_lootCache.TryAdd(
-                botRole,
-                new BotLootCache
-                {
-                    BackpackLoot = new Dictionary<string, double>(),
-                    PocketLoot = new Dictionary<string, double>(),
-                    VestLoot = new Dictionary<string, double>(),
-                    SecureLoot = new Dictionary<string, double>(),
-                    CombinedPoolLoot = new Dictionary<string, double>(),
-
-                    SpecialItems = new Dictionary<string, double>(),
-                    GrenadeItems = new Dictionary<string, double>(),
-                    DrugItems = new Dictionary<string, double>(),
-                    FoodItems = new Dictionary<string, double>(),
-                    DrinkItems = new Dictionary<string, double>(),
-                    CurrencyItems = new Dictionary<string, double>(),
-                    HealingItems = new Dictionary<string, double>(),
-                    StimItems = new Dictionary<string, double>()
-                }
-            )
-        )
-        {
-            if (_logger.IsLogEnabled(LogLevel.Debug))
+        _lootCache.TryAdd(botRole, new BotLootCache
             {
-                _logger.Debug($"Unable to add loot cache for bot role: {botRole} - already exists");
+                BackpackLoot = new Dictionary<string, double>(),
+                PocketLoot = new Dictionary<string, double>(),
+                VestLoot = new Dictionary<string, double>(),
+                SecureLoot = new Dictionary<string, double>(),
+                CombinedPoolLoot = new Dictionary<string, double>(),
+
+                SpecialItems = new Dictionary<string, double>(),
+                GrenadeItems = new Dictionary<string, double>(),
+                DrugItems = new Dictionary<string, double>(),
+                FoodItems = new Dictionary<string, double>(),
+                DrinkItems = new Dictionary<string, double>(),
+                CurrencyItems = new Dictionary<string, double>(),
+                HealingItems = new Dictionary<string, double>(),
+                StimItems = new Dictionary<string, double>()
             }
-        }
+        );
     }
 
     /// <summary>
