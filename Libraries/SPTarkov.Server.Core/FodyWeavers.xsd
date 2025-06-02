@@ -5,6 +5,15 @@
     <xs:complexType>
       <xs:all>
         <xs:element name="Virtuosity" minOccurs="0" maxOccurs="1" type="xs:anyType" />
+        <xs:element name="JsonExtensionData" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:element name="IncludeNamespacesRegex" type="xs:string" minOccurs="0" maxOccurs="1">
+              <xs:annotation>
+                <xs:documentation>Namespaces to use for adding JsonExtensionData properties and attribute</xs:documentation>
+              </xs:annotation>
+            </xs:element>
+          </xs:complexType>
+        </xs:element>
       </xs:all>
       <xs:attribute name="VerifyAssembly" type="xs:boolean">
         <xs:annotation>
