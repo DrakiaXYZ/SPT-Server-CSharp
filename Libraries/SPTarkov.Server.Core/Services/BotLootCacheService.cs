@@ -62,11 +62,13 @@ public class BotLootCacheService(
             AddLootToCache(botRole, isPmc, botJsonTemplate);
         }
 
+        if(!_lootCache.TryGetValue(botRole, out var botRoleCache))
+        {
+            _logger.Error($"Unable to find: {botRole} in loot cache");
+            return [];
+        }
+
         Dictionary<string, double> result = null;
-        BotLootCache botRoleCache;
-
-        botRoleCache = _lootCache[botRole];
-
         switch (lootType)
         {
             case LootCacheType.Special:
