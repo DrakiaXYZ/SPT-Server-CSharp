@@ -250,16 +250,38 @@ public class BotLootCacheService(
             }
         }
 
-        // Assign whitelisted healing items to bot if any exist
-        var healingItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist);
+        var healingItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist);
+        var addHealingItems = !healingItemsInWhitelist.Any(); // Nothing found in whitelist, we need to add items from combinedLootPool
 
-        // No whitelist, find and assign from combined item pool
-        if (!healingItems.Any())
-            // key = tpl, value = weight
+        var drugItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist);
+        var addDrugItems = !drugItemsInWhitelist.Any();
+
+        var foodItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
+        var foodItems = !foodItemsInWhitelist.Any();
+
+        var drinkItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
+        var addDrinkItems = !drinkItemsInWhitelist.Any();
+
+        var currencyItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist);
+        var addCurrencyItems = !currencyItemsInWhitelist.Any();
+
+        var stimItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist);
+        var addStimItems = !stimItemsInWhitelist.Any();
+
+        var grenadeItemsInWhitelist = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist);
+        var addGrenadeItems = !grenadeItemsInWhitelist.Any();
+
+        foreach (var itemKvP in combinedLootPool)
         {
-            foreach (var itemKvP in combinedLootPool)
+            var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
+            if (itemTemplate is null)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
+                continue;
+            }
+
+            if (addHealingItems)
+            {
+                // Whitelist has no healing items, hydrate it using items from combinedLootPool that meet criteria
                 if (
                     IsMedicalItem(itemTemplate.Properties) &&
                     itemTemplate.Parent != BaseClasses.STIMULATOR &&
@@ -268,134 +290,74 @@ public class BotLootCacheService(
                 {
                     lock (_healingLock)
                     {
-                        healingItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                        healingItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
                     }
                 }
             }
-        }
 
-        // Assign whitelisted drugs to bot if any exist
-        var drugItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist);
-
-        // no drugs whitelist, find and assign from combined item pool
-        if (!drugItems.Any())
-        {
-            foreach (var itemKvP in combinedLootPool)
+            if (addDrugItems)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!IsMedicalItem(itemTemplate.Properties) || itemTemplate.Parent != BaseClasses.DRUGS)
+                if (itemTemplate.Parent == BaseClasses.DRUGS && IsMedicalItem(itemTemplate.Properties))
                 {
-                    // Not a drug/medical item, skip
-                    continue;
-                }
-
-                lock (_drugLock)
-                {
-                    drugItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_drugLock)
+                    {
+                        drugItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
-        }
 
-        // Assign whitelisted food to bot if any exist
-        var foodItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
-        // No food whitelist, find and assign from combined item pool
-        if (!foodItems.Any())
-        {
-            foreach (var itemKvP in combinedLootPool)
+            if (foodItems)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.FOOD))
+                if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.FOOD))
                 {
-                    // Not food, skip
-                    continue;
-                }
-
-                lock (_foodLock)
-                {
-                    foodItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_foodLock)
+                    {
+                        foodItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
-        }
 
-        // Assign whitelisted drink to bot if any exist
-        var drinkItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
-
-        // No drink whitelist, find and assign from combined item pool
-        if (!drinkItems.Any())
-        {
-            foreach (var itemKvP in combinedLootPool)
+            if (addDrinkItems)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.DRINK))
+                if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.DRINK))
                 {
-                    // Not a drink, skip
-                    continue;
-                }
-
-                lock (_drinkLock)
-                {
-                    drinkItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_drinkLock)
+                    {
+                        drinkItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
-        }
 
-        // Assign whitelisted currency to bot if any exist
-        var currencyItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist);
-
-        // No currency whitelist, find and assign from combined item pool
-        if (!currencyItems.Any())
-        {
-            foreach (var itemKvP in combinedLootPool)
+            if (addCurrencyItems)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.MONEY))
+                if (_itemHelper.IsOfBaseclass(itemTemplate.Id, BaseClasses.MONEY))
                 {
-                    continue;
-                }
-
-                lock (_currencyLock)
-                {
-                    currencyItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_currencyLock)
+                    {
+                        currencyItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
-        }
 
-        // Assign whitelisted stims to bot if any exist
-        var stimItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist);
-        // No whitelist, find and assign from combined item pool
-        if (!stimItems.Any())
-        {
-            foreach (var itemKvP in combinedLootPool)
+            if (addStimItems)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!IsMedicalItem(itemTemplate.Properties) || itemTemplate.Parent != BaseClasses.STIMULATOR)
+                if (itemTemplate.Parent == BaseClasses.STIMULATOR && IsMedicalItem(itemTemplate.Properties))
                 {
-                    continue;
-                }
-
-                lock (_stimLock)
-                {
-                    stimItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_stimLock)
+                    {
+                        stimItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
-        }
 
-        // Assign whitelisted grenades to bot if any exist
-        var grenadeItems = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist);
-        // no whitelist, find and assign from combined item pool
-        if (!grenadeItems.Any())
-        {
-            foreach (var itemKvP in combinedLootPool)
+            if (addGrenadeItems)
             {
-                var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!IsGrenade(itemTemplate.Properties))
+                if (IsGrenade(itemTemplate.Properties))
                 {
-                    continue;
-                }
-
-                lock (_grenadeLock)
-                {
-                    grenadeItems.TryAdd(itemKvP.Key, itemKvP.Value);
+                    lock (_grenadeLock)
+                    {
+                        grenadeItemsInWhitelist.TryAdd(itemKvP.Key, itemKvP.Value);
+                    }
                 }
             }
         }
@@ -504,13 +466,13 @@ public class BotLootCacheService(
         }
 
         var cacheForRole = _lootCache[botRole];
-        cacheForRole.HealingItems = healingItems;
-        cacheForRole.DrugItems = drugItems;
-        cacheForRole.FoodItems = foodItems;
-        cacheForRole.DrinkItems = drinkItems;
-        cacheForRole.CurrencyItems = currencyItems;
-        cacheForRole.StimItems = stimItems;
-        cacheForRole.GrenadeItems = grenadeItems;
+        cacheForRole.HealingItems = healingItemsInWhitelist;
+        cacheForRole.DrugItems = drugItemsInWhitelist;
+        cacheForRole.FoodItems = foodItemsInWhitelist;
+        cacheForRole.DrinkItems = drinkItemsInWhitelist;
+        cacheForRole.CurrencyItems = currencyItemsInWhitelist;
+        cacheForRole.StimItems = stimItemsInWhitelist;
+        cacheForRole.GrenadeItems = grenadeItemsInWhitelist;
         cacheForRole.SpecialItems = specialLootItems;
         cacheForRole.BackpackLoot = filteredBackpackItems;
         cacheForRole.PocketLoot = filteredPocketItems;
