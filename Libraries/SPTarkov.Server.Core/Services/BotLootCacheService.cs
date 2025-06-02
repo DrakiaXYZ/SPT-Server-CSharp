@@ -376,61 +376,26 @@ public class BotLootCacheService(
         }
 
         // Get backpack loot (excluding magazines, bullets, grenades, drink, food and healing/stim items)
-        var filteredBackpackItems = new Dictionary<string, double>();
-        foreach (var itemKvP in backpackLootPool)
-        {
-            var itemResult = _itemHelper.GetItem(itemKvP.Key);
-            if (itemResult.Value is null)
-            {
-                continue;
-            }
-
-            var itemTemplate = itemResult.Value;
-            if (
-                    IsBulletOrGrenade(itemTemplate.Properties) ||
-                    IsMagazine(itemTemplate.Properties) ||
-                    IsMedicalItem(itemTemplate.Properties) ||
-                    IsGrenade(itemTemplate.Properties) ||
-                    IsFood(itemTemplate.Id) ||
-                    IsDrink(itemTemplate.Id) ||
-                    IsCurrency(itemTemplate.Id)
-                )
-                // Is type we don't want as backpack loot, skip
-            {
-                continue;
-            }
-
-            filteredBackpackItems.TryAdd(itemKvP.Key, itemKvP.Value);
-        }
+        var filteredBackpackItems = FilterItemPool(backpackLootPool, (itemTemplate) =>
+            IsBulletOrGrenade(itemTemplate.Properties) ||
+            IsMagazine(itemTemplate.Properties) ||
+            IsMedicalItem(itemTemplate.Properties) ||
+            IsGrenade(itemTemplate.Properties) ||
+            IsFood(itemTemplate.Id) ||
+            IsDrink(itemTemplate.Id) ||
+            IsCurrency(itemTemplate.Id));
 
         // Get pocket loot (excluding magazines, bullets, grenades, drink, food medical and healing/stim items)
-        var filteredPocketItems = new Dictionary<string, double>();
-        foreach (var itemKvP in pocketLootPool)
-        {
-            var itemResult = _itemHelper.GetItem(itemKvP.Key);
-            if (itemResult.Value is null)
-            {
-                continue;
-            }
-
-            var itemTemplate = itemResult.Value;
-            if (
-                IsBulletOrGrenade(itemTemplate.Properties) ||
-                IsMagazine(itemTemplate.Properties) ||
-                IsMedicalItem(itemTemplate.Properties) ||
-                IsGrenade(itemTemplate.Properties) ||
-                IsFood(itemTemplate.Id) ||
-                IsDrink(itemTemplate.Id) ||
-                IsCurrency(itemTemplate.Id) ||
-                itemTemplate.Properties.Height is null || // lacks height
-                itemTemplate.Properties.Width is null // lacks width
-            )
-            {
-                continue;
-            }
-
-            filteredPocketItems.TryAdd(itemKvP.Key, itemKvP.Value);
-        }
+        var filteredPocketItems = FilterItemPool(pocketLootPool, (itemTemplate) =>
+            IsBulletOrGrenade(itemTemplate.Properties) ||
+            IsMagazine(itemTemplate.Properties) ||
+            IsMedicalItem(itemTemplate.Properties) ||
+            IsGrenade(itemTemplate.Properties) ||
+            IsFood(itemTemplate.Id) ||
+            IsDrink(itemTemplate.Id) ||
+            IsCurrency(itemTemplate.Id) ||
+            itemTemplate.Properties.Height is null || // lacks height
+            itemTemplate.Properties.Width is null); // lacks width
 
         // Get vest loot (excluding magazines, bullets, grenades, medical and healing/stim items)
         var filteredVestItems = new Dictionary<string, double>();
@@ -460,25 +425,17 @@ public class BotLootCacheService(
         }
 
         // Get secure loot (excluding magazines, bullets)
-        var filteredSecureLoot = new Dictionary<string, double>();
-        foreach (var itemKvP in secureLootPool)
+        var filteredSecureLoot = FilterItemPool(secureLootPool, (itemTemplate) =>
+            IsBulletOrGrenade(itemTemplate.Properties) ||
+            IsMagazine(itemTemplate.Properties));
+
+        if(!_lootCache.TryGetValue(botRole, out var cacheForRole))
         {
-            var itemResult = _itemHelper.GetItem(itemKvP.Key);
-            if (itemResult.Value is null)
-            {
-                continue;
-            }
+            _logger.Error($"Unable to get loot cache value using key: {botRole}");
 
-            var itemTemplate = itemResult.Value;
-            if (IsBulletOrGrenade(itemTemplate.Properties) || IsMagazine(itemTemplate.Properties))
-            {
-                continue;
-            }
-
-            filteredSecureLoot.TryAdd(itemKvP.Key, itemKvP.Value);
+            return;
         }
 
-        var cacheForRole = _lootCache[botRole];
         cacheForRole.HealingItems = healingItemsInWhitelist;
         cacheForRole.DrugItems = drugItemsInWhitelist;
         cacheForRole.FoodItems = foodItemsInWhitelist;
@@ -491,6 +448,28 @@ public class BotLootCacheService(
         cacheForRole.PocketLoot = filteredPocketItems;
         cacheForRole.VestLoot = filteredVestItems;
         cacheForRole.SecureLoot = filteredSecureLoot;
+    }
+
+    protected Dictionary<string, double> FilterItemPool(Dictionary<string, double> lootPool, Func<TemplateItem, bool> shouldBeSkipped)
+    {
+        var filteredItems = new Dictionary<string, double>();
+        foreach (var itemKvP in lootPool)
+        {
+            var (isValidItem, itemTemplate) = _itemHelper.GetItem(itemKvP.Key);
+            if (!isValidItem)
+            {
+                continue;
+            }
+
+            if (shouldBeSkipped(itemTemplate))
+            {
+                continue;
+            }
+
+            filteredItems.TryAdd(itemKvP.Key, itemKvP.Value);
+        }
+
+        return filteredItems;
     }
 
     /// <summary>
