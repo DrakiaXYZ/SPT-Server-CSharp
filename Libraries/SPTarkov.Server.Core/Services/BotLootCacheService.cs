@@ -40,7 +40,7 @@ public class BotLootCacheService(
     }
 
     /// <summary>
-    ///     Get the fully created loot array, ordered by price low to high
+    ///     Get a dictionary of lootable item Tpls with their corresponding weight
     /// </summary>
     /// <param name="botRole">bot to get loot for</param>
     /// <param name="isPmc">is the bot a pmc</param>
@@ -68,7 +68,7 @@ public class BotLootCacheService(
             return [];
         }
 
-        Dictionary<string, double> result = null;
+        Dictionary<string, double> result;
         switch (lootType)
         {
             case LootCacheType.Special:
@@ -122,37 +122,47 @@ public class BotLootCacheService(
                         }
                     )
                 );
-                break;
+
+                return [];
         }
 
-        if (itemPriceMinMax is not null)
+        if (!result.Any())
         {
-            var filteredResult = result.Where(i =>
-                {
-                    var itemPrice = _itemHelper.GetItemPrice(i.Key);
-                    if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is not null)
-                    {
-                        return itemPrice >= itemPriceMinMax?.Min && itemPrice <= itemPriceMinMax?.Max;
-                    }
-
-                    if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is null)
-                    {
-                        return itemPrice >= itemPriceMinMax?.Min;
-                    }
-
-                    if (itemPriceMinMax?.Min is null && itemPriceMinMax?.Max is not null)
-                    {
-                        return itemPrice <= itemPriceMinMax?.Max;
-                    }
-
-                    return false;
-                }
-            );
-
-            return _cloner.Clone(filteredResult.ToDictionary(pair => pair.Key, pair => pair.Value));
+            // No loot, exit
+            return result;
         }
 
-        return _cloner.Clone(result);
+        if (itemPriceMinMax is null)
+        {
+            // No filtering requested, exit
+            return _cloner.Clone(result);
+        }
+
+        // Filter the loot pool prior to returning
+        var filteredResult = result.Where(i =>
+            {
+                var itemPrice = _itemHelper.GetItemPrice(i.Key);
+                if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is not null)
+                {
+                    return itemPrice >= itemPriceMinMax?.Min && itemPrice <= itemPriceMinMax?.Max;
+                }
+
+                if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is null)
+                {
+                    return itemPrice >= itemPriceMinMax?.Min;
+                }
+
+                if (itemPriceMinMax?.Min is null && itemPriceMinMax?.Max is not null)
+                {
+                    return itemPrice <= itemPriceMinMax?.Max;
+                }
+
+                return false;
+            }
+        );
+
+        return _cloner.Clone(filteredResult.ToDictionary(pair => pair.Key, pair => pair.Value));
+
     }
 
     /// <summary>
