@@ -188,41 +188,41 @@ public class BotLootCacheService(
             };
 
 
-        foreach (var kvp in poolsToProcess)
+        foreach (var (containerType, itemPool) in poolsToProcess)
         {
             // No items to add, skip
-            if (kvp.Value.Count == 0)
+            if (itemPool.Count == 0)
             {
                 continue;
             }
 
             // Sort loot pool into separate buckets
-            switch (kvp.Key)
+            switch (containerType)
             {
                 case "SpecialLoot":
-                    AddItemsToPool(specialLootPool, kvp.Value);
+                    AddItemsToPool(specialLootPool, itemPool);
                     break;
                 case "Pockets":
-                    AddItemsToPool(pocketLootPool, kvp.Value);
+                    AddItemsToPool(pocketLootPool, itemPool);
                     break;
                 case "TacticalVest":
-                    AddItemsToPool(vestLootPool, kvp.Value);
+                    AddItemsToPool(vestLootPool, itemPool);
                     break;
                 case "SecuredContainer":
-                    AddItemsToPool(secureLootPool, kvp.Value);
+                    AddItemsToPool(secureLootPool, itemPool);
                     break;
                 case "Backpack":
-                    AddItemsToPool(backpackLootPool, kvp.Value);
+                    AddItemsToPool(backpackLootPool, itemPool);
                     break;
                 default:
-                    _logger.Warning($"How did you get here {kvp.Key}");
+                    _logger.Warning($"How did you get here {containerType}");
                     break;
             }
 
             // Add all items (if any) to combined pool (excluding secure)
-            if (kvp.Value.Count > 0 && kvp.Key.ToLower() != "securedcontainer")
+            if (itemPool.Count > 0 && containerType.Equals("securedcontainer", StringComparison.OrdinalIgnoreCase))
             {
-                AddItemsToPool(combinedLootPool, kvp.Value);
+                AddItemsToPool(combinedLootPool, itemPool);
             }
         }
 
