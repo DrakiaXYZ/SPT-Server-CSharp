@@ -1227,18 +1227,33 @@ public class QuestHelper(
         return questsInDb.Where(quest =>
                 {
                     // No fail conditions, skip
-                    if (quest.Conditions.Fail is null || quest.Conditions.Fail.Count == 0)
+                    if (quest.Conditions?.Fail is null || quest.Conditions.Fail.Count == 0)
                     {
                         return false;
                     }
 
-                    // Quest already failed in profile, skip
+                    // Quest already exists in profile and is failed, skip
                     if (pmcProfile.Quests.Any(profileQuest => profileQuest.QId == quest.Id && profileQuest.Status == QuestStatusEnum.Fail))
                     {
                         return false;
                     }
 
-                    return quest.Conditions.Fail.Any(condition => condition.Target?.List?.Contains(completedQuestId) ?? false);
+                    // Check if completed quest is inside iterated quests fail conditions
+                    foreach (var condition in quest.Conditions.Fail)
+                    {
+                        // No target, cant be failed by our completed quest
+                        if (condition?.Target is null)
+                        {
+                            return false;
+                        }
+
+                        // 'Target' property can be Collection or string, handle each differently
+                        return condition.Target.IsList
+                            ? condition.Target.List.Contains(completedQuestId) // Check if completed quest id exists in fail condition
+                            : string.Equals(condition.Target.Item, completedQuestId, StringComparison.InvariantCultureIgnoreCase); // Not a list, plain string
+                    }
+
+                    return false;
                 }
             )
             .ToList();
