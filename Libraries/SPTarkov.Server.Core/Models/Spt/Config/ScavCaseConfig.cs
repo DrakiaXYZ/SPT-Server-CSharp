@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Common;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
@@ -71,6 +71,9 @@ public record ScavCaseConfig : BaseConfig
 
 public record MoneyRewards
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("moneyRewardChancePercent")]
     public int MoneyRewardChancePercent
     {
@@ -109,6 +112,9 @@ public record MoneyRewards
 
 public record MoneyLevels
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("common")]
     public required MinMax<int> Common
     {
@@ -133,6 +139,9 @@ public record MoneyLevels
 
 public record AmmoRewards
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("ammoRewardChancePercent")]
     public int AmmoRewardChancePercent
     {

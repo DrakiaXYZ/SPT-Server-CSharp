@@ -9,6 +9,9 @@ namespace SPTarkov.Server.Core.Models.Eft.Profile;
 
 public record SptProfile
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("info")]
     public Info? ProfileInfo
     {
@@ -109,6 +112,9 @@ public record SptProfile
 
 public record TraderPurchaseData
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("count")]
     public double? PurchaseCount
     {
@@ -126,6 +132,9 @@ public record TraderPurchaseData
 
 public record Info
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     main profile id
     /// </summary>
@@ -181,6 +190,9 @@ public record Info
 
 public record Characters
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("pmc")]
     public PmcData? PmcData
     {
@@ -201,6 +213,9 @@ public record Characters
 /// </summary>
 public record UserBuilds
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("weaponBuilds")]
     public List<WeaponBuild>? WeaponBuilds
     {
@@ -225,6 +240,9 @@ public record UserBuilds
 
 public record UserBuild
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("Id")]
     public string? Id
     {
@@ -315,6 +333,9 @@ public record MagazineBuild : UserBuild
 
 public record MagazineTemplateAmmoItem
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("TemplateId")]
     public string? TemplateId
     {
@@ -345,6 +366,9 @@ public record DefaultEquipmentPreset : EquipmentBuild
 
 public record Dialogue
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("attachmentsNew")]
     public int? AttachmentsNew
     {
@@ -398,6 +422,9 @@ public record Dialogue
 //TODO: @Cleanup: Maybe the same as Dialogue?
 public record DialogueInfo
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("attachmentsNew")]
     public int? AttachmentsNew
     {
@@ -450,6 +477,9 @@ public record DialogueInfo
 
 public record Message
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("_id")]
     public string? Id
     {
@@ -558,6 +588,9 @@ public record Message
 
 public record ReplyTo
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("_id")]
     public string? Id
     {
@@ -596,6 +629,9 @@ public record ReplyTo
 
 public record MessagePreview
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("uid")]
     public string? UserId
     {
@@ -641,6 +677,9 @@ public record MessagePreview
 
 public record MessageItems
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("stash")]
     public string? Stash
     {
@@ -658,6 +697,9 @@ public record MessageItems
 
 public record UpdatableChatMember
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("Nickname")]
     public string? Nickname
     {
@@ -703,6 +745,9 @@ public record UpdatableChatMember
 
 public record Spt
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     What version of SPT was this profile made with
     /// </summary>
@@ -790,6 +835,9 @@ public record Spt
 
 public record AcceptedCultistReward
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("timestamp")]
     public long? Timestamp
     {
@@ -814,6 +862,9 @@ public record AcceptedCultistReward
 
 public record PendingPrestige
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("prestigeLevel")]
     public int? PrestigeLevel
     {
@@ -831,6 +882,9 @@ public record PendingPrestige
 
 public record ModDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("name")]
     public string? Name
     {
@@ -869,6 +923,9 @@ public record ModDetails
 
 public record ReceivedGift
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("giftId")]
     public string? GiftId
     {
@@ -893,6 +950,9 @@ public record ReceivedGift
 
 public record Vitality
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("Hydration")]
     public double? Hydration
     {
@@ -924,6 +984,9 @@ public record Vitality
 
 public record Inraid
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("location")]
     public string? Location
     {
@@ -941,6 +1004,9 @@ public record Inraid
 
 public record Insurance
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("scheduledTime")]
     public int? ScheduledTime
     {

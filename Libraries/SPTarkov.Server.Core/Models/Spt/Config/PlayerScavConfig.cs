@@ -23,6 +23,9 @@ public record PlayerScavConfig : BaseConfig
 
 public record KarmaLevel
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("botTypeForLoot")]
     public required string BotTypeForLoot
     {
@@ -68,6 +71,9 @@ public record KarmaLevel
 
 public record Modifiers
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("equipment")]
     public required Dictionary<string, double> Equipment
     {

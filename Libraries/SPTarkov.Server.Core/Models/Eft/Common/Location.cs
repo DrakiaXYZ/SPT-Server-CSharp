@@ -6,6 +6,9 @@ namespace SPTarkov.Server.Core.Models.Eft.Common;
 
 public record Location
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     Map meta-data
     /// </summary>
@@ -76,6 +79,9 @@ public record Location
 
 public record StaticContainer
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("containersGroups")]
     public Dictionary<string, ContainerMinMax>? ContainersGroups
     {
@@ -93,6 +99,9 @@ public record StaticContainer
 
 public record ContainerMinMax
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("minContainers")]
     public int? MinContainers
     {
@@ -124,6 +133,9 @@ public record ContainerMinMax
 
 public record ContainerData
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("groupId")]
     public string? GroupId
     {
@@ -134,6 +146,9 @@ public record ContainerData
 
 public record StaticLootDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("itemcountDistribution")]
     public ItemCountDistribution[] ItemCountDistribution
     {
@@ -151,6 +166,9 @@ public record StaticLootDetails
 
 public record ItemCountDistribution
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("count")]
     public int? Count
     {
@@ -168,6 +186,9 @@ public record ItemCountDistribution
 
 public record ItemDistribution
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("tpl")]
     public string? Tpl
     {
@@ -185,6 +206,9 @@ public record ItemDistribution
 
 public record StaticContainerDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("staticWeapons")]
     public List<SpawnpointTemplate> StaticWeapons
     {
@@ -209,6 +233,9 @@ public record StaticContainerDetails
 
 public record StaticForced
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("containerId")]
     public string ContainerId
     {
@@ -226,6 +253,9 @@ public record StaticForced
 
 public record StaticContainerData
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("probability")]
     public float? Probability
     {
@@ -243,6 +273,9 @@ public record StaticContainerData
 
 public record StaticAmmoDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("tpl")]
     public string? Tpl
     {

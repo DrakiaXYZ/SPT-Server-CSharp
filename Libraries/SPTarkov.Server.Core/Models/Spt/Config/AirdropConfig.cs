@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Enums;
 
@@ -43,6 +43,9 @@ public record AirdropConfig : BaseConfig
 /// </summary>
 public record AirdropLoot
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("icon")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public required AirdropTypeEnum Icon

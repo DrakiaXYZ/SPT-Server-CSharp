@@ -1,9 +1,13 @@
-﻿using SPTarkov.Server.Core.Models.Enums;
+using System.Text.Json.Serialization;
+using SPTarkov.Server.Core.Models.Enums;
 
 namespace SPTarkov.Server.Core.Models.Spt.Bots;
 
 public record BotDetailsForChatMessages
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     public string Nickname
     {
         get;

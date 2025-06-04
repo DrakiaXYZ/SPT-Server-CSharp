@@ -88,6 +88,9 @@ public record HideoutConfig : BaseConfig
 
 public record HideoutCraftToAdd
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     The new mongoId for the craft to use
     /// </summary>
@@ -122,6 +125,9 @@ public record HideoutCraftToAdd
 
 public record CultistCircleSettings
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("maxRewardItemCount")]
     public int MaxRewardItemCount
     {
@@ -267,6 +273,9 @@ public record CraftTimeThreshold : MinMax<int>
 
 public record DirectRewardSettings
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("reward")]
     public required List<string> Reward
     {

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -124,6 +124,9 @@ public record InRaidConfig : BaseConfig
 
 public record RaidMenuSettings
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("aiAmount")]
     public required string AiAmount
     {
@@ -183,6 +186,9 @@ public record RaidMenuSettings
 
 public record RaidSave
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     Should loot gained from raid be saved
     /// </summary>

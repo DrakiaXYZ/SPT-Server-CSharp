@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Common;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
@@ -69,6 +69,9 @@ public record InventoryConfig : BaseConfig
 
 public record RewardDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("_type")]
     public string? Type
     {
@@ -107,6 +110,9 @@ public record RewardDetails
 
 public record SealedAirdropContainerSettings
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("weaponRewardWeight")]
     public required Dictionary<string, double> WeaponRewardWeight
     {

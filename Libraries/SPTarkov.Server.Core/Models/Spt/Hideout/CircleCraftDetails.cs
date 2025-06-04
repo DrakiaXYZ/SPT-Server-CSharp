@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Enums.Hideout;
 using SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -6,6 +6,9 @@ namespace SPTarkov.Server.Core.Models.Spt.Hideout;
 
 public record CircleCraftDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("time")]
     public required long Time
     {

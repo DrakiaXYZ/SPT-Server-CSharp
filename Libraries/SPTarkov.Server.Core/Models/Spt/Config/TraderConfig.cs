@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Spt.Services;
 
@@ -68,6 +68,9 @@ public record TraderConfig : BaseConfig
 
 public record UpdateTime
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("_name")]
     public string Name
     {
@@ -95,6 +98,9 @@ public record UpdateTime
 
 public record FenceConfig
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("discountOptions")]
     public required DiscountOptions DiscountOptions
     {
@@ -293,6 +299,9 @@ public record FenceConfig
 
 public record ItemDurabilityCurrentMax
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("current")]
     public required MinMax<double> Current
     {
@@ -341,6 +350,9 @@ public record CoopExtractReward : LootRequest
 
 public record DiscountOptions
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("assortSize")]
     public int AssortSize
     {
@@ -382,6 +394,9 @@ public record DiscountOptions
 /// </summary>
 public record ModdedTraders
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     Trader Ids to enable the clothing service for
     /// </summary>

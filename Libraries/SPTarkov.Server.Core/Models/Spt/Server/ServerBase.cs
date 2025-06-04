@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Server;
 
@@ -7,6 +7,9 @@ namespace SPTarkov.Server.Core.Models.Spt.Server;
 /// </summary>
 public record ServerBase
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("ip")]
     public required string Ip
     {

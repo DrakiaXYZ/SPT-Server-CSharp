@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -14,6 +14,9 @@ public abstract record BaseConfig
 
 public record RunIntervalValues
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("inRaid")]
     public int InRaid
     {

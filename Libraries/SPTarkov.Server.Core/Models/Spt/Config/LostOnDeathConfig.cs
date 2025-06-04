@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -44,6 +44,9 @@ public record LostOnDeathConfig : BaseConfig
 
 public record LostEquipment
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("ArmBand")]
     public bool ArmBand
     {

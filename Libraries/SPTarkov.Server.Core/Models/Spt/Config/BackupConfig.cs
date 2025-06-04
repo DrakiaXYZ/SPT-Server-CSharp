@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -42,6 +42,9 @@ public record BackupConfig : BaseConfig
 
 public record BackupConfigInterval
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("enabled")]
     public bool Enabled
     {

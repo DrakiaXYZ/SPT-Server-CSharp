@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -28,6 +28,9 @@ public record PmcChatResponse : BaseConfig
 
 public record ResponseSettings
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("responseChancePercent")]
     public double ResponseChancePercent
     {

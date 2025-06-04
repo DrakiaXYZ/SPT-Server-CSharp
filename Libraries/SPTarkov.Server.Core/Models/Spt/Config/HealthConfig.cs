@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace SPTarkov.Server.Core.Models.Spt.Config;
 
@@ -28,6 +28,9 @@ public record HealthConfig : BaseConfig
 
 public record HealthMultipliers
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("death")]
     public double Death
     {
@@ -45,6 +48,9 @@ public record HealthMultipliers
 
 public record HealthSave
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("health")]
     public bool Health
     {

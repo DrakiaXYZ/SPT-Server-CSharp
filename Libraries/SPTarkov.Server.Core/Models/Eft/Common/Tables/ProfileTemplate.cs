@@ -1,10 +1,13 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 
 namespace SPTarkov.Server.Core.Models.Eft.Common.Tables;
 
 public record ProfileTemplates
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("Standard")]
     public ProfileSides? Standard
     {
@@ -71,6 +74,9 @@ public record ProfileTemplates
 
 public record ProfileSides
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("descriptionLocaleKey")]
     public string? DescriptionLocaleKey
     {
@@ -95,6 +101,9 @@ public record ProfileSides
 
 public record TemplateSide
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("character")]
     public PmcData? Character
     {
@@ -147,6 +156,9 @@ public record TemplateSide
 
 public record ProfileTraderTemplate
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("initialLoyaltyLevel")]
     public Dictionary<string, int?>? InitialLoyaltyLevel
     {

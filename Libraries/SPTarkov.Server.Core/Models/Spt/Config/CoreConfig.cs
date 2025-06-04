@@ -129,6 +129,9 @@ public record CoreConfig : BaseConfig
 
 public record BsgLogging
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     verbosity of what to log, yes I know this is backwards, but its how nlog deals with ordinals. <br />
     ///     complain to them about it! In all cases, better exceptions will be logged.<br />
@@ -161,6 +164,9 @@ public record BsgLogging
 
 public record Release
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     Disclaimer outlining the intended usage of bleeding edge
     /// </summary>
@@ -294,6 +300,9 @@ public record Release
 
 public record GameFixes
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     Shotguns use a different value than normal guns causing huge pellet dispersion
     /// </summary>
@@ -337,6 +346,9 @@ public record GameFixes
 
 public record ServerFeatures
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("compressProfile")]
     public bool CompressProfile
     {
@@ -374,6 +386,9 @@ public record ServerFeatures
 
 public record ChatbotFeatures
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("sptFriendGiftsEnabled")]
     public bool SptFriendGiftsEnabled
     {
@@ -418,6 +433,9 @@ public record ChatbotFeatures
 
 public record CommandoFeatures
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("giveCommandEnabled")]
     public bool GiveCommandEnabled
     {
