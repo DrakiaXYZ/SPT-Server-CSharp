@@ -804,13 +804,14 @@ public class ItemHelper(
     public List<Item> FindAndReturnChildrenAsItems(IEnumerable<Item> items, string baseItemId, bool modsOnly = false)
     {
         // Use dictionary to make key lookup faster, convert to list before being returned
-        Dictionary<string, Item> result = [];
+        OrderedDictionary<string, Item> result = [];
         foreach (var childItem in items)
         {
             // Include itself
             if (string.Equals(childItem.Id, baseItemId, StringComparison.Ordinal))
             {
-                result.Add(childItem.Id, childItem);
+                // Root item MUST be at 0 index for things like flea market offers
+                result.Insert(0, childItem.Id, childItem);
                 continue;
             }
 
