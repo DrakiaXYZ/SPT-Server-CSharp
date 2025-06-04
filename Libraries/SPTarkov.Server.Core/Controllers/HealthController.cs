@@ -275,6 +275,11 @@ public class HealthController(
 
         foreach (var bodyPartKvP in healthTreatmentRequest.Difference.BodyParts.GetAllPropsAsDict())
         {
+            if (string.Equals(bodyPartKvP.Key, "extensiondata", StringComparison.InvariantCultureIgnoreCase))
+            {
+                continue;
+            }
+
             // Get body part from request + from pmc profile
             var partRequest = (BodyPartEffects) bodyPartKvP.Value;
             var profilePart = pmcData.Health.BodyParts[bodyPartKvP.Key];

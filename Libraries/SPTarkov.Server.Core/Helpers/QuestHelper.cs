@@ -1205,6 +1205,11 @@ public class QuestHelper(
                     continue;
                 }
 
+                if (string.Equals(rewardType.Key, "extensiondata", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    continue;
+                }
+
                 propsAsDict[rewardType.Key] = ((List<Reward>) propsAsDict[rewardType.Key])
                     .Where(reward =>
                         _rewardHelper.RewardIsForGameEdition(reward, gameVersion)
