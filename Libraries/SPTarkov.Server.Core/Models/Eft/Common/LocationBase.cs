@@ -949,11 +949,11 @@ public record NonWaveGroupScenario
 public record Limit : MinMax<int>
 {
     [JsonPropertyName("items")]
-    public object[] Items
+    public List<string>? Items
     {
         get;
         set;
-    } // TODO: was on TS any[] hmmm..
+    }
 
     [JsonPropertyName("min")]
     public int? Min
