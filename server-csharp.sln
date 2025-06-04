@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPTarkov.Server", "SPTarkov.Server\SPTarkov.Server.csproj", "{1F5ED9C6-8B1F-4776-85AB-B387CBBC5557}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPTarkov.Server.Core", "Libraries\SPTarkov.Server.Core\SPTarkov.Server.Core.csproj", "{AC8643DC-8779-4B4A-BBDA-2D4CC466F765}"
-	ProjectSection(ProjectDependencies) = postProject
-		{905FBA04-D73A-4A46-930B-1B0C3A7C4EB8} = {905FBA04-D73A-4A46-930B-1B0C3A7C4EB8}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{6C0681F9-4013-4579-82DA-0A9297984FD3}"
 EndProject
