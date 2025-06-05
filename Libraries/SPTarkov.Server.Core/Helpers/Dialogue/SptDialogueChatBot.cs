@@ -93,7 +93,7 @@ public class SptDialogueChatBot(
         _mailSendService.SendUserMessageToPlayer(
             sessionId,
             GetChatBot(),
-            "The available commands are:\\n GIVEMESPACE \\n HOHOHO \\n VERYSPOOKY \\n ITSONLYSNOWALAN \\n GIVEMESUNSHINE",
+            "The available commands are:\n GIVEMESPACE \n HOHOHO \n VERYSPOOKY \n ITSONLYSNOWALAN \n GIVEMESUNSHINE",
             [],
             null
         );
@@ -119,7 +119,7 @@ public class SptDialogueChatBot(
                                 _mailSendService.SendUserMessageToPlayer(
                                     sessionId,
                                     GetChatBot(),
-                                    $"Subcommand {subCommand}:\\n{chatCommand.GetCommandHelp(subCommand)}",
+                                    $"Subcommand {subCommand}:\n{chatCommand.GetCommandHelp(subCommand)}",
                                     [],
                                     null
                                 );

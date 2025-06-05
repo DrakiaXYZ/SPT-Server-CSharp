@@ -31,7 +31,7 @@ public class TraderSptCommand(
     public string GetCommandHelp()
     {
         return
-            "spt trader\n========\nSets the reputation or money spent to the input quantity through the message system.\n\n\tspt trader [trader] rep [quantity]\n\t\tEx: spt trader prapor rep 2\n\n\tspt trader [trader] spend [quantity]\n\t\tEx: spt trader therapist spend 1000000";
+            "spt trader \n ======== \n Sets the reputation or money spent to the input quantity through the message system.\n\n\tspt trader [trader] rep [quantity]\n\t\tEx: spt trader prapor rep 2\n\n\tspt trader [trader] spend [quantity]\n\t\tEx: spt trader therapist spend 1000000";
     }
 
     public string PerformAction(UserDialogInfo commandHandler, string sessionId, SendMessageRequest request)
