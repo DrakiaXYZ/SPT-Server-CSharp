@@ -566,10 +566,14 @@ public class ProfileHelper(
     public void AddStashRowsBonusToProfile(string sessionId, int rowsToAdd)
     {
         var profile = GetPmcProfile(sessionId);
-        var existingBonus = profile?.Bonuses?.FirstOrDefault(b => b.Type == BonusType.StashRows);
-        if (existingBonus != null)
+        if (profile?.Bonuses is null)
         {
-            profile?.Bonuses?.Add(
+            return;
+        }
+        var existingBonus = profile?.Bonuses.FirstOrDefault(b => b.Type == BonusType.StashRows);
+        if (existingBonus is null)
+        {
+            profile!.Bonuses.Add(
                 new Bonus
                 {
                     Id = _hashUtil.Generate(),
