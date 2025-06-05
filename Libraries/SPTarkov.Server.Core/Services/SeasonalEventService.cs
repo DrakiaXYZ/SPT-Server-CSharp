@@ -861,9 +861,8 @@ public class SeasonalEventService(
             return;
         }
 
-        var mapKeys = botsToAddPerMap;
         var locations = _databaseService.GetLocations().GetAllPropsAsDict();
-        foreach (var (locationKey, _) in mapKeys)
+        foreach (var (locationKey, _) in botsToAddPerMap)
         {
             if (!botsToAddPerMap.TryGetValue(locationKey, out var bossesToAdd))
             {
