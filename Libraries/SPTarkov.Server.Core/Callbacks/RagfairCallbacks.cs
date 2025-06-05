@@ -18,10 +18,12 @@ public class RagfairCallbacks(
     RagfairController _ragfairController,
     RagfairTaxService _ragfairTaxService,
     RagfairPriceService _ragfairPriceService,
-    ConfigServer _configServer
+    ConfigServer _configServer,
+    TimeUtil _timeUtil
 ) : IOnLoad, IOnUpdate
 {
     private readonly RagfairConfig _ragfairConfig = _configServer.GetConfig<RagfairConfig>();
+    private long _lastRunOnUpdateTimestamp = long.MaxValue;
 
     public Task OnLoad()
     {
@@ -30,19 +32,25 @@ public class RagfairCallbacks(
         return Task.CompletedTask;
     }
 
-    public Task OnUpdate(long timeSinceLastRun)
+    public Task OnUpdate(long secondsSinceLastRun)
     {
-        if (timeSinceLastRun > _ragfairConfig.RunIntervalSeconds)
+        if (_timeUtil.GetTimeStamp() <= _lastRunOnUpdateTimestamp + _ragfairConfig.RunIntervalSeconds)
         {
-            // There is a flag inside this class that only makes it run once.
-            _ragfairServer.AddPlayerOffers();
-
-            // Check player offers and mail payment to player if sold
-            _ragfairController.Update();
-
-            // Process all offers / expire offers
-            _ragfairServer.Update();
+            // Not enough time has passed since last run, exit early
+            return Task.CompletedTask;
         }
+
+        // There is a flag inside this class that only makes it run once.
+        _ragfairServer.AddPlayerOffers();
+
+        // Check player offers and mail payment to player if sold
+        _ragfairController.Update();
+
+        // Process all offers / expire offers
+        _ragfairServer.Update();
+
+        // Store last completion time for later use
+        _lastRunOnUpdateTimestamp = _timeUtil.GetTimeStamp();
 
         return Task.CompletedTask;
     }

@@ -118,11 +118,7 @@ public class App(
                     updateableName = $"{updateable.GetType().Namespace}.{updateable.GetType().Name}";
                 }
 
-                if (!_onUpdateLastRun.TryGetValue(updateableName, out var lastRunTimeTimestamp))
-                {
-                    lastRunTimeTimestamp = 0;
-                }
-
+                var lastRunTimeTimestamp = _onUpdateLastRun.GetValueOrDefault(updateableName, 0);
                 var secondsSinceLastRun = _timeUtil.GetTimeStamp() - lastRunTimeTimestamp;
 
                 try
