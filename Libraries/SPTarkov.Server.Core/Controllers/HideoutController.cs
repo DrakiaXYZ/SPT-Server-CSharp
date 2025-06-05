@@ -1550,7 +1550,8 @@ public class HideoutController(
     }
 
     /// <summary>
-    ///     Function called every `hideoutConfig.runIntervalSeconds` seconds as part of onUpdate event
+    ///     Called every `hideoutConfig.runIntervalSeconds` seconds as part of onUpdate event
+    /// Updates hideout craft times
     /// </summary>
     public void Update()
     {
