@@ -60,6 +60,11 @@ public static class ObjectExtensions
 
         foreach (var prop in list)
         {
+            if (string.Equals(prop.Name, "extensiondata", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             result.Add(prop.GetValue(obj));
         }
 
@@ -68,7 +73,15 @@ public static class ObjectExtensions
 
     public static Dictionary<string, object?> GetAllPropsAsDict(this object? obj)
     {
-        var props = obj.GetType().GetProperties();
+        if (obj is null)
+        {
+            return [];
+        }
+
+        var props = obj
+            .GetType()
+            .GetProperties()
+            .Where(prop => !string.Equals(prop.Name, "extensiondata", StringComparison.OrdinalIgnoreCase));
 
         return props.ToDictionary(prop => prop.Name, prop => prop.GetValue(obj));
     }

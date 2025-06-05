@@ -62,7 +62,9 @@ public class LauncherController(
     {
         var result = new Dictionary<string, string>();
         var dbProfiles = _databaseService.GetProfiles();
-        foreach (var templatesProperty in typeof(ProfileTemplates).GetProperties().Where(p => p.CanWrite && p.Name != "ExtensionData"))
+        foreach (var templatesProperty in typeof(ProfileTemplates).GetProperties()
+                     .Where(p => p.CanWrite
+                                 && !string.Equals(p.Name, "extensiondata", StringComparison.InvariantCultureIgnoreCase)))
         {
             var propertyValue = templatesProperty.GetValue(dbProfiles);
             if (propertyValue == null)
