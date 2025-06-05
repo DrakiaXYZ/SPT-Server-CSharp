@@ -3,6 +3,7 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
@@ -10,11 +11,13 @@ namespace SPTarkov.Server.Core.Callbacks;
 public class SaveCallbacks(
     SaveServer _saveServer,
     ConfigServer _configServer,
-    BackupService _backupService
+    BackupService _backupService,
+    TimeUtil _timeUtil
 )
     : IOnLoad, IOnUpdate
 {
     private readonly CoreConfig _coreConfig = _configServer.GetConfig<CoreConfig>();
+    private long _lastRunOnUpdateTimestamp = long.MaxValue;
 
     public async Task OnLoad()
     {
@@ -22,13 +25,19 @@ public class SaveCallbacks(
         _saveServer.Load();
     }
 
-    public Task OnUpdate(long timeSinceLastRun)
+    public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        if (timeSinceLastRun > _coreConfig.ProfileSaveIntervalInSeconds)
+        if (_timeUtil.GetTimeStamp() <= _lastRunOnUpdateTimestamp + _coreConfig.ProfileSaveIntervalInSeconds)
         {
-            _saveServer.Save();
+            // Not enough time has passed since last run, exit early
+            return Task.FromResult(false);
         }
 
-        return Task.CompletedTask;
+        _saveServer.Save();
+
+        // Store last completion time for later use
+        _lastRunOnUpdateTimestamp = _timeUtil.GetTimeStamp();
+
+        return Task.FromResult(false);
     }
 }

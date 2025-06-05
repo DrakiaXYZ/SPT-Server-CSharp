@@ -20,12 +20,12 @@ public class HideoutCallbacks(
     private readonly HideoutConfig _hideoutConfig = _configServer.GetConfig<HideoutConfig>();
     private long _lastRunOnUpdateTimestamp = long.MaxValue;
 
-    public Task OnUpdate(long secondsSinceLastRun)
+    public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
         if (_timeUtil.GetTimeStamp() <= _lastRunOnUpdateTimestamp + _hideoutConfig.RunIntervalSeconds)
         {
             // Not enough time has passed since last run, exit early
-            return Task.CompletedTask;
+            return Task.FromResult(false);
         }
 
         _hideoutController.Update();
@@ -33,7 +33,7 @@ public class HideoutCallbacks(
         // Store last completion time for later use
         _lastRunOnUpdateTimestamp = _timeUtil.GetTimeStamp();
 
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     /// <summary>
