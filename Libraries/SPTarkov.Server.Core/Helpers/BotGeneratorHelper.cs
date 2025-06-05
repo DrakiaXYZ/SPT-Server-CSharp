@@ -1,9 +1,7 @@
 using System.Collections.Frozen;
 using SPTarkov.Server.Core.Constants;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Bots;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -36,6 +34,8 @@ public class BotGeneratorHelper(
         EquipmentSlots.Holster.ToString(),
         EquipmentSlots.ArmBand.ToString()
     ];
+
+    private static readonly string[] _pmcTypes = [ Sides.PmcBear.ToLower(), Sides.PmcUsec.ToLower() ];
 
     private readonly BotConfig _botConfig = _configServer.GetConfig<BotConfig>();
 
@@ -520,11 +520,7 @@ public class BotGeneratorHelper(
     /// <returns>Equipment role (e.g. pmc / assault / bossTagilla)</returns>
     public string GetBotEquipmentRole(string botRole)
     {
-        PmcConfig pmcConfig = _configServer.GetConfig<PmcConfig>();
-
-        string[] pmcTypes = [ pmcConfig.UsecType.ToLower(), pmcConfig.BearType.ToLower() ];
-
-        return pmcTypes.Contains(botRole, StringComparer.OrdinalIgnoreCase)
+        return _pmcTypes.Contains(botRole, StringComparer.OrdinalIgnoreCase)
             ? Sides.PmcEquipmentRole
             : botRole;
     }
