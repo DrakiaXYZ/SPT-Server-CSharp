@@ -587,29 +587,26 @@ public class SeasonalEventService(
 
     private void ReplaceBotHostility(Dictionary<string, List<AdditionalHostilitySettings>> hostilitySettings)
     {
-        var locations = _databaseService.GetLocations();
+        var locations = _databaseService.GetLocations().GetDictionary();
         var ignoreList = _locationConfig.NonMaps;
 
-        var props = locations.GetType().GetProperties();
-
-        foreach (var locationProp in props)
+        foreach (var (locationName, locationBase) in locations)
         {
-            if (ignoreList.Contains(locationProp.Name))
+            if (ignoreList.Contains(locationName))
             {
                 continue;
             }
 
-            var location = (Location) locationProp.GetValue(locations);
-            if (location?.Base?.BotLocationModifier?.AdditionalHostilitySettings is null)
+            if (locationBase?.Base?.BotLocationModifier?.AdditionalHostilitySettings is null)
             {
                 continue;
             }
 
             // Try to get map 'default' first if it exists
-            if (!hostilitySettings.TryGetValue("Default", out var newHostilitySettings))
+            if (!hostilitySettings.TryGetValue("default", out var newHostilitySettings))
             {
                 // No 'default', try for location name
-                if (!hostilitySettings.TryGetValue(locationProp.Name, out newHostilitySettings))
+                if (!hostilitySettings.TryGetValue(locationName, out newHostilitySettings))
                 {
                     // no settings for map by name, skip map
                     continue;
@@ -618,7 +615,7 @@ public class SeasonalEventService(
 
             foreach (var settings in newHostilitySettings)
             {
-                var matchingBaseSettings = location.Base.BotLocationModifier.AdditionalHostilitySettings.FirstOrDefault(x => x.BotRole == settings.BotRole);
+                var matchingBaseSettings = locationBase.Base.BotLocationModifier.AdditionalHostilitySettings.FirstOrDefault(x => x.BotRole == settings.BotRole);
                 if (matchingBaseSettings is null)
                 {
                     continue;
