@@ -350,9 +350,9 @@ public class BotGeneratorHelper(
 
         // TODO: Can probably be optimized to cache itemTemplates as items are added to inventory
         var equippedItemsDb = itemsEquipped.Select(equippedItem => _itemHelper.GetItem(equippedItem.Template).Value).ToList();
-        var (key, itemToEquip) = _itemHelper.GetItem(tplToCheck);
+        var (itemIsValid, itemToEquip) = _itemHelper.GetItem(tplToCheck);
 
-        if (!key)
+        if (!itemIsValid)
         {
             _logger.Warning(
                 _localisationService.GetText(
