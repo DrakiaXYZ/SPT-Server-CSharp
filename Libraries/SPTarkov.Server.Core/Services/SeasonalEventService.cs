@@ -863,27 +863,28 @@ public class SeasonalEventService(
 
         var mapKeys = botsToAddPerMap;
         var locations = _databaseService.GetLocations().GetAllPropsAsDict();
-        foreach (var (key, _) in mapKeys)
+        foreach (var (locationKey, _) in mapKeys)
         {
-            if (!botsToAddPerMap.TryGetValue(key, out var bossesToAdd))
+            if (!botsToAddPerMap.TryGetValue(locationKey, out var bossesToAdd))
             {
-                _logger.Warning($"Unable to add: {eventType} bosses to: {key}");
+                _logger.Warning($"Unable to add: {eventType} bosses to: {locationKey}");
 
                 continue;
             }
 
-            if (mapIdWhitelist is null || !mapIdWhitelist.Contains(key))
+            if (mapIdWhitelist is null || !mapIdWhitelist.Contains(locationKey))
             {
                 continue;
             }
 
+            var locationName = _databaseService.GetLocations().GetMappedKey(locationKey);
             foreach (var boss in bossesToAdd)
             {
-                var mapBosses = ((Location) locations[key]).Base.BossLocationSpawn;
+                var mapBosses = ((Location) locations[locationName]).Base.BossLocationSpawn;
                 // If no bosses match by name
                 if (mapBosses.All(bossSpawn => bossSpawn.BossName != boss.BossName))
                 {
-                    ((Location) locations[key]).Base.BossLocationSpawn.AddRange(bossesToAdd);
+                    ((Location) locations[locationName]).Base.BossLocationSpawn.AddRange(bossesToAdd);
                 }
             }
         }
