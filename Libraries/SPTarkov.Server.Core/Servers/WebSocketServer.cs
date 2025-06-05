@@ -40,7 +40,7 @@ public class WebSocketServer(
 
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
-            _logger.Debug($"[WS] Notifying handlers of new websocket connection openning with reference {sessionIdContext}");
+            _logger.Debug($"[WS] Notifying handlers of new websocket connection opening with reference {sessionIdContext}");
         }
         foreach (var wsh in socketHandlers)
         {
