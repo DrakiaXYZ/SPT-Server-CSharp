@@ -13,25 +13,20 @@ namespace SPTarkov.Server.Core.Callbacks;
 [Injectable(TypePriority = OnUpdateOrder.HideoutCallbacks)]
 public class HideoutCallbacks(
     HideoutController _hideoutController,
-    ConfigServer _configServer,
-    TimeUtil _timeUtil
+    ConfigServer _configServer
 ) : IOnUpdate
 {
     private readonly HideoutConfig _hideoutConfig = _configServer.GetConfig<HideoutConfig>();
-    private long _lastRunOnUpdateTimestamp = long.MaxValue;
 
     public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        if (_timeUtil.GetTimeStamp() <= _lastRunOnUpdateTimestamp + _hideoutConfig.RunIntervalSeconds)
+        if (secondsSinceLastRun < _hideoutConfig.RunIntervalSeconds)
         {
             // Not enough time has passed since last run, exit early
             return Task.FromResult(false);
         }
 
         _hideoutController.Update();
-
-        // Store last completion time for later use
-        _lastRunOnUpdateTimestamp = _timeUtil.GetTimeStamp();
 
         return Task.FromResult(true);
     }

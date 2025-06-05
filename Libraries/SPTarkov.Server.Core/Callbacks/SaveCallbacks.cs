@@ -11,13 +11,11 @@ namespace SPTarkov.Server.Core.Callbacks;
 public class SaveCallbacks(
     SaveServer _saveServer,
     ConfigServer _configServer,
-    BackupService _backupService,
-    TimeUtil _timeUtil
+    BackupService _backupService
 )
     : IOnLoad, IOnUpdate
 {
     private readonly CoreConfig _coreConfig = _configServer.GetConfig<CoreConfig>();
-    private long _lastRunOnUpdateTimestamp = long.MaxValue;
 
     public async Task OnLoad()
     {
@@ -27,16 +25,13 @@ public class SaveCallbacks(
 
     public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        if (_timeUtil.GetTimeStamp() <= _lastRunOnUpdateTimestamp + _coreConfig.ProfileSaveIntervalInSeconds)
+        if (secondsSinceLastRun < _coreConfig.ProfileSaveIntervalInSeconds)
         {
             // Not enough time has passed since last run, exit early
             return Task.FromResult(false);
         }
 
         _saveServer.Save();
-
-        // Store last completion time for later use
-        _lastRunOnUpdateTimestamp = _timeUtil.GetTimeStamp();
 
         return Task.FromResult(false);
     }

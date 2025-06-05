@@ -16,25 +16,20 @@ public class InsuranceCallbacks(
     InsuranceController _insuranceController,
     InsuranceService _insuranceService,
     HttpResponseUtil _httpResponseUtil,
-    ConfigServer _configServer,
-    TimeUtil _timeUtil
+    ConfigServer _configServer
 )
     : IOnUpdate
 {
     private readonly InsuranceConfig _insuranceConfig = _configServer.GetConfig<InsuranceConfig>();
-    private long _lastRunOnUpdateTimestamp = long.MaxValue;
 
     public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        if (_timeUtil.GetTimeStamp() <= _lastRunOnUpdateTimestamp + _insuranceConfig.RunIntervalSeconds)
+        if (secondsSinceLastRun < _insuranceConfig.RunIntervalSeconds)
         {
             return Task.FromResult(false);
         }
 
         _insuranceController.ProcessReturn();
-
-        // Store last completion time for later use
-        _lastRunOnUpdateTimestamp = _timeUtil.GetTimeStamp();
 
         return Task.FromResult(true);
     }

@@ -123,15 +123,15 @@ public class App(
 
                 try
                 {
-                    await updateable.OnUpdate(secondsSinceLastRun);
+                    if(await updateable.OnUpdate(secondsSinceLastRun))
+                    {
+                        _onUpdateLastRun[updateableName] = _timeUtil.GetTimeStamp();
+                    }
                 }
                 catch (Exception err)
                 {
                     LogUpdateException(err, updateable);
                 }
-
-                // Set last run after try catch, so if an exception is caused the task is seen as failed.
-                _onUpdateLastRun[updateableName] = _timeUtil.GetTimeStamp();
             }
 
             await Task.Delay(5000, _appLifeTime.ApplicationStopping);
