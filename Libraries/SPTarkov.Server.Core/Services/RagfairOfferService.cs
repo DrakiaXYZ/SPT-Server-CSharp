@@ -230,13 +230,13 @@ public class RagfairOfferService(
         offerCreatorProfile.RagfairInfo.NotSellSum ??= 0;
         offerCreatorProfile.RagfairInfo.NotSellSum += playerOffer.SummaryCost;
 
-        var firstOfferItem = playerOffer.Items[0];
+        var firstOfferItem = playerOffer.Items.FirstOrDefault();
         if (firstOfferItem.Upd.StackObjectsCount > firstOfferItem.Upd.OriginalStackObjectsCount)
         {
-            playerOffer.Items[0].Upd.StackObjectsCount = firstOfferItem.Upd.OriginalStackObjectsCount;
+            firstOfferItem.Upd.StackObjectsCount = firstOfferItem.Upd.OriginalStackObjectsCount;
         }
 
-        playerOffer.Items[0].Upd.OriginalStackObjectsCount = null;
+        firstOfferItem.Upd.OriginalStackObjectsCount = null;
 
         // Remove player offer from flea
         ragfairOfferHolder.RemoveOffer(playerOffer.Id, false);
