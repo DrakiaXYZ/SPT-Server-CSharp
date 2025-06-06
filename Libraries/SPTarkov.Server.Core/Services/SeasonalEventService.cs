@@ -54,7 +54,8 @@ public class SeasonalEventService(
         ItemTpl.FACECOVER_HARE_MASK,
         ItemTpl.FACECOVER_ROOSTER_MASK,
         ItemTpl.FLARE_RSP30_REACTIVE_SIGNAL_CARTRIDGE_FIREWORK,
-        ItemTpl.BARTER_SHYSHKA_CHRISTMAS_TREE_LIFE_EXTENDER
+        ItemTpl.BARTER_SHYSHKA_CHRISTMAS_TREE_LIFE_EXTENDER,
+        ItemTpl.BACKPACK_MYSTERY_RANCH_TERRAFRAME_BACKPACK_CHRISTMAS_EDITION
     ];
 
     private List<SeasonalEvent> _currentlyActiveEvents = [];
