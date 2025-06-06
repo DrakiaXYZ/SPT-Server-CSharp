@@ -24,6 +24,8 @@ public class RagfairOfferService(
     LocalisationService localisationService,
     ICloner cloner,
     RagfairOfferHolder ragfairOfferHolder,
+    NotifierHelper notifierHelper,
+    NotificationSendHelper notificationSendHelper,
     ConfigServer configServer
 )
 {
@@ -252,6 +254,12 @@ public class RagfairOfferService(
                 item.ParentId = newParentId;
             }
         }
+
+        // Send toast notification to player
+        var notificationMessage = notifierHelper.CreateRagfairNewRatingNotification(
+            offerCreatorProfile.RagfairInfo.Rating.Value,
+            offerCreatorProfile.RagfairInfo.IsRatingGrowing.GetValueOrDefault(false));
+        notificationSendHelper.SendMessage(offerCreatorId, notificationMessage);
 
         ragfairServerHelper.ReturnItems(offerCreatorProfile.SessionId, unstackedItems);
         offerCreatorProfile.RagfairInfo.Offers.Splice(indexOfOfferInProfile, 1);
