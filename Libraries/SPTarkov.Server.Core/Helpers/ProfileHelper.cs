@@ -568,6 +568,7 @@ public class ProfileHelper(
         var profile = GetPmcProfile(sessionId);
         if (profile?.Bonuses is null)
         {
+            // Something is very wrong with profile to lack bonuses array, likely broken profile, exit early
             return;
         }
         var existingBonus = profile?.Bonuses.FirstOrDefault(b => b.Type == BonusType.StashRows);
