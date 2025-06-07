@@ -79,6 +79,13 @@ public record SptProfile
         set;
     }
 
+    [JsonPropertyName("btrDelivery")]
+    public List<BtrDelivery>? BtrDeliveryList
+    {
+        get;
+        set;
+    }
+
     /// <summary>
     ///     Assort purchases made by player since last trader refresh
     /// </summary>
@@ -1044,6 +1051,33 @@ public record Insurance
 
     [JsonPropertyName("messageTemplateId")]
     public string? MessageTemplateId
+    {
+        get;
+        set;
+    }
+
+    [JsonPropertyName("items")]
+    public List<Item>? Items
+    {
+        get;
+        set;
+    }
+}
+
+public record BtrDelivery
+{
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
+    [JsonPropertyName("_id")]
+    public string? Id
+    {
+        get;
+        set;
+    }
+
+    [JsonPropertyName("scheduledTime")]
+    public int? ScheduledTime
     {
         get;
         set;

@@ -8,7 +8,6 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Quests;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Spt.Location;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
@@ -54,6 +53,7 @@ public class LocationLifecycleService
     protected TimeUtil _timeUtil;
     protected TraderConfig _traderConfig;
     protected TraderHelper _traderHelper;
+    protected BtrDeliveryService _btrDeliveryService;
 
     public LocationLifecycleService(
         ISptLogger<LocationLifecycleService> logger,
@@ -83,7 +83,8 @@ public class LocationLifecycleService
         PmcWaveGenerator pmcWaveGenerator,
         QuestHelper questHelper,
         InsuranceService insuranceService,
-        MatchBotDetailsCacheService matchBotDetailsCacheService
+        MatchBotDetailsCacheService matchBotDetailsCacheService,
+        BtrDeliveryService btrDeliveryService
     )
     {
         _logger = logger;
@@ -114,6 +115,7 @@ public class LocationLifecycleService
         _questHelper = questHelper;
         _insuranceService = insuranceService;
         _matchBotDetailsCacheService = matchBotDetailsCacheService;
+        _btrDeliveryService = btrDeliveryService;
 
         _locationConfig = _configServer.GetConfig<LocationConfig>();
         _inRaidConfig = _configServer.GetConfig<InRaidConfig>();
@@ -442,7 +444,7 @@ public class LocationLifecycleService
         var isSurvived = IsPlayerSurvived(request.Results);
 
         // Handle items transferred via BTR or transit to player mailbox
-        HandleItemTransferEvent(sessionId, request);
+        _btrDeliveryService.HandleItemTransferEvent(sessionId, request);
 
         // Player is moving between maps
         if (isTransfer && request.LocationTransit is not null)
@@ -458,7 +460,6 @@ public class LocationLifecycleService
         if (!isPmc)
         {
             HandlePostRaidPlayerScav(sessionId, pmcProfile, scavProfile, isDead, isTransfer, isSurvived, request);
-
             return;
         }
 
@@ -695,7 +696,7 @@ public class LocationLifecycleService
         {
             _logger.Error($"post raid fence data not found for: {sessionId}");
         }
-        
+
         scavProfile.TradersInfo[Traders.FENCE].Standing = Math.Min(Math.Max(postRaidFenceData.Standing.Value, fenceMin), fenceMax);
 
         // Successful extract as scav, give some rep
@@ -1074,81 +1075,6 @@ public class LocationLifecycleService
                 tradersServerProfile[traderId.Key].Standing = clientProfileTrader.Standing;
             }
         }
-    }
-
-    /// <summary>
-    ///     Check if player used BTR or transit item sending service and send items to player via mail if found
-    /// </summary>
-    /// <param name="sessionId"> Session ID </param>
-    /// <param name="request"> End raid request from client </param>
-    protected void HandleItemTransferEvent(string sessionId, EndLocalRaidRequestData request)
-    {
-        var transferTypes = new List<string>
-        {
-            "btr",
-            "transit"
-        };
-
-        foreach (var trasferType in transferTypes)
-        {
-            var rootId = $"{Traders.BTR}_{trasferType}";
-            List<Item>? itemsToSend = null;
-
-            // if rootId doesnt exist in TransferItems, skip
-            if (!request?.TransferItems?.TryGetValue(rootId, out itemsToSend) ?? false)
-            {
-                continue;
-            }
-
-            // Filter out the btr container item from transferred items before delivering
-            itemsToSend = itemsToSend?.Where(item => item.Id != Traders.BTR).ToList();
-            if (itemsToSend?.Count == 0)
-            {
-                continue;
-            }
-
-            TransferItemDelivery(sessionId, Traders.BTR, itemsToSend);
-        }
-    }
-
-    protected void TransferItemDelivery(string sessionId, string traderId, List<Item> items)
-    {
-        var serverProfile = _saveServer.GetProfile(sessionId);
-        var pmcData = serverProfile.CharacterData.PmcData;
-
-        var dialogueTemplates = _databaseService.GetTrader(traderId).Dialogue;
-        if (dialogueTemplates is null)
-        {
-            _logger.Error(_localisationService.GetText("inraid-unable_to_deliver_item_no_trader_found", traderId));
-
-            return;
-        }
-
-        if (!dialogueTemplates.TryGetValue("itemsDelivered", out var itemsDelivered))
-        {
-            _logger.Error("dialogueTemplates doesn't contain itemsDelivered");
-            return;
-        }
-
-        var messageId = _randomUtil.GetArrayValue(itemsDelivered);
-        var messageStoreTime = _timeUtil.GetHoursAsSeconds(_traderConfig.Fence.BtrDeliveryExpireHours);
-
-        // Remove any items that were returned by the item delivery, but also insured, from the player's insurance list
-        // This is to stop items being duplicated by being returned from both item delivery and insurance
-        var deliveredItemIds = items.Select(item => item.Id);
-        pmcData.InsuredItems = pmcData.InsuredItems.Where(insuredItem => !deliveredItemIds.Contains(insuredItem.ItemId)
-            )
-            .ToList();
-
-        // Send the items to the player
-        _mailSendService.SendLocalisedNpcMessageToPlayer(
-            sessionId,
-            traderId,
-            MessageType.BtrItemsDelivery,
-            messageId,
-            items,
-            messageStoreTime
-        );
     }
 
     protected void HandleInsuredItemLostEvent(

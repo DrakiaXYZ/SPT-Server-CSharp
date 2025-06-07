@@ -118,6 +118,7 @@ public class CreateProfileService(
             VitalityData = new Vitality(),
             InraidData = new Inraid(),
             InsuranceList = [],
+            BtrDeliveryList = [],
             TraderPurchases = new Dictionary<string, Dictionary<string, TraderPurchaseData>?>(),
             FriendProfileIds = [],
             CustomisationUnlocks = []
