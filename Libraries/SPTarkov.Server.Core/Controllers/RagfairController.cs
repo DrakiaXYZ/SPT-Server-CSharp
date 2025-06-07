@@ -125,14 +125,14 @@ public class RagfairController
 
     /// <summary>
     ///     Handles client/ragfair/find
+    ///     Returns an object containing an array of flea offers to show to player
     /// </summary>
     /// <param name="sessionID">Session/Player id</param>
-    /// <param name="searchRequest">Search request data</param>
+    /// <param name="searchRequest">Search request data from client</param>
     /// <returns>Flea offers that match required search parameters</returns>
     public GetOffersResult GetOffers(string sessionID, SearchRequestData searchRequest)
     {
         var profile = _profileHelper.GetFullProfile(sessionID);
-
         var itemsToAdd = _ragfairHelper.FilterCategories(sessionID, searchRequest);
         var traderAssorts = _ragfairHelper.GetDisplayableAssorts(sessionID);
         var result = new GetOffersResult
@@ -150,6 +150,7 @@ public class RagfairController
             result.Categories = GetSpecificCategories(profile.CharacterData.PmcData, searchRequest, result.Offers);
         }
 
+        // Adjust index value of offers found to start at 0 
         AddIndexValueToOffers(result.Offers);
 
         // Sort offers
@@ -176,15 +177,50 @@ public class RagfairController
 
         result.OffersCount = result.Offers.Count;
 
-        // Handle paging before returning results only if searching for general items, not preset items
+        // Handle paging before returning results if searching for general items, not preset items
         if (searchRequest.BuildCount == 0)
         {
-            var start = searchRequest.Page * searchRequest.Limit;
-            var end = Math.Min((searchRequest.Page.Value + 1) * searchRequest.Limit.Value, result.Offers.Count);
-            result.Offers = result.Offers.Slice(start.Value, end - start.Value);
+            PaginateOffers(searchRequest, result);
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Paginate offers based on search request properties
+    /// </summary>
+    /// <param name="searchRequest">Client request</param>
+    /// <param name="result">Object to return to client</param>
+    protected void PaginateOffers(SearchRequestData searchRequest, GetOffersResult result)
+    {
+        // Number of items to show per page
+        var perPageLimit = searchRequest.Limit.GetValueOrDefault(15); // Client defaults to 15 items per page
+
+        // Total pages to show player
+        var totalPages = result.Offers.Count / perPageLimit;
+
+        // Page player was just on before clicking new page
+        var previousPage = searchRequest.Page.GetValueOrDefault(0);
+
+        // Assumed page player is moving to
+        var nextPage = searchRequest.Page.GetValueOrDefault(0) + 1;
+
+        // Get start/end item indexes
+        var startIndex = previousPage * perPageLimit;
+        var endIndex = Math.Min(nextPage * perPageLimit, result.Offers.Count);
+
+        // Edge case
+        if (previousPage > totalPages)
+        {
+            // Occurs when player edits "item count shown per page" value when on page near end of offer list
+            // The page no longer exists due to the larger number of items on each page, show them the very end of the offer list instead
+            _logger.Warning("Ragfair page no longer exists, showing end of offers list");
+            startIndex = result.Offers.Count - perPageLimit;
+            endIndex = result.Offers.Count;
+        }
+
+        //result.Offers = result.Offers.Slice(start, end - start);
+        result.Offers = result.Offers.Skip(startIndex).Take(endIndex - startIndex).ToList();
     }
 
     /// <summary>
