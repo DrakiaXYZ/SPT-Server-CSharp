@@ -22,7 +22,7 @@ public record BtrDeliveryConfig : BaseConfig
     }
 
     /// <summary>
-    /// How often server should process insurance in seconds
+    /// How often server should process BTR delivery in seconds
     /// </summary>
     [JsonPropertyName("runIntervalSeconds")]
     public double RunIntervalSeconds
