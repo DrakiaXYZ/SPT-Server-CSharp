@@ -40,7 +40,7 @@ public class BtrDeliveryCallbacks(
     /// <summary>
     /// Process BTR delivery items of all profiles prior to being given back to the player through the mail service
     /// </summary>
-    private void ProcessDeliveries()
+    protected void ProcessDeliveries()
     {
         // Process each installed profile.
         foreach (var sessionId in _saveServer.GetProfiles())
