@@ -5,9 +5,9 @@ namespace Ceciler.Virtualizer;
 
 public class VirtualizerPatch : IPatcher
 {
-    public void Patch(ModuleDefinition module)
+    public void Patch(AssemblyDefinition assembly)
     {
-        foreach (var typeDefinition in module.Types)
+        foreach (var typeDefinition in assembly.MainModule.Types)
         {
             foreach (var typeDefinitionMethod in typeDefinition.Methods)
             {
@@ -57,7 +57,17 @@ public class VirtualizerPatch : IPatcher
                 typeDefinitionMethod.IsNewSlot = true;
             }
         }
-        module.Write();
+
+#if DEBUG
+        var writerParams = new WriterParameters()
+        {
+            WriteSymbols = true
+        };
+        assembly.Write(writerParams);
+#else
+        assembly.Write();
+#endif
+
     }
 
     static bool MethodIsSerializationCallback(MethodDefinition method)
