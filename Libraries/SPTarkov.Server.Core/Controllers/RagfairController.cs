@@ -142,6 +142,7 @@ public class RagfairController
             SelectedCategory = searchRequest.HandbookId
         };
 
+        // Get all offers ready for sorting/filtering below
         result.Offers = GetOffersForSearchType(searchRequest, itemsToAdd, traderAssorts, profile.CharacterData.PmcData);
 
         // Client requested a category refresh
@@ -160,7 +161,16 @@ public class RagfairController
             searchRequest.SortDirection.GetValueOrDefault(0)
         );
 
-        // Match offers with quests and lock unfinished quests - get offers from traders
+        // Must occur prior to pagination
+        result.OffersCount = result.Offers.Count;
+
+        // Handle paging before returning results if searching for general items, not preset items
+        if (searchRequest.BuildCount == 0)
+        {
+            PaginateOffers(searchRequest, result);
+        }
+
+        // Update trader offers' values, Lock quest-linked offers + adjust offer buy limits
         foreach (var traderOffer in result.Offers.Where(offer => _ragfairOfferHelper.OfferIsFromTrader(offer)))
         {
             // For the items, check the barter schemes. The method getDisplayableAssorts sets a flag sptQuestLocked
@@ -173,14 +183,6 @@ public class RagfairController
             // Update offers BuyRestrictionCurrent/BuyRestrictionMax values
             SetTraderOfferPurchaseLimits(traderOffer, profile);
             SetTraderOfferStackSize(traderOffer);
-        }
-
-        result.OffersCount = result.Offers.Count;
-
-        // Handle paging before returning results if searching for general items, not preset items
-        if (searchRequest.BuildCount == 0)
-        {
-            PaginateOffers(searchRequest, result);
         }
 
         return result;
@@ -219,7 +221,6 @@ public class RagfairController
             endIndex = result.Offers.Count;
         }
 
-        //result.Offers = result.Offers.Slice(start, end - start);
         result.Offers = result.Offers.Skip(startIndex).Take(endIndex - startIndex).ToList();
     }
 
