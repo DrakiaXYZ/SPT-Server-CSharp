@@ -1,4 +1,3 @@
-using SPTarkov.Common.Extensions;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -38,43 +37,30 @@ public class LauncherController(
     public ConnectResponse Connect()
     {
         // Get all possible profile types + filter out any that are blacklisted
-
-        var profiles = typeof(ProfileTemplates).GetProperties()
-            .Where(p => p.CanWrite)
-            .Select(p => p.GetJsonName())
-            .Where(profileName => !_coreConfig.Features.CreateNewProfileTypesBlacklist.Contains(profileName))
-            .ToList();
+        var profileTemplates = _databaseService.GetProfileTemplates()
+            .Where(profile => !_coreConfig.Features.CreateNewProfileTypesBlacklist.Contains(profile.Key))
+            .ToDictionary();
 
         return new ConnectResponse
         {
             BackendUrl = _httpServerHelper.GetBackendUrl(),
             Name = _coreConfig.ServerName,
-            Editions = profiles,
-            ProfileDescriptions = GetProfileDescriptions()
+            Editions = profileTemplates.Select(x => x.Key).ToList(),
+            ProfileDescriptions = GetProfileDescriptions(profileTemplates)
         };
     }
 
     /// <summary>
     ///     Get descriptive text for each of the profile editions a player can choose, keyed by profile.json profile type e.g. "Edge Of Darkness"
     /// </summary>
+    /// <param name="profileTemplates">Profiles to get descriptions of</param>
     /// <returns>Dictionary of profile types with related descriptive text</returns>
-    protected Dictionary<string, string> GetProfileDescriptions()
+    protected Dictionary<string, string> GetProfileDescriptions(Dictionary<string, ProfileSides> profileTemplates)
     {
         var result = new Dictionary<string, string>();
-        var dbProfiles = _databaseService.GetProfiles();
-        foreach (var templatesProperty in typeof(ProfileTemplates).GetProperties()
-                     .Where(p => p.CanWrite
-                                 && !string.Equals(p.Name, "extensiondata", StringComparison.InvariantCultureIgnoreCase)))
+        foreach (var (profileKey, profile) in profileTemplates)
         {
-            var propertyValue = templatesProperty.GetValue(dbProfiles);
-            if (propertyValue == null)
-            {
-                _logger.Warning(_localisationService.GetText("launcher-missing_property", templatesProperty.Name));
-                continue;
-            }
-
-            var casterPropertyValue = propertyValue as ProfileSides;
-            result[templatesProperty.GetJsonName()] = _localisationService.GetText(casterPropertyValue?.DescriptionLocaleKey!);
+            result.TryAdd(profileKey, _localisationService.GetText(profile.DescriptionLocaleKey));
         }
 
         return result;

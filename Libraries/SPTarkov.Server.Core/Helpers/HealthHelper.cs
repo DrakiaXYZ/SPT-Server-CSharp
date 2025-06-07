@@ -1,11 +1,9 @@
-using SPTarkov.Common.Extensions;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using BodyPartHealth = SPTarkov.Server.Core.Models.Eft.Common.Tables.BodyPartHealth;
 using Vitality = SPTarkov.Server.Core.Models.Eft.Profile.Vitality;
@@ -16,7 +14,7 @@ namespace SPTarkov.Server.Core.Helpers;
 public class HealthHelper(
     TimeUtil _timeUtil,
     SaveServer _saveServer,
-    DatabaseService _databaseService,
+    ProfileHelper _profileHelper,
     ConfigServer _configServer
 )
 {
@@ -128,8 +126,6 @@ public class HealthHelper(
     /// <param name="postRaidHealth">Post raid data</param>
     /// <param name="sessionID">Session id</param>
     /// <param name="isDead">Is player dead</param>
-    /// <param name="addEffects">Should effects be added to profile (default - true)</param>
-    /// <param name="deleteExistingEffects">Should all prior effects be removed before apply new ones  (default - true)</param>
     public void UpdateProfileHealthPostRaid(
         PmcData pmcData,
         BotBaseHealth postRaidHealth,
@@ -139,16 +135,14 @@ public class HealthHelper(
         var fullProfile = _saveServer.GetProfile(sessionID);
         var profileEdition = fullProfile.ProfileInfo.Edition;
         var profileSide = fullProfile.CharacterData.PmcData.Info.Side;
+        
+        // Get matching 'side e.g. USEC
+        var matchingSide = _profileHelper.GetProfileTemplateForSide(profileEdition, profileSide);
 
-        var defaultTemperature =
-            _databaseService.GetProfiles()
-                .GetByJsonProp<ProfileSides>(profileEdition)
-                .GetByJsonProp<TemplateSide>(profileSide.ToLower())
-                ?.Character?.Health?.Temperature ??
-            new CurrentMinMax
-            {
-                Current = 36.6
-            };
+        var defaultTemperature = matchingSide?.Character?.Health?.Temperature ?? new CurrentMinMax
+        {
+            Current = 36.6
+        };
 
         StoreHydrationEnergyTempInProfile(
             fullProfile,

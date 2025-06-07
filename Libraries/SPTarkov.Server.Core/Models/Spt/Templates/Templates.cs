@@ -69,7 +69,7 @@ public record Templates
     ///     The profile templates listed in the launcher on profile creation, split by account type (e.g. Standard) then side (e.g. bear/usec)
     /// </summary>
     [JsonPropertyName("profiles")]
-    public ProfileTemplates? Profiles
+    public Dictionary<string, ProfileSides>? Profiles
     {
         get;
         set;

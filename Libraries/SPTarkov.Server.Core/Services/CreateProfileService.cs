@@ -43,9 +43,8 @@ public class CreateProfileService(
     public string CreateProfile(string sessionId, ProfileCreateRequestData request)
     {
         var account = _cloner.Clone(_saveServer.GetProfile(sessionId));
-        var profileTemplateClone = _cloner.Clone(
-            _databaseService.GetProfiles()?.GetByJsonProp<ProfileSides>(account.ProfileInfo.Edition)?.GetByJsonProp<TemplateSide>(request.Side.ToLower())
-        );
+        var profileTemplateClone = _cloner.Clone(_profileHelper.GetProfileTemplateForSide(account.ProfileInfo.Edition, request.Side));
+
         var pmcData = profileTemplateClone.Character;
 
         // Delete existing profile
