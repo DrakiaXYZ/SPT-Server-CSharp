@@ -997,7 +997,7 @@ public record BaseSkill
         set;
     }
 
-    public string? Id
+    public SkillTypes? Id
     {
         get;
         set;

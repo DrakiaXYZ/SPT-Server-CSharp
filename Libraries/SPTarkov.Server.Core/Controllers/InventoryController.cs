@@ -197,7 +197,7 @@ public class InventoryController(
                     break;
                 case "SkillPoints":
                     {
-                        var profileSkill = pmcData.Skills.Common.FirstOrDefault(x => x.Id == mailEvent.Entity);
+                        var profileSkill = pmcData.Skills.Common.FirstOrDefault(x => x.Id == Enum.Parse<SkillTypes>(mailEvent.Entity));
                         if (profileSkill is null)
                         {
                             _logger.Warning($"Unable to find skill with name: {mailEvent.Entity}");
@@ -231,7 +231,7 @@ public class InventoryController(
                     {
                         var areaName = mailEvent.Entity;
                         var newValue = mailEvent.Value;
-                        var hideoutAreaType = Enum.Parse<HideoutAreas>(areaName ?? "NOTSET");
+                        var hideoutAreaType = Enum.Parse<HideoutAreas>(areaName ?? "NotSet");
 
                         var desiredArea = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == hideoutAreaType);
                         if (desiredArea is not null)

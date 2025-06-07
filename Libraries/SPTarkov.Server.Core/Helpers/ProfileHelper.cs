@@ -470,7 +470,7 @@ public class ProfileHelper(
             return false;
         }
 
-        var profileSkill = profileSkills.FirstOrDefault(s => s.Id == skill.ToString());
+        var profileSkill = profileSkills.FirstOrDefault(s => s.Id == skill);
         if (profileSkill == null)
         {
             _logger.Error(_localisationService.GetText("quest-no_skill_found", skill));
@@ -504,7 +504,7 @@ public class ProfileHelper(
             return;
         }
 
-        var profileSkill = profileSkills.FirstOrDefault(s => s.Id == skill.ToString());
+        var profileSkill = profileSkills.FirstOrDefault(s => s.Id == skill);
         if (profileSkill == null)
         {
             _logger.Error(_localisationService.GetText("quest-no_skill_found", skill));
@@ -539,7 +539,7 @@ public class ProfileHelper(
     /// <returns>Common skill object from desired profile</returns>
     public BaseSkill? GetSkillFromProfile(PmcData pmcData, SkillTypes skill)
     {
-        var skillToReturn = pmcData?.Skills?.Common.FirstOrDefault(s => s.Id == skill.ToString());
+        var skillToReturn = pmcData?.Skills?.Common.FirstOrDefault(s => s.Id == skill);
         if (skillToReturn == null)
         {
             _logger.Warning($"Profile {pmcData.SessionId} does not have a skill named: {skill.ToString()}");

@@ -60,7 +60,7 @@ public class CircleOfCultistService(
     {
         var output = _eventOutputHolder.GetOutput(sessionId);
 
-        var cultistCircleStashId = pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(((int)HideoutAreas.CIRCLE_OF_CULTISTS).ToString());
+        var cultistCircleStashId = pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(((int)HideoutAreas.CircleOfCultists).ToString());
         if (cultistCircleStashId is null)
         {
             _logger.Error("Could not find cultist circle stash ID inside inventory! No rewards generated");
@@ -800,7 +800,7 @@ public class CircleOfCultistService(
     {
         return areas.Where(area =>
                 {
-                    if (area.Type == HideoutAreas.CHRISTMAS_TREE && !_seasonalEventService.ChristmasEventEnabled())
+                    if (area.Type == HideoutAreas.ChristmasIllumination && !_seasonalEventService.ChristmasEventEnabled())
                         // Christmas tree area and not Christmas, skip
                     {
                         return false;

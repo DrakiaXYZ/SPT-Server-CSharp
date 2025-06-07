@@ -662,7 +662,7 @@ public class BotGenerator(
                     // All skills have id and progress props
                     var skillToAdd = new BaseSkill
                     {
-                        Id = kvp.Key,
+                        Id = Enum.Parse<SkillTypes>(kvp.Key),
                         Progress = _randomUtil.GetDouble(skill.Min, skill.Max)
                     };
 

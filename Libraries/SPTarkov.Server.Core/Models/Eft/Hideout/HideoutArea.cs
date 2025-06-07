@@ -254,8 +254,7 @@ public record StageImprovementBonus
     }
 
     [JsonPropertyName("skillType")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public SkillTypes? SkillType
+    public SkillClass? SkillType
     {
         get;
         set;

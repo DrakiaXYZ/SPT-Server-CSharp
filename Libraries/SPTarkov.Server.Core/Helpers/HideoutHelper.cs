@@ -241,15 +241,15 @@ public class HideoutHelper(
     /// <returns>Properties</returns>
     protected HideoutProperties GetHideoutProperties(PmcData pmcData)
     {
-        var bitcoinFarm = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.BITCOIN_FARM);
+        var bitcoinFarm = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.BitcoinFarm);
         var bitcoinCount = (bitcoinFarm?.Slots).Count(slot => slot.Items is not null); // Get slots with an item property
 
         var hideoutProperties = new HideoutProperties
         {
             BtcFarmGcs = bitcoinCount,
-            IsGeneratorOn = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.GENERATOR)?.Active ?? false,
+            IsGeneratorOn = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.Generator)?.Active ?? false,
             WaterCollectorHasFilter = DoesWaterCollectorHaveFilter(
-                pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.WATER_COLLECTOR)
+                pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.WaterCollector)
             )
         };
 
@@ -312,22 +312,22 @@ public class HideoutHelper(
             }
 
             // Special handling required
-            if (IsCraftOfType(craft, HideoutAreas.SCAV_CASE))
+            if (IsCraftOfType(craft, HideoutAreas.ScavCase))
             {
                 UpdateScavCaseProductionTimer(pmcData, prodId.Key);
 
                 continue;
             }
 
-            if (IsCraftOfType(craft, HideoutAreas.WATER_COLLECTOR))
+            if (IsCraftOfType(craft, HideoutAreas.WaterCollector))
             {
                 UpdateWaterCollectorProductionTimer(pmcData, prodId.Key, hideoutProperties);
 
                 continue;
             }
 
-            // Continious craft
-            if (IsCraftOfType(craft, HideoutAreas.BITCOIN_FARM))
+            // Continuous craft
+            if (IsCraftOfType(craft, HideoutAreas.BitcoinFarm))
             {
                 UpdateBitcoinFarm(
                     pmcData,
@@ -340,7 +340,7 @@ public class HideoutHelper(
             }
 
             // No recipe, needs special handling
-            if (IsCraftOfType(craft, HideoutAreas.CIRCLE_OF_CULTISTS))
+            if (IsCraftOfType(craft, HideoutAreas.CircleOfCultists))
             {
                 UpdateCultistCircleCraftProgress(pmcData, prodId.Key);
 
@@ -348,7 +348,7 @@ public class HideoutHelper(
             }
 
             // Ensure recipe exists before using it in updateProductionProgress()
-            var recipe = recipes.Recipes.FirstOrDefault(r => r.Id == prodId.Key);
+            var recipe = recipes?.Recipes?.FirstOrDefault(r => r.Id == prodId.Key);
             if (recipe is null)
             {
                 _logger.Error(_localisationService.GetText("hideout-missing_recipe_for_area", prodId));
@@ -370,13 +370,13 @@ public class HideoutHelper(
     {
         switch (hideoutType)
         {
-            case HideoutAreas.WATER_COLLECTOR:
+            case HideoutAreas.WaterCollector:
                 return craft.RecipeId == WaterCollector;
-            case HideoutAreas.BITCOIN_FARM:
+            case HideoutAreas.BitcoinFarm:
                 return craft.RecipeId == BitcoinFarm;
-            case HideoutAreas.SCAV_CASE:
+            case HideoutAreas.ScavCase:
                 return craft.SptIsScavCase ?? false;
-            case HideoutAreas.CIRCLE_OF_CULTISTS:
+            case HideoutAreas.CircleOfCultists:
                 return craft.SptIsCultistCircle ?? false;
             default:
                 _logger.Error($"Unhandled hideout area: {hideoutType}, assuming craft: {craft.RecipeId} is not of this type");
@@ -541,18 +541,18 @@ public class HideoutHelper(
         {
             switch (area.Type)
             {
-                case HideoutAreas.GENERATOR:
+                case HideoutAreas.Generator:
                     if (hideoutProperties.IsGeneratorOn)
                     {
                         UpdateFuel(area, pmcData, hideoutProperties.IsGeneratorOn);
                     }
 
                     break;
-                case HideoutAreas.WATER_COLLECTOR:
+                case HideoutAreas.WaterCollector:
                     UpdateWaterCollector(sessionID, pmcData, area, hideoutProperties);
                     break;
 
-                case HideoutAreas.AIR_FILTERING:
+                case HideoutAreas.AirFilteringUnit:
                     if (hideoutProperties.IsGeneratorOn)
                     {
                         UpdateAirFilters(area, pmcData, hideoutProperties.IsGeneratorOn);
@@ -1388,9 +1388,9 @@ public class HideoutHelper(
     public void UnlockHideoutWallInProfile(PmcData profileData)
     {
         var profileHideoutAreas = profileData.Hideout.Areas;
-        var waterCollector = profileHideoutAreas.FirstOrDefault(x => x.Type == HideoutAreas.WATER_COLLECTOR);
-        var medStation = profileHideoutAreas.FirstOrDefault(x => x.Type == HideoutAreas.MEDSTATION);
-        var wall = profileHideoutAreas.FirstOrDefault(x => x.Type == HideoutAreas.EMERGENCY_WALL);
+        var waterCollector = profileHideoutAreas.FirstOrDefault(x => x.Type == HideoutAreas.WaterCollector);
+        var medStation = profileHideoutAreas.FirstOrDefault(x => x.Type == HideoutAreas.MedStation);
+        var wall = profileHideoutAreas.FirstOrDefault(x => x.Type == HideoutAreas.EmergencyWall);
 
         // No collector or med station, skip
         if (waterCollector is null && medStation is null)
@@ -1442,12 +1442,12 @@ public class HideoutHelper(
     /// <param name="profileData">Player profile</param>
     public void ApplyPlaceOfFameDogtagBonus(PmcData pmcData)
     {
-        var fameAreaProfile = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.PLACE_OF_FAME);
+        var fameAreaProfile = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.PlaceOfFame);
 
         // Get hideout area 16 bonus array
         var fameAreaDb = _databaseService
             .GetHideout()
-            .Areas.FirstOrDefault(area => area.Type == HideoutAreas.PLACE_OF_FAME);
+            .Areas.FirstOrDefault(area => area.Type == HideoutAreas.PlaceOfFame);
 
         // Get SkillGroupLevelingBoost object
         var combatBoostBonusDb = fameAreaDb.Stages[fameAreaProfile.Level.ToString()]
