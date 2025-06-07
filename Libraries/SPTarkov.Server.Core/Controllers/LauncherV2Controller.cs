@@ -1,6 +1,4 @@
-using SPTarkov.Common.Extensions;
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -46,21 +44,11 @@ public class LauncherV2Controller(
     public Dictionary<string, string> Types()
     {
         var result = new Dictionary<string, string>();
-        var dbProfiles = _databaseService.GetProfiles();
+        var dbProfiles = _databaseService.GetProfileTemplates();
 
-        foreach (var templatesProperty in typeof(ProfileTemplates).GetProperties()
-                     .Where(p => p.CanWrite
-                                 && !string.Equals(p.Name, "extensiondata", StringComparison.InvariantCultureIgnoreCase)))
+        foreach (var profileKvP in dbProfiles)
         {
-            var propertyValue = templatesProperty.GetValue(dbProfiles);
-            if (propertyValue == null)
-            {
-                _logger.Warning(_localisationService.GetText("launcher-missing_property", templatesProperty.Name));
-                continue;
-            }
-
-            var casterPropertyValue = propertyValue as ProfileSides;
-            result[templatesProperty.GetJsonName()] = _localisationService.GetText(casterPropertyValue?.DescriptionLocaleKey!);
+            result.TryAdd(profileKvP.Key, _localisationService.GetText(profileKvP.Value.DescriptionLocaleKey));
         }
 
         return result;

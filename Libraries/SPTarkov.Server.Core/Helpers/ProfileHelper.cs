@@ -754,4 +754,23 @@ public class ProfileHelper(
             fullProfile.SptData.ExtraRepeatableQuests[repeatableId] += rewardValue;
         }
     }
+
+    /// <summary>
+    /// Get a profile template by the account and side
+    /// </summary>
+    /// <param name="accountEdition">Edition of profile desired, e.g. "Standard"</param>
+    /// <param name="side">Side of profile desired, e.g. "Bear"</param>
+    /// <returns></returns>
+    public TemplateSide GetProfileTemplateForSide(string accountEdition, string side)
+    {
+        var profileTemplates = _databaseService.GetProfileTemplates();
+
+        // Get matching profile 'type' e.g. 'standard'
+        profileTemplates.TryGetValue(accountEdition, out var matchingProfileTemplate);
+
+        // Get matching profile by 'side' e.g. USEC
+        return string.Equals(side, "bear", StringComparison.OrdinalIgnoreCase)
+            ? matchingProfileTemplate.Bear
+            : matchingProfileTemplate.Usec;
+    }
 }

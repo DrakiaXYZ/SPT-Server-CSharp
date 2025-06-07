@@ -257,7 +257,7 @@ public class DatabaseService(
     }
 
     /// <returns> assets/database/templates/profiles.json </returns>
-    public ProfileTemplates GetProfiles()
+    public Dictionary<string, ProfileSides> GetProfileTemplates()
     {
         if (_databaseServer.GetTables().Templates?.Profiles == null)
         {
