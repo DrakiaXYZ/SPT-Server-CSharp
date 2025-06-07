@@ -156,8 +156,8 @@ public class RagfairController
         // Sort offers
         result.Offers = _ragfairSortHelper.SortOffers(
             result.Offers,
-            searchRequest.SortType.Value,
-            searchRequest.SortDirection.Value
+            searchRequest.SortType.GetValueOrDefault(RagfairSort.ID),
+            searchRequest.SortDirection.GetValueOrDefault(0)
         );
 
         // Match offers with quests and lock unfinished quests - get offers from traders
