@@ -4,6 +4,7 @@ using SPTarkov.Server.Core.Helpers.Dialog.Commando.SptCommands;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Dialog;
 using SPTarkov.Server.Core.Models.Utils;
@@ -64,15 +65,15 @@ public class TraderSptCommand(
             return request.DialogId;
         }
 
-        ProfileChangeEventType profileChangeEventType;
+        NotificationEventType profileChangeEventType;
         switch (command)
         {
             case "rep":
                 quantity /= 100;
-                profileChangeEventType = ProfileChangeEventType.TraderStanding;
+                profileChangeEventType = NotificationEventType.TraderStanding;
                 break;
             case "spend":
-                profileChangeEventType = ProfileChangeEventType.TraderSalesSum;
+                profileChangeEventType = NotificationEventType.TraderSalesSum;
                 break;
             default:
                 {
@@ -109,12 +110,12 @@ public class TraderSptCommand(
         return request.DialogId;
     }
 
-    protected ProfileChangeEvent CreateProfileChangeEvent(ProfileChangeEventType profileChangeEventType, int quantity, string dbTraderId)
+    protected ProfileChangeEvent CreateProfileChangeEvent(NotificationEventType profileChangeEventType, int quantity, string dbTraderId)
     {
         return new ProfileChangeEvent
         {
             Id = _hashUtil.Generate(),
-            Type = profileChangeEventType,
+            Type = profileChangeEventType.ToString(),
             Value = quantity,
             Entity = dbTraderId
         };
