@@ -662,11 +662,11 @@ public class ProfileHelper(
     {
         var fullFavorites = new List<Item>();
 
-        foreach (var itemId in profile.Inventory.FavoriteItems ?? new List<string>())
+        foreach (var itemId in profile.Inventory?.FavoriteItems ?? [])
         {
             // When viewing another users profile, the client expects a full item with children, so get that
             var itemAndChildren = _itemHelper.FindAndReturnChildrenAsItems(profile.Inventory.Items, itemId);
-            if (itemAndChildren != null && itemAndChildren.Count > 0)
+            if (itemAndChildren?.Count > 0)
             {
                 // To get the client to actually see the items, we set the main item's parent to null, so it's treated as a root item
                 var clonedItems = _cloner.Clone(itemAndChildren);
