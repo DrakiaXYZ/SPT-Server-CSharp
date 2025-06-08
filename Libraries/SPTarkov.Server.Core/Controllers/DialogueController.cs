@@ -400,8 +400,7 @@ public class DialogueController(
         string sessionId)
     {
         var profile = _saveServer.GetProfile(sessionId);
-        var dialog = profile.DialogueRecords.GetValueOrDefault(dialogueId);
-        if (dialog is null)
+        if (!profile.DialogueRecords.ContainsKey(dialogueId))
         {
             _logger.Error(
                 _localisationService.GetText(
@@ -651,5 +650,23 @@ public class DialogueController(
         {
             profile.FriendProfileIds.RemoveAt(friendIndex);
         }
+    }
+
+    /// <summary>
+    /// Clear messages from a specified dialogue
+    /// </summary>
+    /// <param name="sessionId">Session/Player id</param>
+    /// <param name="request">Client request to clear messages</param>
+    public void ClearMessages(string sessionId, ClearMailMessageRequest request)
+    {
+        var profile = _saveServer.GetProfile(sessionId);
+        if (!profile.DialogueRecords.TryGetValue(request.DialogId, out var dialogToClear))
+        {
+            _logger.Warning($"unable to clear messages from dialog: {request.DialogId} as it cannot be found in profile: {sessionId}");
+
+            return;
+        }
+
+        dialogToClear.Messages?.Clear();
     }
 }

@@ -246,6 +246,8 @@ public class DialogueCallbacks(
 
     public virtual ValueTask<string> ClearMail(string url, ClearMailMessageRequest request, string sessionID)
     {
+        _dialogueController.ClearMessages(sessionID, request);
+
         return new ValueTask<string>(_httpResponseUtil.EmptyArrayResponse());
     }
 
