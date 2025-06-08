@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using SPTarkov.Common.Extensions;
-using SPTarkov.DI.Annotations;
+﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;

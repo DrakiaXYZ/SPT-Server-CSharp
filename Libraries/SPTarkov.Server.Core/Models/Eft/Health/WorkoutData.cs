@@ -24,7 +24,7 @@ public record WorkoutSkills
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Common")]
-    public List<BaseSkill> Common
+    public List<CommonSkill> Common
     {
         get;
         set;

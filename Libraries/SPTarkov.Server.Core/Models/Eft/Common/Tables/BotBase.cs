@@ -931,43 +931,18 @@ public record BotBaseInventory
     }
 }
 
-public record BaseJsonSkills
-{
-    [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
-
-    public List<Common>? Common
-    {
-        get;
-        set;
-    }
-
-
-    public List<Mastering>? Mastering
-    {
-        get;
-        set;
-    }
-
-    public double? Points
-    {
-        get;
-        set;
-    }
-}
-
 public record Skills
 {
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public List<BaseSkill>? Common
+    public List<CommonSkill>? Common
     {
         get;
         set;
     }
 
-    public List<BaseSkill>? Mastering
+    public List<MasterySkill>? Mastering
     {
         get;
         set;
@@ -980,7 +955,22 @@ public record Skills
     }
 }
 
-public record BaseSkill
+public record MasterySkill
+{
+    public string? Id
+    {
+        get;
+        set;
+    }
+
+    public double? Progress
+    {
+        get;
+        set;
+    }
+}
+
+public record CommonSkill
 {
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
@@ -1022,14 +1012,6 @@ public record BaseSkill
         get;
         set;
     }
-}
-
-public record Common : BaseSkill
-{
-}
-
-public record Mastering : BaseSkill
-{
 }
 
 public record Stats

@@ -123,7 +123,7 @@ public class QuestHelper(
     /// <param name="profileSkill">the skill experience is being added to</param>
     /// <param name="progressAmount">the amount of experience being added to the skill</param>
     /// <returns>the adjusted skill progress gain</returns>
-    public int AdjustSkillExpForLowLevels(Models.Eft.Common.Tables.Common profileSkill, int progressAmount)
+    public int AdjustSkillExpForLowLevels(CommonSkill profileSkill, int progressAmount)
     {
         var currentLevel = Math.Floor((double) (profileSkill.Progress / 100));
 

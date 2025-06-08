@@ -1144,7 +1144,7 @@ public class LocationLifecycleService
     ///     Reset the skill points earned in a raid to 0, ready for next raid
     /// </summary>
     /// <param name="commonSkills"> Profile common skills to update </param>
-    protected void ResetSkillPointsEarnedDuringRaid(List<BaseSkill> commonSkills)
+    protected void ResetSkillPointsEarnedDuringRaid(List<CommonSkill> commonSkills)
     {
         foreach (var skill in commonSkills)
         {
