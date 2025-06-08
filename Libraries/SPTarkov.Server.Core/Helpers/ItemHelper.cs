@@ -618,7 +618,7 @@ public class ItemHelper(
     {
         if (_databaseService.GetItems().TryGetValue(itemTpl, out var item))
         {
-            return GetItem(itemTpl).Value?.Properties?.Slots?.Count > 0;
+            return item?.Properties?.Slots?.Count > 0;
         }
 
         return false;
@@ -2226,8 +2226,8 @@ public class ItemHelper(
     /// <summary>
     ///     Get a blank two-dimensional representation of a container
     /// </summary>
-    /// <param name="containerH">Horizontal size of container</param>
-    /// <param name="containerY">Vertical size of container</param>
+    /// <param name="containerY">Horizontal size of container</param>
+    /// <param name="containerX">Vertical size of container</param>
     /// <returns>Two-dimensional representation of container</returns>
     public int[][] GetBlankContainerMap(int containerY, int containerX)
     {
@@ -2240,7 +2240,7 @@ public class ItemHelper(
         //return x;
 
         return Enumerable.Range(0, containerY)
-            .Select(i => new int[containerX])
+            .Select(_ => new int[containerX])
             .ToArray();
     }
 }

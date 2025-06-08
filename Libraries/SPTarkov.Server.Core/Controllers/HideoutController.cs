@@ -923,7 +923,7 @@ public class HideoutController(
             var addToolsRequest = new AddItemsDirectRequest
             {
                 ItemsWithModsToAdd = [toolItem],
-                FoundInRaid = toolItem[0].Upd?.SpawnedInSession ?? false,
+                FoundInRaid = toolItem.FirstOrDefault()?.Upd?.SpawnedInSession ?? false,
                 UseSortingTable = false,
                 Callback = null
             };

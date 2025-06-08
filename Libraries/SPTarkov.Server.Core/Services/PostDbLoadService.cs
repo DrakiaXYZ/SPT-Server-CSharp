@@ -518,7 +518,7 @@ public class PostDbLoadService(
         }
 
         foreach (var area in _databaseService.GetHideout().Areas)
-        foreach (var (key, stage) in area.Stages)
+        foreach (var (_, stage) in area.Stages)
         // Only adjust crafts ABOVE the override
         {
             stage.ConstructionTime = Math.Min(stage.ConstructionTime.Value, overrideSeconds);

@@ -146,7 +146,6 @@ public class TraderHelper(
         }
 
         // Get matching profile 'type' e.g. 'standard'
-        profiles.TryGetValue(fullProfile.ProfileInfo.Edition, out var matchingProfileTemplate);
         var pmcData = fullProfile.CharacterData.PmcData;
         var matchingSide = _profileHelper.GetProfileTemplateForSide(fullProfile.ProfileInfo.Edition, pmcData.Info.Side);
 

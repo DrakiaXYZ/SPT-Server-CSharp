@@ -39,8 +39,8 @@ public class JsonExtensionDataGeneratorLauncher
         var content = File.ReadAllText(modelFile);
         if (!content.Contains("public record ") && !content.Contains("public class "))
         {
-            Console.WriteLine($"File {fileName} doesnt contain any records or classes, skipping...");
-            // probably an enum or interface
+            Console.WriteLine($"File {fileName} doesn't contain any records or classes, skipping...");
+            // Probably an enum or interface
             return;
         }
 
@@ -76,7 +76,7 @@ public class JsonExtensionDataGeneratorLauncher
                 {
                     if (!content.Contains("using System.Text.Json.Serialization;"))
                     {
-                        Console.WriteLine($"Class index {i} for {fileName} doesnt contain using for Json.Serialization. Adding.");
+                        Console.WriteLine($"Class index {i} for {fileName} doesn't contain using for Json.Serialization. Adding.");
                         // insert the using and adjust the indexes
                         content = Using + content;
                         startIndex += Using.Length;

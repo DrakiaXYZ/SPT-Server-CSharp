@@ -708,7 +708,7 @@ public class RagfairController
 
         // multi-offers are all the same item,
         // Get first item and its children and use as template
-        var firstListingAndChidren = _itemHelper.FindAndReturnChildrenAsItems(
+        var firstListingAndChildren = _itemHelper.FindAndReturnChildrenAsItems(
             pmcData.Inventory.Items,
             offerRequest.Items[0]
         );
@@ -725,11 +725,12 @@ public class RagfairController
 
         // When listing identical items on flea, condense separate items into one stack with a merged stack count
         // e.g. 2 ammo items, stackObjectCount = 3 for each, will result in 1 stack of 6
-        firstListingAndChidren[0].Upd ??= new Upd();
-        firstListingAndChidren[0].Upd.StackObjectsCount = stackCountTotal;
+        var firstListingRootItem = firstListingAndChildren.FirstOrDefault();
+        firstListingRootItem.Upd ??= new Upd();
+        firstListingRootItem.Upd.StackObjectsCount = stackCountTotal;
 
         // Create flea object
-        var offer = CreatePlayerOffer(sessionID, offerRequest.Requirements, firstListingAndChidren, true);
+        var offer = CreatePlayerOffer(sessionID, offerRequest.Requirements, firstListingAndChildren, true);
 
         // This is the item that will be listed on flea, has merged stackObjectCount
         var newRootOfferItem = offer.Items[0]; // TODO: add logic like single/multi offers to find root item
@@ -738,7 +739,7 @@ public class RagfairController
         var averages = GetItemMinAvgMaxFleaPriceValues(
             new GetMarketPriceRequestData
             {
-                TemplateId = firstListingAndChidren[0].Template
+                TemplateId = firstListingRootItem.Template
             }
         );
         var singleItemPrice = averages.Avg;
@@ -765,7 +766,7 @@ public class RagfairController
             qualityMultiplier
         );
 
-        // Create array of sell times for items listed + sell all at once as its a pack
+        // Create array of sell times for items listed + sell all at once as it's a pack
         offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int) stackCountTotal, true);
 
         // Subtract flea market fee from stash

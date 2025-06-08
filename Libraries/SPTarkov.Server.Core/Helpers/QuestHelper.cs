@@ -1077,7 +1077,7 @@ public class QuestHelper(
             }
 
             // Player can use trader mods then remove them, leaving quests behind
-            if (!profile.TradersInfo.TryGetValue(quest.TraderId, out var trader))
+            if (!profile.TradersInfo.ContainsKey(quest.TraderId))
             {
                 if (_logger.IsLogEnabled(LogLevel.Debug))
                 {

@@ -420,10 +420,6 @@ public class LocationLifecycleService
         var pmcProfile = fullProfile.CharacterData.PmcData;
         var scavProfile = fullProfile.CharacterData.ScavData;
 
-        // TODO:
-        // Quest status?
-        // stats/eft/aggressor - weird values (EFT.IProfileDataContainer.Nickname)
-
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
             _logger.Debug($"Raid: {request.ServerId} outcome: {request.Results.Result}");
@@ -438,7 +434,6 @@ public class LocationLifecycleService
 
         var locationName = serverDetails[0].ToLower();
         var isPmc = serverDetails[1].ToLower().Contains("pmc");
-        var mapBase = _databaseService.GetLocation(locationName).Base;
         var isDead = IsPlayerDead(request.Results);
         var isTransfer = IsMapToMapTransfer(request.Results);
         var isSurvived = IsPlayerSurvived(request.Results);

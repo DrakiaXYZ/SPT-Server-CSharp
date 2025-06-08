@@ -555,7 +555,11 @@ public class RagfairOfferGenerator(
             barterScheme = CreateBarterBarterScheme(itemWithChildren, ragfairConfig.Dynamic.Barter);
             if (ragfairConfig.Dynamic.Barter.MakeSingleStackOnly)
             {
-                itemWithChildren[0].Upd.StackObjectsCount = 1;
+                var rootItem = itemWithChildren.FirstOrDefault();
+                if (rootItem?.Upd != null)
+                {
+                    rootItem.Upd.StackObjectsCount = 1;
+                }
             }
         }
         else
@@ -565,7 +569,7 @@ public class RagfairOfferGenerator(
             barterScheme = CreateCurrencyBarterScheme(itemWithChildren, isPackOffer);
         }
 
-        var offer = CreateAndAddFleaOffer(
+        CreateAndAddFleaOffer(
             sellerId,
             timeUtil.GetTimeStamp(),
             itemWithChildren,
@@ -654,7 +658,7 @@ public class RagfairOfferGenerator(
             var barterSchemeItems = barterScheme[0];
             var loyalLevel = assortsClone.LoyalLevelItems[item.Id];
 
-            var offer = CreateAndAddFleaOffer(traderID, time, items, barterSchemeItems, loyalLevel, (int?) item.Upd.StackObjectsCount ?? 1);
+           CreateAndAddFleaOffer(traderID, time, items, barterSchemeItems, loyalLevel, (int?) item.Upd.StackObjectsCount ?? 1);
 
             // Refresh complete, reset flag to false
             trader.Base.RefreshTraderRagfairOffers = false;

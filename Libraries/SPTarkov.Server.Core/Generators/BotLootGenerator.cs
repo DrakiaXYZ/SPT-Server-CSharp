@@ -712,10 +712,18 @@ public class BotLootGenerator(
                 isPmc,
                 botLevel
             );
+
+            var weaponRootItem = generatedWeapon.Weapon?.FirstOrDefault();
+            if (weaponRootItem is null)
+            {
+                _logger.Error($"Generated loose weapon: {chosenWeaponType} for: {botRole} level: {botLevel} was null, skipping");
+
+                continue;
+            }
             var result = _botGeneratorHelper.AddItemWithChildrenToEquipmentSlot(
                 [equipmentSlot],
-                generatedWeapon.Weapon[0].Id,
-                generatedWeapon.Weapon[0].Template,
+                weaponRootItem.Id,
+                weaponRootItem.Template,
                 generatedWeapon.Weapon,
                 botInventory,
                 containersIdFull
@@ -725,7 +733,7 @@ public class BotLootGenerator(
             {
                 if (_logger.IsLogEnabled(LogLevel.Debug))
                 {
-                    _logger.Debug($"Failed to add additional weapon {generatedWeapon.Weapon[0].Id} to bot backpack, reason: {result.ToString()}");
+                    _logger.Debug($"Failed to add additional weapon: {weaponRootItem.Id} to bot backpack, reason: {result.ToString()}");
                 }
             }
         }
