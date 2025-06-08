@@ -99,7 +99,7 @@ public record HandbookPriceOverride
     ///     NOT parentId from items.json, but handbook.json
     /// </summary>
     [JsonPropertyName("parentId")]
-    public string ParentId
+    public string? ParentId
     {
         get;
         set;
