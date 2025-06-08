@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <Import Project="..\..\Build.props" />
 
@@ -38,7 +38,8 @@
   </PropertyGroup>
 
   <Target Name="AfterEverythingDone" AfterTargets="PostBuildEvent">
-    <Exec ConsoleToMsBuild="true" Command='dotnet ../../Ceciler/Ceciler.Launcher.dll "$(OutDir)SPTarkov.Server.Core.dll" ../../Patches/Ceciler.Virtualizer/bin/$(Configuration)/$(TargetFramework)/Ceciler.Virtualizer.dll' />
+    <Exec ConsoleToMsBuild="true" Condition="'$(IsPublish)' == 'true'" Command='dotnet build -c Release $(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/Ceciler.Virtualizer.csproj' />
+    <Exec ConsoleToMsBuild="true" Command='dotnet "$(MSBuildProjectDirectory)/../../Ceciler/Ceciler.Launcher.dll" "$(OutDir)SPTarkov.Server.Core.dll" "$(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/bin/$(Configuration)/$(TargetFramework)/Ceciler.Virtualizer.dll"' />
   </Target>
 
   <!--  Generates the ProgramStatics class with the build information -->
