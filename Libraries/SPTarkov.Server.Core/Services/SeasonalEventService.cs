@@ -225,17 +225,12 @@ public class SeasonalEventService(
     ///     Look up quest in configs/quest.json
     /// </summary>
     /// <param name="questId">Quest to look up</param>
-    /// <param name="event">event type (Christmas/Halloween/None)</param>
+    /// <param name="eventType">event type (Christmas/Halloween/None)</param>
     /// <returns>true if related</returns>
     public bool IsQuestRelatedToEvent(string questId, SeasonalEventType eventType)
     {
         var eventQuestData = _questConfig.EventQuests.GetValueOrDefault(questId, null);
-        if (eventQuestData?.Season == eventType)
-        {
-            return true;
-        }
-
-        return false;
+        return eventQuestData?.Season == eventType;
     }
 
     /// <summary>
