@@ -218,12 +218,12 @@ public class HealthHelper(
 
                 // Effect already exists on limb in server profile, skip
                 var profileBodyPartEffects = profileData.Health.BodyParts[bodyPartId.Key].Effects;
-                if (profileBodyPartEffects.TryGetValue(effect.Key, out var dictEffect))
+                if (profileBodyPartEffects.TryGetValue(effect.Key, out _))
                 {
                     if (effectsToIgnore.Contains(effect.Key))
-                        // Get rid of certain effects we dont want to persist out of raid
+                        // Get rid of certain effects we don't want to persist out of raid
                     {
-                        dictEffect = null;
+                        profileBodyPartEffects[effect.Key] = null;
                     }
 
                     continue;
@@ -249,7 +249,7 @@ public class HealthHelper(
     }
 
     /// <summary>
-    ///     Adjust hydration/energy/temperate and body part hp values in player profile to values in profile.vitality
+    ///     Adjust hydration/energy/temperate and body part hp values in player profile to values in `profile.vitality`
     /// </summary>
     /// <param name="pmcData">Profile to update</param>
     /// <param name="sessionID">Session id</param>
