@@ -829,12 +829,12 @@ public class RepeatableQuestController(
     protected bool IsPmcLevelAllowedOnLocation(string location, int pmcLevel)
     {
         // All PMC levels are allowed for 'any' location requirement
-        if (location == ELocationName.any.ToString())
+        if (location == nameof(ELocationName.any))
         {
             return true;
         }
 
-        var locationBase = _databaseService.GetLocation(location.ToLower())?.Base;
+        var locationBase = _databaseService.GetLocation(location)?.Base;
         if (locationBase is null)
         {
             return true;

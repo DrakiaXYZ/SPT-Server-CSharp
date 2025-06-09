@@ -18,16 +18,14 @@ public class SeasonalEventService(
     DatabaseService _databaseService,
     GiftService _giftService,
     LocalisationService _localisationService,
-    BotHelper _botHelper,
     ProfileHelper _profileHelper,
-    //DatabaseImporter _databaseImporter,
     ConfigServer _configServer,
     LocaleService _localeService
 )
 {
     private bool _christmasEventActive;
 
-    protected HashSet<string> _christmasEventItems =
+    protected readonly HashSet<string> _christmasEventItems =
     [
         ItemTpl.ARMOR_6B13_M_ASSAULT_ARMOR_CHRISTMAS_EDITION,
         ItemTpl.BACKPACK_SANTAS_BAG,
@@ -60,12 +58,12 @@ public class SeasonalEventService(
 
     private List<SeasonalEvent> _currentlyActiveEvents = [];
 
-    protected HashSet<EquipmentSlots> _equipmentSlotsToFilter =
+    protected readonly HashSet<EquipmentSlots> _equipmentSlotsToFilter =
         [EquipmentSlots.FaceCover, EquipmentSlots.Headwear, EquipmentSlots.Backpack, EquipmentSlots.TacticalVest];
 
     private bool _halloweenEventActive;
 
-    protected HashSet<string> _halloweenEventItems =
+    protected readonly HashSet<string> _halloweenEventItems =
     [
         ItemTpl.HEADWEAR_JACKOLANTERN_TACTICAL_PUMPKIN_HELMET,
         ItemTpl.FACECOVER_FACELESS_MASK,
