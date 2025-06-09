@@ -229,8 +229,8 @@ public class RepeatableQuestGenerator(
             }
             else
             {
-                // never should reach this if everything works out
-                _logger.Error("Encountered issue when creating Elimination quest. Please report.");
+                // Never should reach this if everything works out
+                _logger.Error(_localisationService.GetText("quest-repeatable_elimination_generation_failed_please_report"));
             }
         }
 

@@ -37,6 +37,7 @@ public class CircleOfCultistService(
     DatabaseService _databaseService,
     ItemFilterService _itemFilterService,
     SeasonalEventService _seasonalEventService,
+    LocalisationService localisationService,
     ConfigServer _configServer
 )
 {
@@ -60,10 +61,10 @@ public class CircleOfCultistService(
     {
         var output = _eventOutputHolder.GetOutput(sessionId);
 
-        var cultistCircleStashId = pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(((int)HideoutAreas.CircleOfCultists).ToString());
+        var cultistCircleStashId = pmcData.Inventory?.HideoutAreaStashes?.GetValueOrDefault(((int)HideoutAreas.CircleOfCultists).ToString());
         if (cultistCircleStashId is null)
         {
-            _logger.Error("Could not find cultist circle stash ID inside inventory! No rewards generated");
+            _logger.Error(localisationService.GetText("cultistcircle-unable_to_find_stash_id"));
 
             return output;
         }

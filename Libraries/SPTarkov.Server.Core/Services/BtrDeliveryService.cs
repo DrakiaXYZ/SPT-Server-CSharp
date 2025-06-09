@@ -101,7 +101,8 @@ public class BtrDeliveryService(
 
         if (!dialogueTemplates.TryGetValue("itemsDelivered", out var itemsDelivered))
         {
-            _logger.Error("dialogueTemplates doesn't contain itemsDelivered");
+            _logger.Error(_localisationService.GetText("btr-unable_to_find_items_in_dialog_template", sessionId));
+
             return;
         }
 

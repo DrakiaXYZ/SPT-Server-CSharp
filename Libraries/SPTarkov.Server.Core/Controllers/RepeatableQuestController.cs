@@ -354,7 +354,7 @@ public class RepeatableQuestController(
 
         if (attempts > maxAttempts)
         {
-            _logger.Error("We were stuck in repeatable quest generation. This should never happen. Please report");
+            _logger.Error(_localisationService.GetText("quest-repeatable_generation_failed_please_report", attempts));
         }
 
         return newRepeatableQuest;

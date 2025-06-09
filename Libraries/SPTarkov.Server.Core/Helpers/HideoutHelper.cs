@@ -1067,7 +1067,7 @@ public class HideoutHelper(
     {
         if (btcProduction is null)
         {
-            _logger.Error("Bitcoin farm production was null, skipping");
+            _logger.Error(_localisationService.GetText("hideout-bitcoin_craft_missing"));
 
             return;
         }

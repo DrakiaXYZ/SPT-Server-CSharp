@@ -123,7 +123,7 @@ public class RewardHelper(
                     break;
                 case RewardType.NotificationPopup:
                     // TODO: Wire up to notification system
-                    _logger.Error("Unhandled: RewardType.NotificationPopup");
+                    _logger.Error("UNHANDLED: RewardType.NotificationPopup");
                     break;
                 default:
                     _logger.Error(
