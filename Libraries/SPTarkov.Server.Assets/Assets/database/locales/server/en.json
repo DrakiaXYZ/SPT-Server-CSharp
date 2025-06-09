@@ -634,7 +634,7 @@
   "ragfair-unable_to_remove_offer_doesnt_exist": "Unable to remove offer with id: %s as it cannot be found in flea market",
   "ragfair-unable_to_remove_offer_not_found_in_profile": "Unable to find offer: {{offerId}} in profile: {{profileId}} as offer is undefined, creating",
   "ragfair-generating_offers": "Generating flea offers...",
-  "ragfair-offer_page_doesnt_exist": "The current flag page no longer exists, showing end of offers list",
+  "ragfair-offer_page_doesnt_exist": "The current flea page no longer exists, showing end of offers list",
   "release-beta-disclaimer": "By pressing OK you agree that no support is offered and that this is for bug testing only. NOT actual gameplay. Mods are disabled. New profiles may be required frequently. Report all bugs in the reports channel in discord, or on the issues page on the website. If you don't press OK by the time specified, the game will close.",
   "release-beta-disclaimer-accept": "User accepted the beta disclaimer",
   "release-beta-disclaimer-mods-enabled": "By pressing OK you agree that no support is offered and that this is for bug testing only. NOT actual gameplay. Mods are enabled, do NOT report issues with mods. Do NOT ask mod authors for updated mods. Report all bugs in the reports channel in discord, or on the issues page on the website. If you dont press OK by the time specificed, the game will close.",
