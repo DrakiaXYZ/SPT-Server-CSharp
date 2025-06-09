@@ -33,6 +33,6 @@ public class SaveCallbacks(
 
         _saveServer.Save();
 
-        return Task.FromResult(false);
+        return Task.FromResult(true);
     }
 }
