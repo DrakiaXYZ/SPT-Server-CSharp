@@ -98,7 +98,7 @@ public class DatabaseService(
     }
 
     /// <summary>
-    ///     Get specific location by its ID
+    ///     Get specific location by its ID, automatically ToLowers id
     /// </summary>
     /// <param name="locationId"> Desired location ID </param>
     /// <returns> assets/database/locations/ </returns>

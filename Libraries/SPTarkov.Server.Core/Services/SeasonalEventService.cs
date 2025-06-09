@@ -749,21 +749,20 @@ public class SeasonalEventService(
         infectionHalloween.Enabled = true;
 
         var globalInfectionDict = globals.LocationInfection.GetAllPropsAsDict();
-        foreach (var infectedLocationKvP in zombieSettings.MapInfectionAmount)
+        foreach (var (locationId, infectionPercentage) in zombieSettings.MapInfectionAmount)
         {
-            var mappedLocations = GetLocationFromInfectedLocation(infectedLocationKvP.Key);
-
+            // Infection rates sometimes apply to multiple maps, e.g. Factory day/night or Sandbox/sandbox_high
+            // Get the list of maps that should have infection value applied to their base
+            // 90% of locations are just 1 map e.g. bigmap = customs
+            var mappedLocations = GetLocationFromInfectedLocation(locationId);
             foreach (var locationKey in mappedLocations)
             {
-                _databaseService.GetLocation(
-                            locationKey.ToLower()
-                        )
-                        .Base.Events.Halloween2024.InfectionPercentage =
-                    zombieSettings.MapInfectionAmount[infectedLocationKvP.Key];
+                _databaseService.GetLocation(locationKey)
+                    .Base.Events.Halloween2024.InfectionPercentage = infectionPercentage;
             }
 
-            globalInfectionDict[infectedLocationKvP.Key] =
-                zombieSettings.MapInfectionAmount[infectedLocationKvP.Key];
+            // Globals data needs value updated too
+            globalInfectionDict[locationId] = infectionPercentage;
         }
 
         foreach (var locationId in zombieSettings.DisableBosses)
@@ -856,12 +855,10 @@ public class SeasonalEventService(
         }
 
         var locations = _databaseService.GetLocations().GetAllPropsAsDict();
-        foreach (var (locationKey, _) in botsToAddPerMap)
+        foreach (var (locationKey, bossesToAdd) in botsToAddPerMap)
         {
-            if (!botsToAddPerMap.TryGetValue(locationKey, out var bossesToAdd))
+            if (bossesToAdd.Count == 0)
             {
-                _logger.Warning($"Unable to add: {eventType} bosses to: {locationKey}");
-
                 continue;
             }
 
@@ -871,13 +868,14 @@ public class SeasonalEventService(
             }
 
             var locationName = _databaseService.GetLocations().GetMappedKey(locationKey);
+            var mapBosses = ((Location) locations[locationName]).Base.BossLocationSpawn;
             foreach (var boss in bossesToAdd)
             {
-                var mapBosses = ((Location) locations[locationName]).Base.BossLocationSpawn;
-                // If no bosses match by name
+                
                 if (mapBosses.All(bossSpawn => bossSpawn.BossName != boss.BossName))
                 {
-                    ((Location) locations[locationName]).Base.BossLocationSpawn.AddRange(bossesToAdd);
+                    // Zombie doesn't exist in maps boss list yet, add
+                    mapBosses.Add(boss);
                 }
             }
         }
