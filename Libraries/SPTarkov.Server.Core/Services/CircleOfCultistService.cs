@@ -255,12 +255,13 @@ public class CircleOfCultistService(
         // No matching threshold, make one
         if (matchingThreshold is null)
         {
-            // None found, use a defalt
-            _logger.Warning("Unable to find a matching cultist circle threshold, using fallback of 12 hours");
+            // None found, use a default
+            _logger.Warning(
+                localisationService.GetText("cultistcircle-no_matching_threshhold_found", new { rewardAmountRoubles  = rewardAmountRoubles }));
 
             // Use first threshold value (cheapest) from parameter array, otherwise use 12 hours
             var firstThreshold = thresholds.FirstOrDefault();
-            var craftTime = firstThreshold?.CraftTimeSeconds is not null && firstThreshold.CraftTimeSeconds > 0
+            var craftTime = firstThreshold?.CraftTimeSeconds > 0
                 ? firstThreshold.CraftTimeSeconds
                 : _timeUtil.GetHoursAsSeconds(12);
 

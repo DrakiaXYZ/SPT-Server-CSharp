@@ -216,7 +216,7 @@ public class RagfairController
         {
             // Occurs when player edits "item count shown per page" value when on page near end of offer list
             // The page no longer exists due to the larger number of items on each page, show them the very end of the offer list instead
-            _logger.Warning("Ragfair page no longer exists, showing end of offers list");
+            _logger.Warning(_localisationService.GetText("ragfair-offer_page_doesnt_exist"));
             startIndex = result.Offers.Count - perPageLimit;
             endIndex = result.Offers.Count;
         }
