@@ -186,31 +186,37 @@ public class RagfairServerHelper(
         return weightedRandomHelper.GetWeightedValue(ragfairConfig.Dynamic.Currencies);
     }
 
-    /**
-     * Given a preset id from globals.json, return an array of items[] with unique ids
-     * @param item Preset item
-     * @returns Array of weapon and its children
-     */
+    /// <summary>
+    /// Given a preset id from globals.json, return an array of items[] with unique ids
+    /// </summary>
+    /// <param name="item">Preset item</param>
+    /// <returns>Collection containing weapon and its children</returns>
     public List<Item> GetPresetItems(Item item)
     {
-        var preset = cloner.Clone(databaseService.GetGlobals().ItemPresets[item.Id].Items);
-        return itemHelper.ReparentItemAndChildren(item, preset);
+        if (!databaseService.GetGlobals().ItemPresets.TryGetValue(item.Id, out var presetToClone))
+        {
+            return [];
+        }
+
+        // Re-parent and clone the matching preset found
+        return itemHelper.ReparentItemAndChildren(item, cloner.Clone(presetToClone.Items));
     }
 
-    /**
-     * Possible bug, returns all items associated with an items tpl, could be multiple presets from globals.json
-     * @param item Preset item
-     * @returns
-     */
+    /// <summary>
+    /// Possible bug, returns all items associated with an items tpl, could be multiple presets from globals.json
+    /// </summary>
+    /// <param name="item">Preset item</param>
+    /// <returns>Collection of item objects</returns>
     public List<Item> GetPresetItemsByTpl(Item item)
     {
         var presets = new List<Item>();
         foreach (var itemId in databaseService.GetGlobals().ItemPresets.Keys)
         {
-            if (databaseService.GetGlobals().ItemPresets[itemId].Items[0].Template == item.Template)
+            if (databaseService.GetGlobals().ItemPresets.TryGetValue(itemId, out var presetsOfItem)
+                && presetsOfItem.Items?.FirstOrDefault()?.Template == item.Template)
             {
-                var presetItems = cloner.Clone(databaseService.GetGlobals().ItemPresets[itemId].Items);
-                presets.AddRange(itemHelper.ReparentItemAndChildren(item, presetItems));
+                // Add a clone of the found preset into list above
+                presets.AddRange(itemHelper.ReparentItemAndChildren(item, cloner.Clone(presetsOfItem.Items)));
             }
         }
 
