@@ -968,12 +968,11 @@ public class QuestHelper(
     public ItemEventRouterResponse CompleteQuest(PmcData pmcData, CompleteQuestRequestData body, string sessionID)
     {
         var completeQuestResponse = _eventOutputHolder.GetOutput(sessionID);
-
         var preCompleteProfileQuests = _cloner.Clone(pmcData.Quests);
-
         var completedQuestId = body.QuestId;
-        var clientQuestsClone =
-            _cloner.Clone(GetClientQuests(sessionID)); // Must be gathered prior to applyQuestReward() & failQuests()
+
+        // Keep a copy of player quest statuses from their profile (Must be gathered prior to applyQuestReward() & failQuests())
+        var clientQuestsClone = _cloner.Clone(GetClientQuests(sessionID)); 
 
         const QuestStatusEnum newQuestState = QuestStatusEnum.Success;
         UpdateQuestState(pmcData, newQuestState, completedQuestId);
@@ -992,7 +991,7 @@ public class QuestHelper(
             FailQuests(sessionID, pmcData, questsToFail, completeQuestResponse);
         }
 
-        // Show modal on player screen
+        // Show success modal on player screen
         SendSuccessDialogMessageOnQuestComplete(sessionID, pmcData, completedQuestId, questRewards.ToList());
 
         // Add diff of quests before completion vs after for client response
@@ -1244,13 +1243,21 @@ public class QuestHelper(
                         // No target, cant be failed by our completed quest
                         if (condition?.Target is null)
                         {
-                            return false;
+                            continue;
                         }
 
                         // 'Target' property can be Collection or string, handle each differently
-                        return condition.Target.IsList
-                            ? condition.Target.List.Contains(completedQuestId) // Check if completed quest id exists in fail condition
-                            : string.Equals(condition.Target.Item, completedQuestId, StringComparison.InvariantCultureIgnoreCase); // Not a list, plain string
+                        if (condition.Target.IsList && condition.Target.List.Contains(completedQuestId))
+                        {
+                            // Check if completed quest id exists in fail condition
+                            return true;
+                        }
+
+                        if (condition.Target.IsItem && string.Equals(condition.Target.Item, completedQuestId, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            // Not a list, plain string
+                            return true;
+                        }
                     }
 
                     return false;
