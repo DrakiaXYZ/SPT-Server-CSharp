@@ -225,7 +225,7 @@ public record Dynamic
     ///     How many offers should be listed
     /// </summary>
     [JsonPropertyName("offerItemCount")]
-    public MinMax<int> OfferItemCount
+    public Dictionary<string, MinMax<int>> OfferItemCount
     {
         get;
         set;

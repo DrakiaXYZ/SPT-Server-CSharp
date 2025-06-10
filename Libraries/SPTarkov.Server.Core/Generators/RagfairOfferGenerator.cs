@@ -2,6 +2,7 @@ using System.Diagnostics;
 using SPTarkov.Common.Extensions;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Ragfair;
 using SPTarkov.Server.Core.Models.Enums;
@@ -415,13 +416,7 @@ public class RagfairOfferGenerator(
         // Limit to 1 offer when processing expired - like-for-like replacement
         var offerCount = isExpiredOffer
             ? 1
-            : randomUtil.GetDouble(config.OfferItemCount.Min, config.OfferItemCount.Max);
-
-        /* // TODO: ???????
-        if (ProgramStatics.DEBUG && !ProgramStatics.COMPILED) {
-            offerCount = 2;
-        }
-        */
+            : ragfairServerHelper.GetOfferCountByBaseType(itemToSellDetails.Value.Parent);
 
         for (var index = 0; index < offerCount; index++)
         {

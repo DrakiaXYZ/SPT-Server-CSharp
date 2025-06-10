@@ -266,9 +266,15 @@
       "priceThreshholdRub": 20000
     },
     "offerItemCount": {
-      "max": 30,
-      "min": 7
-    },
+		"default": {
+		  "max": 30,
+		  "min": 7
+		},
+		"543be5cb4bdc2deb348b4568": {
+		  "max": 3,
+		  "min": 0
+		}
+	},
     "pack": {
       "chancePercent": 0.5,
       "itemCountMax": 17,

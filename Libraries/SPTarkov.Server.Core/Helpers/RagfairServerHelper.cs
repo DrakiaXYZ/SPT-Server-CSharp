@@ -26,7 +26,7 @@ public class RagfairServerHelper(
 )
 {
     protected const string goodsReturnedTemplate = "5bdabfe486f7743e1665df6e 0"; // Your item was not sold
-    protected RagfairConfig ragfairConfig = configServer.GetConfig<RagfairConfig>();
+    protected readonly RagfairConfig ragfairConfig = configServer.GetConfig<RagfairConfig>();
 
     /**
      * Is item valid / on blacklist / quest item
@@ -215,5 +215,20 @@ public class RagfairServerHelper(
         }
 
         return presets;
+    }
+
+    /// <summary>
+    /// Get a randomised offer count for the provided item base type
+    /// </summary>
+    /// <param name="itemParentType">Parent type for the item</param>
+    /// <returns>randomised number between min and max</returns>
+    public int GetOfferCountByBaseType(string itemParentType)
+    {
+        if (!ragfairConfig.Dynamic.OfferItemCount.TryGetValue(itemParentType, out var minMaxRange))
+        {
+            minMaxRange = ragfairConfig.Dynamic.OfferItemCount.GetValueOrDefault("default");
+        }
+
+        return randomUtil.GetInt(minMaxRange.Min, minMaxRange.Max);
     }
 }
