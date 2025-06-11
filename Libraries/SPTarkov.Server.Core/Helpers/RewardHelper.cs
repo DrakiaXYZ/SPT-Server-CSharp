@@ -125,6 +125,10 @@ public class RewardHelper(
                     // TODO: Wire up to notification system
                     _logger.Error("UNHANDLED: RewardType.NotificationPopup");
                     break;
+                case RewardType.WebPromoCode:
+                    // TODO: ??? (Free arena trial from Balancing - Part 1)
+                    _logger.Error("UNHANDLED: RewardType.WebPromoCode");
+                    break;
                 default:
                     _logger.Error(
                         _localisationService.GetText(
