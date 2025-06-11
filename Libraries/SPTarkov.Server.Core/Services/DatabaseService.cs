@@ -15,6 +15,9 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Services;
 
+/// <summary>
+/// Provides access to the servers database, these are in-memory representations of the .JSON files stored inside `Libraries\SPTarkov.Server.Assets\Assets\database`
+/// </summary>
 [Injectable(InjectionType.Singleton)]
 public class DatabaseService(
     ISptLogger<DatabaseService> _logger,
