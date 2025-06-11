@@ -56,9 +56,9 @@ public class PMCLootGenerator
     /// <summary>
     ///     Create a List of loot items a PMC can have in their pockets
     /// </summary>
-    /// <param name="botRole"></param>
+    /// <param name="pmcRole">Role of PMC having loot generated (bear or usec)</param>
     /// <returns>Dictionary of string and number</returns>
-    public Dictionary<string, double> GeneratePMCPocketLootPool(string botRole)
+    public Dictionary<string, double> GeneratePMCPocketLootPool(string pmcRole)
     {
         lock (PocketLock)
         {
@@ -71,12 +71,12 @@ public class PMCLootGenerator
             _pocketLootPool = new Dictionary<string, double>();
             var items = _databaseService.GetItems();
             var pmcPriceOverrides =
-                _databaseService.GetBots().Types[string.Equals(botRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
+                _databaseService.GetBots().Types[string.Equals(pmcRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
                     .Pockets;
 
             var allowedItemTypeWhitelist = _pmcConfig.PocketLoot.Whitelist;
 
-            var blacklist = GetLootBlacklist();
+            var blacklist = GetContainerLootBlacklist();
 
             var itemsToAdd = items.Where(item =>
                 allowedItemTypeWhitelist.Contains(item.Value.Parent) &&
@@ -116,7 +116,11 @@ public class PMCLootGenerator
         }
     }
 
-    protected HashSet<string> GetLootBlacklist()
+    /// <summary>
+    /// Get a generic all-container blacklist
+    /// </summary>
+    /// <returns>Hashset of blacklisted items</returns>
+    protected HashSet<string> GetContainerLootBlacklist()
     {
         var blacklist = new HashSet<string>();
         blacklist.UnionWith(_pmcConfig.PocketLoot.Blacklist);
@@ -129,11 +133,11 @@ public class PMCLootGenerator
     }
 
     /// <summary>
-    ///     Create a List of loot items a PMC can have in their vests
+    ///     Create a dictionary of loot items a PMC can have in their vests with a corresponding weight of being picked to spawn
     /// </summary>
-    /// <param name="botRole"></param>
-    /// <returns>Dictionary of string and number</returns>
-    public Dictionary<string, double> GeneratePMCVestLootPool(string botRole)
+    /// <param name="pmcRole">Role of PMC having loot generated (bear or usec)</param>
+    /// <returns>Dictionary item template ids and a weighted chance of being picked</returns>
+    public Dictionary<string, double> GeneratePMCVestLootPool(string pmcRole)
     {
         lock (VestLock)
         {
@@ -143,47 +147,54 @@ public class PMCLootGenerator
                 return _vestLootPool;
             }
 
+            // Create dictionary to hold vest loot
             _vestLootPool = new Dictionary<string, double>();
+
+            // Get all items from database
             var items = _databaseService.GetItems();
+
+            // Grab price overrides if they exist for the pmcRole passed in
             var pmcPriceOverrides =
-                _databaseService.GetBots().Types[string.Equals(botRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
+                _databaseService.GetBots().Types[string.Equals(pmcRole, "pmcbear", StringComparison.OrdinalIgnoreCase) ? "bear" : "usec"].BotInventory.Items
                     .TacticalVest;
 
-            var allowedItemTypeWhitelist = _pmcConfig.VestLoot.Whitelist;
+            var blacklist = GetContainerLootBlacklist();
+            blacklist.UnionWith(_pmcConfig.VestLoot.Blacklist); // Add vest-specific blacklist
 
-            var blacklist = GetLootBlacklist();
-
-            var itemsToAdd = items.Where(item =>
-                allowedItemTypeWhitelist.Contains(item.Value.Parent) &&
-                _itemHelper.IsValidItem(item.Value.Id) &&
+            var itemTplsToAdd = items.Where(item =>
+                _pmcConfig.VestLoot.Whitelist.Contains(item.Value.Parent) && // A whitelist of item types the PMC is allowed to have
                 !blacklist.Contains(item.Value.Id) &&
                 !blacklist.Contains(item.Value.Parent) &&
+                _itemHelper.IsValidItem(item.Value.Id) &&
                 ItemFitsInto2By2Slot(item.Value)
             ).Select(x => x.Key);
 
-            foreach (var tpl in itemsToAdd)
-                // If pmc has price override, use that. Otherwise, use flea price
+            foreach (var tpl in itemTplsToAdd)
+                // If PMC has price override, use that. Otherwise, use flea price
             {
                 if (pmcPriceOverrides.TryGetValue(tpl, out var overridePrice))
                 {
+                    // There's a price override for this item, use override instead of default price
                     _vestLootPool.TryAdd(tpl, overridePrice);
                 }
                 else
                 {
-                    // Set price of item as its weight
+                    // Store items price so we can turn it into a weighting later
                     var price = _ragfairPriceService.GetDynamicItemPrice(tpl, Money.ROUBLES);
                     _vestLootPool[tpl] = price ?? 0;
                 }
             }
 
+            // Find the highest priced item added to vest pool
             var highestPrice = _vestLootPool.Max(price => price.Value);
             foreach (var (key, _) in _vestLootPool)
-                // Invert price so cheapest has a larger weight
+                // Invert price so cheapest has a larger weight, giving us a weighting of low-priced items being more common
                 // Times by highest price so most expensive item has weight of 1
             {
                 _vestLootPool[key] = Math.Round(1 / _vestLootPool[key] * highestPrice);
             }
 
+            // Find the greatest common divisor between all the prices and apply it to reduce the values for better readability of weights
             _weightedRandomHelper.ReduceWeightValues(_vestLootPool);
 
             return _vestLootPool;
@@ -219,7 +230,7 @@ public class PMCLootGenerator
     /// <summary>
     ///     Create a List of loot items a PMC can have in their backpack
     /// </summary>
-    /// <param name="botRole"></param>
+    /// <param name="botRole">Role of PMC having loot generated (bear or usec)</param>
     /// <returns>Dictionary of string and number</returns>
     public Dictionary<string, double> GeneratePMCBackpackLootPool(string botRole)
     {
@@ -239,7 +250,8 @@ public class PMCLootGenerator
 
             var allowedItemTypeWhitelist = _pmcConfig.BackpackLoot.Whitelist;
 
-            var blacklist = GetLootBlacklist();
+            var blacklist = GetContainerLootBlacklist();
+            blacklist.UnionWith(_pmcConfig.BackpackLoot.Blacklist); // Add backpack-specific blacklist
 
             var itemsToAdd = items.Where(item =>
                 allowedItemTypeWhitelist.Contains(item.Value.Parent) &&
