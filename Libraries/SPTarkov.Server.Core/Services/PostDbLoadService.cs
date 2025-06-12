@@ -155,7 +155,7 @@ public class PostDbLoadService(
         {
             if (achievements.Exists(a => a.Id == customAchievement.Id))
             {
-                _logger.Warning(
+                _logger.Debug(
                     $"Unable to add custom achievement as id: {customAchievement.Id} already exists"
                 );
                 continue;
