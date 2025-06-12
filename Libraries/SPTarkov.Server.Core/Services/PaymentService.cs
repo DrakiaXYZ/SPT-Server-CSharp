@@ -19,7 +19,6 @@ public class PaymentService(
     ISptLogger<PaymentService> _logger,
     HashUtil _hashUtil,
     HttpResponseUtil _httpResponseUtil,
-    DatabaseService _databaseService,
     HandbookHelper _handbookHelper,
     TraderHelper _traderHelper,
     ItemHelper _itemHelper,
@@ -361,7 +360,9 @@ public class PaymentService(
     }
 
     /// <summary>
-    ///     Get all money stacks in inventory and prioritise items in stash
+    /// Get all money stacks in inventory and prioritise items in stash
+    /// Ignore locked stacks
+    /// Prioritise the lowest sized stack
     /// </summary>
     /// <param name="pmcData"> Player profile </param>
     /// <param name="currencyTpl"> Currency to find </param>
@@ -370,16 +371,47 @@ public class PaymentService(
     // TODO - ensure money in containers inside secure container are LAST
     protected List<Item> GetSortedMoneyItemsInInventory(PmcData pmcData, string currencyTpl, string playerStashId)
     {
+        // Get money stacks player has
         var moneyItemsInInventory = _itemHelper.FindBarterItems("tpl", pmcData.Inventory.Items, currencyTpl);
         if (moneyItemsInInventory.Count == 0)
         {
             _logger.Debug($"No {currencyTpl} money items found in inventory");
+
+            return moneyItemsInInventory;
+        }
+
+        // Create a cache inventory items with a bool of being in stash or not
+        var itemsInStashCache = GetItemInStashCache(pmcData.Inventory.Items, playerStashId);
+
+        // Filter out 'Locked' money stacks as they cannot be used
+        var noLocked = moneyItemsInInventory.Where(moneyItem => moneyItem.Upd.PinLockState != PinLockState.Locked);
+        if (noLocked.Any())
+        {
+            // We found unlocked money
+            moneyItemsInInventory = noLocked.ToList();
         }
 
         // Prioritise items in stash to top of array
-        moneyItemsInInventory.Sort((a, b) => PrioritiseStashSort(a, b, pmcData.Inventory.Items, playerStashId));
+        moneyItemsInInventory.Sort((a, b) => PrioritiseStashSort(a, b, pmcData.Inventory.Items, itemsInStashCache));
 
         return moneyItemsInInventory;
+    }
+
+    /// <summary>
+    /// Create a dictionary of all items from player inventory that are in the players stash
+    /// </summary>
+    /// <param name="items">Inventory items to check</param>
+    /// <param name="playerStashId">Id of players stash</param>
+    /// <returns>Dictionary</returns>
+    protected IReadOnlyDictionary<string, bool> GetItemInStashCache(List<Item> items, string playerStashId)
+    {
+        var itemsInStashCache = new Dictionary<string, bool>();
+        foreach (var inventoryItem in items)
+        {
+            itemsInStashCache.TryAdd(inventoryItem.Id, IsInStash(inventoryItem.Id, items, playerStashId));
+        }
+
+        return itemsInStashCache;
     }
 
     /// <summary>
@@ -388,51 +420,60 @@ public class PaymentService(
     /// </summary>
     /// <param name="a"> First money stack item </param>
     /// <param name="b"> Second money stack item </param>
-    /// <param name="inventoryItems"> Players inventory items </param>
-    /// <param name="playerStashId"> Players stash ID </param>
-    /// <returns> Sort order, -1 if in a, 1 if in b, 0 if they match </returns>
-    protected int PrioritiseStashSort(Item a, Item b, List<Item> inventoryItems, string playerStashId)
+    /// <param name="inventoryItems"> Players inventory items</param>
+    /// <param name="itemInStashCache">Cache of item IDs and if they're in stash</param>
+    /// <returns> Sort order, -1 if A has priority, 1 if B has priority, 0 if they match </returns>
+    protected int PrioritiseStashSort(
+        Item a,
+        Item b,
+        List<Item> inventoryItems,
+        IReadOnlyDictionary<string, bool> itemInStashCache)
     {
-        // a in root of stash, prioritise
-        if (a.ParentId == playerStashId && b.ParentId != playerStashId)
+        itemInStashCache.TryGetValue(a.Id, out var aInStash);
+        itemInStashCache.TryGetValue(b.Id, out var bInStash);
+
+        // A in root of stash, B not, prioritise A
+        if (aInStash && !bInStash)
         {
             return -1;
         }
 
-        // b in root stash, prioritise
-        if (a.ParentId != playerStashId && b.ParentId == playerStashId)
+        // B in root stash, A not, prioritise B
+        if (!aInStash && bInStash)
         {
             return 1;
         }
 
-        // both in containers
+        // Both in root stash, prioritise the smallest sized
+        if (aInStash && bInStash)
+        {
+            return GetPriorityBySmallestStackSize(a, b);
+        }
+
+        // Both in containers
         if (a.SlotId == "main" && b.SlotId == "main")
         {
-            // Both items are in containers
-            var aInStash = IsInStash(a.ParentId, inventoryItems, playerStashId);
-            var bInStash = IsInStash(b.ParentId, inventoryItems, playerStashId);
-
-            // a in stash in container, prioritise
+            // A container in stash, B not, prioritise A
             if (aInStash && !bInStash)
             {
                 return -1;
             }
 
-            // b in stash in container, prioritise
+            // B container in stash, A not,  prioritise B
             if (!aInStash && bInStash)
             {
                 return 1;
             }
 
-            // Both in stash in containers
+            // Both containers in stash
             if (aInStash && bInStash)
             {
-                // Containers where taking money from would inconvinence player
+                // Containers where taking money from would inconvenience player
                 var deprioritisedContainers = _inventoryConfig.DeprioritisedMoneyContainers;
                 var aImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == a.ParentId);
                 var bImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == b.ParentId);
 
-                // A is not a deprioritised container, B is
+                // A is not a deprioritized container, B is
                 if (
                     !deprioritisedContainers.Contains(aImmediateParent.Template) &&
                     deprioritisedContainers.Contains(bImmediateParent.Template)
@@ -441,7 +482,7 @@ public class PaymentService(
                     return -1;
                 }
 
-                // B is not a deprioritised container, A is
+                // B is not a deprioritized container, A is
                 if (
                     deprioritisedContainers.Contains(aImmediateParent.Template) &&
                     !deprioritisedContainers.Contains(bImmediateParent.Template)
@@ -452,8 +493,23 @@ public class PaymentService(
             }
         }
 
-        // they match
+        // They match / we don't know
         return 0;
+    }
+
+    /// <summary>
+    /// Get priority of items based on their stack size
+    /// Smallest stack size has priority
+    /// </summary>
+    /// <param name="a">Item A</param>
+    /// <param name="b">Item B</param>
+    /// <returns>-1 = a, 1 = b, 0 = same</returns>
+    protected static int GetPriorityBySmallestStackSize(Item a, Item b)
+    {
+        var aStackSize = a.Upd?.StackObjectsCount ?? 1;
+        var bStackSize = b.Upd?.StackObjectsCount ?? 1;
+
+        return aStackSize.CompareTo(bStackSize);
     }
 
     /// <summary>
@@ -466,22 +522,25 @@ public class PaymentService(
     protected bool IsInStash(string itemId, List<Item> inventoryItems, string playerStashId)
     {
         var itemParent = inventoryItems.FirstOrDefault(item => item.Id == itemId);
-
-        if (itemParent is not null)
+        if (itemParent is null)
         {
-            if (itemParent.SlotId == "hideout")
-            {
-                return true;
-            }
-
-            if (itemParent.Id == playerStashId)
-            {
-                return true;
-            }
-
-            return IsInStash(itemParent.ParentId, inventoryItems, playerStashId);
+            // Needs parent id be in stash
+            return false;
         }
 
-        return false;
+        // is root item and its parent is the player stash
+        if (itemParent.Id == playerStashId)
+        {
+            return true;
+        }
+
+        // is child item and its parent is a root item
+        if (itemParent.SlotId == "hideout")
+        {
+            return true;
+        }
+
+        // Recursive call for parentId
+        return IsInStash(itemParent.ParentId, inventoryItems, playerStashId);
     }
 }
