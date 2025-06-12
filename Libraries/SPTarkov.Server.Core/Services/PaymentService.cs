@@ -403,20 +403,22 @@ public class PaymentService(
     /// <param name="items">Inventory items to check</param>
     /// <param name="playerStashId">Id of players stash</param>
     /// <returns>Dictionary</returns>
-    protected IReadOnlyDictionary<string, bool> GetItemInStashCache(List<Item> items, string playerStashId)
+    protected IReadOnlyDictionary<string, InventoryLocation> GetItemInStashCache(List<Item> items, string playerStashId)
     {
-        var itemsInStashCache = new Dictionary<string, bool>();
+        var itemsInStashCache = new Dictionary<string, InventoryLocation>();
         foreach (var inventoryItem in items)
         {
-            itemsInStashCache.TryAdd(inventoryItem.Id, IsInStash(inventoryItem.Id, items, playerStashId));
+            itemsInStashCache.TryAdd(inventoryItem.Id, GetItemLocation(inventoryItem.Id, items, playerStashId));
         }
 
         return itemsInStashCache;
     }
 
     /// <summary>
-    ///     Prioritise player stash first over player inventory.
-    ///     Post-raid healing would often take money out of the players pockets/secure container.
+    /// Get stacks of money from player inventory, ordered by priority to use from
+    /// Post-raid healing would often take money out of the players pockets/secure container.
+    /// Return money stacks in root of stash first, with the smallest stacks taking priority
+    /// Stacks inside secure are returned last
     /// </summary>
     /// <param name="a"> First money stack item </param>
     /// <param name="b"> Second money stack item </param>
@@ -427,69 +429,97 @@ public class PaymentService(
         Item a,
         Item b,
         List<Item> inventoryItems,
-        IReadOnlyDictionary<string, bool> itemInStashCache)
+        IReadOnlyDictionary<string, InventoryLocation> itemInStashCache)
     {
-        itemInStashCache.TryGetValue(a.Id, out var aInStash);
-        itemInStashCache.TryGetValue(b.Id, out var bInStash);
+        // Get the location of A and B
+        itemInStashCache.TryGetValue(a.Id, out var aLocation);
+        itemInStashCache.TryGetValue(b.Id, out var bLocation);
 
-        // A in root of stash, B not, prioritise A
-        if (aInStash && !bInStash)
-        {
-            return -1;
-        }
+        // Helper fields
+        var aInStash = aLocation == InventoryLocation.Stash;
+        var bInStash = bLocation == InventoryLocation.Stash;
+        var aInSecure = aLocation == InventoryLocation.Secure;
+        var bInSecure = bLocation == InventoryLocation.Secure;
+        var onlyAInStash = aInStash && !bInStash;
+        var onlyBInStash = !aInStash && bInStash;
+        var bothInStash = aInStash && bInStash;
 
-        // B in root stash, A not, prioritise B
-        if (!aInStash && bInStash)
+        if (bothInStash)
         {
-            return 1;
-        }
+            // Determine if they're in containers
+            var aInContainer = string.Equals(a.SlotId, "main", StringComparison.InvariantCultureIgnoreCase);
+            var bInContainer = string.Equals(b.SlotId, "main", StringComparison.InvariantCultureIgnoreCase);
 
-        // Both in root stash, prioritise the smallest sized
-        if (aInStash && bInStash)
-        {
-            return GetPriorityBySmallestStackSize(a, b);
-        }
-
-        // Both in containers
-        if (a.SlotId == "main" && b.SlotId == "main")
-        {
-            // A container in stash, B not, prioritise A
-            if (aInStash && !bInStash)
+            // Return item not in container
+            var compare = aInContainer.CompareTo(bInContainer);
+            if (compare != 0)
             {
-                return -1;
+                return compare;
             }
 
-            // B container in stash, A not,  prioritise B
-            if (!aInStash && bInStash)
-            {
-                return 1;
-            }
-
-            // Both containers in stash
-            if (aInStash && bInStash)
+            // Both in containers, deprioritized item in 'bad' container
+            if (aInContainer
+                && bInContainer)
             {
                 // Containers where taking money from would inconvenience player
                 var aImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == a.ParentId);
                 var bImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == b.ParentId);
 
-                // A is not a deprioritized container, B is
+                var aInDeprioContainer = _inventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParent.Template);
+                var bInDeprioContainer = _inventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParent.Template);
+
+                // Prioritize B
                 if (
-                    !_inventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParent.Template) &&
-                    _inventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParent.Template)
+                    !aInDeprioContainer
+                    && bInDeprioContainer
                 )
                 {
                     return -1;
                 }
 
-                // B is not a deprioritized container, A is
+                // Prioritize A
                 if (
-                    _inventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParent.Template) &&
-                    !_inventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParent.Template)
+                    aInDeprioContainer
+                    && !bInDeprioContainer
                 )
                 {
                     return 1;
                 }
+
+                // Both in bad containers, fall out of IF and run GetPriorityBySmallestStackSize
             }
+
+            return GetPriorityBySmallestStackSize(a, b);
+        }
+
+        // Prioritise A
+        if (onlyAInStash)
+        {
+            return -1;
+        }
+
+        // Prioritise B
+        if (onlyBInStash)
+        {
+            return 1;
+        }
+
+        // A in secure, B not, prioritise B
+        if (aInSecure && !bInSecure)
+        {
+            return 1;
+        }
+
+        // B in secure, A not, prioritise A
+        if (!aInSecure && bInSecure)
+        {
+            return -1;
+        }
+
+        // Both in secure
+        if (aInSecure && bInSecure)
+        {
+            return 0;
         }
 
         // They match / we don't know
@@ -518,28 +548,40 @@ public class PaymentService(
     /// <param name="inventoryItems"> Player inventory </param>
     /// <param name="playerStashId"> Players stash ID </param>
     /// <returns> True if it's in inventory </returns>
-    protected bool IsInStash(string itemId, List<Item> inventoryItems, string playerStashId)
+    protected InventoryLocation GetItemLocation(string itemId, List<Item> inventoryItems, string playerStashId)
     {
-        var itemParent = inventoryItems.FirstOrDefault(item => item.Id == itemId);
-        if (itemParent is null)
+        var inventoryItem = inventoryItems.FirstOrDefault(item => item.Id == itemId);
+        if (inventoryItem is null)
         {
-            // Needs parent id be in stash
-            return false;
+            // Doesn't exist
+            return InventoryLocation.Other;
         }
 
         // is root item and its parent is the player stash
-        if (itemParent.Id == playerStashId)
+        if (inventoryItem.Id == playerStashId)
         {
-            return true;
+            return InventoryLocation.Stash;
         }
 
         // is child item and its parent is a root item
-        if (itemParent.SlotId == "hideout")
+        if (inventoryItem.SlotId == "hideout")
         {
-            return true;
+            return InventoryLocation.Stash;
+        }
+
+        if (inventoryItem.SlotId == "SecuredContainer")
+        {
+            return InventoryLocation.Secure;
         }
 
         // Recursive call for parentId
-        return IsInStash(itemParent.ParentId, inventoryItems, playerStashId);
+        return GetItemLocation(inventoryItem.ParentId, inventoryItems, playerStashId);
+    }
+
+    protected enum InventoryLocation
+    {
+        Other = 0,
+        Stash = 1,
+        Secure = 2
     }
 }
