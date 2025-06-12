@@ -105,7 +105,7 @@ public class QuestHelper(
         var beforeQuests = before.Select(quest => quest.Id).ToHashSet();
 
         // Return quests found in after but not before
-        return after.Where(quest => beforeQuests.Contains(quest.Id)).ToList();
+        return after.Where(quest => !beforeQuests.Contains(quest.Id)).ToList();
     }
 
     /// <summary>
@@ -1453,12 +1453,12 @@ public class QuestHelper(
         fullProfile.CharacterData.ScavData.Quests.Remove(repeatableInScavProfile);
     }
 
-    /**
-     * Return quests that have different statuses
-     * @param preQuestStatuses Quests before
-     * @param postQuestStatuses Quests after
-     * @returns QuestStatusChange array
-     */
+    /// <summary>
+    /// Get quests that have different statuses
+    /// </summary>
+    /// <param name="preQuestStatuses">Quests before</param>
+    /// <param name="postQuestStatuses">Quests after</param>
+    /// <returns>QuestStatusChange array</returns>
     protected List<QuestStatus> GetQuestsWithDifferentStatuses(
         List<QuestStatus> preQuestStatuses,
         List<QuestStatus> postQuestStatuses
@@ -1479,12 +1479,12 @@ public class QuestHelper(
         return result;
     }
 
-    /**
-     * Does a provided quest have a level requirement equal to or below defined level
-     * @param quest Quest to check
-     * @param playerLevel level of player to test against quest
-     * @returns true if quest can be seen/accepted by player of defined level
-     */
+    /// <summary>
+    /// Does a provided quest have a level requirement equal to or below defined level
+    /// </summary>
+    /// <param name="quest">Quest to check</param>
+    /// <param name="playerLevel">level of player to test against quest</param>
+    /// <returns>true if quest can be seen/accepted by player of defined level</returns>
     protected bool PlayerLevelFulfillsQuestRequirement(Quest quest, double playerLevel)
     {
         if (quest.Conditions is null)
