@@ -469,14 +469,13 @@ public class PaymentService(
             if (aInStash && bInStash)
             {
                 // Containers where taking money from would inconvenience player
-                var deprioritisedContainers = _inventoryConfig.DeprioritisedMoneyContainers;
                 var aImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == a.ParentId);
                 var bImmediateParent = inventoryItems.FirstOrDefault(item => item.Id == b.ParentId);
 
                 // A is not a deprioritized container, B is
                 if (
-                    !deprioritisedContainers.Contains(aImmediateParent.Template) &&
-                    deprioritisedContainers.Contains(bImmediateParent.Template)
+                    !_inventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParent.Template) &&
+                    _inventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParent.Template)
                 )
                 {
                     return -1;
@@ -484,8 +483,8 @@ public class PaymentService(
 
                 // B is not a deprioritized container, A is
                 if (
-                    deprioritisedContainers.Contains(aImmediateParent.Template) &&
-                    !deprioritisedContainers.Contains(bImmediateParent.Template)
+                    _inventoryConfig.DeprioritisedMoneyContainers.Contains(aImmediateParent.Template) &&
+                    !_inventoryConfig.DeprioritisedMoneyContainers.Contains(bImmediateParent.Template)
                 )
                 {
                     return 1;
