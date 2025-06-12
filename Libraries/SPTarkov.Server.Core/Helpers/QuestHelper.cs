@@ -88,7 +88,7 @@ public class QuestHelper(
     }
 
     /// <summary>
-    ///     Get quests in after but not before
+    ///     Get new quests in `after` that are not in `before`
     /// </summary>
     /// <param name="before">List of quests #1</param>
     /// <param name="after">List of quests #2</param>
