@@ -47574,7 +47574,9 @@
                     "equipment": "5fe49444ae6628187a2e77b8",
                     "fastPanel": {},
 					"favoriteItems": [],
-                    "hideoutAreaStashes": {},
+                    "hideoutAreaStashes": {
+						"16": "5d494a295b56502f18c98a08"
+					},
                     "items": [{
                             "_id": "5fe49444ae6628187a2e77b8",
                             "_tpl": "55d7217a4bdc2d86028b456d"
@@ -47582,6 +47584,9 @@
                             "_id": "63db64cbf9963741dc0d741f",
                             "_tpl": "6401c7b213d9b818bf0e7dd7"
                         }, {
+							"_id": "5d494a295b56502f18c98a08",
+							"_tpl": "63dbd45917fff4dee40fe16e"
+						}, {
 							"_id": "676db384777490e23c45b657",
 							"_tpl": "673c7b00cbf4b984b5099181"
 						}, {
@@ -50992,7 +50997,9 @@
                     "equipment": "5fe49444ae6628187a2e77b8",
                     "fastPanel": {},
 					"favoriteItems": [],
-                    "hideoutAreaStashes": {},
+                    "hideoutAreaStashes": {
+						"16": "5d494a295b56502f18c98a08"
+					},
                     "items": [{
                             "_id": "5fe49444ae6628187a2e77b8",
                             "_tpl": "55d7217a4bdc2d86028b456d"
@@ -51002,6 +51009,9 @@
                         }, {
 							"_id": "676db384777490e23c45b657",
 							"_tpl": "673c7b00cbf4b984b5099181"
+						}, {
+							"_id": "5d494a295b56502f18c98a08",
+							"_tpl": "63dbd45917fff4dee40fe16e"
 						}, {
                             "_id": "f5e6bdac05e699d687993249",
                             "_tpl": "5857a8bc2459772bad15db29",

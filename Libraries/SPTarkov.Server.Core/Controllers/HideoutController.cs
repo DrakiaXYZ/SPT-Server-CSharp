@@ -283,8 +283,8 @@ public class HideoutController(
 
         // Don't inform client when upgraded area is hall of fame or equipment stand, BSG doesn't inform client this specific upgrade has occurred
         // will break client if sent
-        HashSet<HideoutAreas> check = [HideoutAreas.PlaceOfFame];
-        if (!check.Contains(dbHideoutArea.Type ?? HideoutAreas.NotSet))
+        
+        if (ShouldAddContainerUpgradeToClientResponse(dbHideoutArea, profileParentHideoutArea.Level.GetValueOrDefault(1)))
         {
             AddContainerUpgradeToClientOutput(sessionId, keyForHideoutAreaStash, dbHideoutArea, hideoutStage, output);
         }
@@ -313,6 +313,22 @@ public class HideoutController(
             // Inform client of the changes
             AddContainerUpgradeToClientOutput(sessionId, childAreaTypeKey, childDbArea, childDbAreaStage, output);
         }
+    }
+
+    /// <summary>
+    /// Should the newly completed hideout area container upgrade/addition be included in client response
+    /// Deny when: area is place of fame + we're upgrading to level 1
+    /// </summary>
+    /// <param name="dbHideoutArea">Hideout area upgraded</param>
+    /// <param name="areaLevel">Level of area upgraded to</param>
+    /// <returns>True = it should be included</returns>
+    private bool ShouldAddContainerUpgradeToClientResponse(HideoutArea dbHideoutArea, int areaLevel)
+    {
+        HashSet<HideoutAreas> areaBlacklist = [HideoutAreas.PlaceOfFame];
+        var isOnAreaBlacklist = areaBlacklist.Contains(dbHideoutArea.Type ?? HideoutAreas.NotSet);
+        var isFirstStage = areaLevel == 1;
+
+        return isOnAreaBlacklist && !isFirstStage;
     }
 
     /// <summary>
