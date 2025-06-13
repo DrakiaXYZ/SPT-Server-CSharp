@@ -129,8 +129,6 @@
   "modloader-error_parsing_mod_load_order": "Feil under parsing av mod lastings rekkefølge",
   "modloader-incompatibilities_not_string_array": "Mod %s package.json egenskaps 'inkompatibiliteter' bør være en streng array",
   "modloader-incompatible_mod_found": "Mod {{author}}–{{name}} er inkompatibel med {{incompatibleModName}}",
-  "modloader-installing_external_dependencies": "Installerer avhengigheter for Mod: {{name}} av: {{author}}",
-  "modloader-installing_external_dependencies_disabled": "Mod: {{name}} av: {{author}} krever eksterne avhengigheter, men funksjonen er for øyeblikket deaktivert. gå til \"{{configPath}}\", sett \"{{configOption}}\" til sant, og start serveren på nytt.\nVed å aktivere dette godtar du alt ansvar for hva {{name}} laster ned til maskinen din.",
   "modloader-invalid_version_property": "Mod %s pakke.json inneholder en ugyldig versjonstreng",
   "modloader-is_client_mod": "Mod (%s) er en klientmod og skal plasseres i følgende mappe: /spt/bepinex/plugins",
   "modloader-load_order_conflict": "`{{modOneName}}` og `{{modTwoName}}` har motstridende krav for innlastingsrekkefølge. serveren kan ikke starte før dette er fikset og vil slå seg av",
@@ -392,7 +390,6 @@
   "server_start_meme_5": "Har du sett våres meme-side?",
   "server_start_meme_9": "Ste-sanker? H-Hva er det du gjør?",
   "server_start_player_active_botreload_skill": "Karakteren din har 'BotReload'-ferdigheten aktivert, dette vil gjøre at du lader våpnene dine unaturlig raskt, ignorer denne meldingen hvis dette er ment",
-  "server_start_success": "Ha det gøy i spillet",
   "started_webserver_success": "Startet webserver på %s",
   "trader-missing_durability_threshold_value": "Kan ikke finne holdbarhetsverdi for kjøpmann: {{traderId}}, faller tilbake til standard på: {{value}}",
   "trader-missing_trader_details_using_default_refresh_time": "Kjøpmann: {{traderId}} ble ikke funnet, genererer midlertidig oppføring med standard oppdateringstid på: {{updateTime}}",
@@ -419,7 +416,6 @@
   "websocket-message_sent": "[WS] melding sendt",
   "websocket-not_ready_message_not_sent": "[WS] Socket er ikke klar for %s, melding ikke sendt",
   "websocket-pinging_player": "[WS] Pinger spiller: %s",
-  "websocket-player_connected": "[WS] Spiller: {{sessionId}} {{contextId}} har koblet til",
   "websocket-received_message": "[WS] Mottatt melding fra bruker %s ",
   "websocket-started": "Startet webserver på %s"
 }
