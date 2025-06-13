@@ -18,6 +18,14 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
+        // Some users don't know how to create a shortcut...
+        if (!IsRunFromInstallationFolder())
+        {
+            Console.WriteLine("You have not created a shortcut properly. Please hold alt when dragging to create a shortcut.");
+            await Task.Delay(-1);
+            return;
+        }
+
         // Initialize the program variables
         ProgramStatics.Initialize();
 
@@ -154,6 +162,14 @@ public static class Program
         {
             throw new Exception("Unable to set console mode");
         }
+    }
+
+    private static bool IsRunFromInstallationFolder()
+    {
+        var dirFiles =  Directory.GetFiles(Directory.GetCurrentDirectory());
+
+        // This file is guaranteed to exist if ran from the correct location, even if the game does not exist here.
+        return dirFiles.Any(dirFile => dirFile.EndsWith("sptLogger.json"));
     }
 
     [DllImport("kernel32.dll", SetLastError = true)]
