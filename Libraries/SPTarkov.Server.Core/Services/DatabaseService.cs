@@ -93,7 +93,7 @@ public class DatabaseService(
         if (_databaseServer.GetTables().Locations == null)
         {
             throw new Exception(
-                _localisationService.GetText("database-data_at_path_missing", "assets/database/locales")
+                _localisationService.GetText("database-data_at_path_missing", "assets/database/locations")
             );
         }
 
