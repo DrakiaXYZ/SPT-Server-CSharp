@@ -530,7 +530,7 @@ public class HideoutController(
     protected ItemEventRouterResponse RemoveResourceFromArea(string sessionID, PmcData pmcData, HideoutTakeItemOutRequestData removeResourceRequest,
         ItemEventRouterResponse output, BotHideoutArea hideoutArea)
     {
-        var slotIndexToRemove = removeResourceRequest?.Slots.FirstOrDefault();
+        var slotIndexToRemove = removeResourceRequest?.Slots?.FirstOrDefault();
         if (slotIndexToRemove is null)
         {
             _logger.Warning(
