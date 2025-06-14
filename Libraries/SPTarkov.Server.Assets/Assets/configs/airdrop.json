@@ -1,10 +1,11 @@
 {
     "airdropTypeWeightings": {
-        "mixed": 5,
-        "weaponArmor": 4,
-        "foodMedical": 1,
-        "barter": 1,
-        "radar": 0
+        "mixed": 500,
+        "weaponArmor": 400,
+        "foodMedical": 100,
+        "barter": 100,
+        "radar": 0,
+		"toiletPaper": 1
     },
     "loot": {
         "mixed": {
@@ -382,6 +383,37 @@
             "useForcedLoot": true,
             "forcedLoot": {
                 "66d9f7256916142b3b02276e": { "min": 2, "max": 4 }
+            }
+        },
+		"toiletPaper": {
+            "icon": "Supply",
+            "weaponPresetCount": {
+                "min": 0,
+                "max": 0
+            },
+            "armorPresetCount": {
+                "min": 0,
+                "max": 0
+            },
+            "itemCount": {
+                "min": 0,
+                "max": 0
+            },
+            "weaponCrateCount": {
+                "min": 0,
+                "max": 0
+            },
+            "itemBlacklist": [],
+            "itemTypeWhitelist": [],
+            "itemLimits": {},
+            "itemStackLimits": {},
+            "armorLevelWhitelist": [],
+            "allowBossItems": false,
+            "useRewardItemBlacklist": true,
+            "blockSeasonalItemsOutOfSeason": true,
+            "useForcedLoot": true,
+            "forcedLoot": {
+                "5c13cef886f774072e618e82": { "min": 100, "max": 120 }
             }
         }
     },

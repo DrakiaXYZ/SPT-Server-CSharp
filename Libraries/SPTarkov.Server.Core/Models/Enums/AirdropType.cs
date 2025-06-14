@@ -17,5 +17,6 @@ public enum SptAirdropTypeEnum
     barter,
     foodMedical,
     weaponArmor,
-    radar
+    radar,
+    toiletPaper
 }

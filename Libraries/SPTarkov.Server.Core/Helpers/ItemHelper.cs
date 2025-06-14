@@ -948,6 +948,49 @@ public class ItemHelper(
         return rootAndChildren;
     }
 
+
+    /// <summary>
+    ///     Splits the item stack if it exceeds its items StackMaxSize property into child items of the passed parent.
+    ///     TODO: untested
+    /// </summary>
+    /// <param name="itemWithChildren">Item (with children) to split into smaller stacks.</param>
+    /// <returns>List of root item + children.</returns>
+    public List<List<Item>> SplitStack(List<Item> itemWithChildren)
+    {
+        var originRootItem = itemWithChildren.FirstOrDefault();
+        if (originRootItem?.Upd?.StackObjectsCount is null)
+        {
+            return [itemWithChildren];
+        }
+
+        var maxStackSize = GetItem(originRootItem.Template).Value.Properties.StackMaxSize;
+        var remainingCount = originRootItem.Upd.StackObjectsCount;
+        List<List<Item>> result = [];
+
+        // If the current count is already equal or less than the max
+        // return the item as is.
+        if (remainingCount <= maxStackSize)
+        {
+            result.Add(itemWithChildren);
+
+            return result;
+        }
+
+        while (remainingCount.Value != 0)
+        {
+            // Clone item and make IDs unique
+            var itemWithChildrenClone = ReplaceIDs(_cloner.Clone(itemWithChildren));
+
+            // Set stack count to new value
+            var amount = Math.Min(remainingCount ?? 0, maxStackSize ?? 0);
+            itemWithChildrenClone[0].Upd.StackObjectsCount = amount;
+            remainingCount -= amount;
+            result.Add(itemWithChildrenClone);
+        }
+
+        return result;
+    }
+
     /// <summary>
     ///     Turns items like money into separate stacks that adhere to max stack size.
     /// </summary>

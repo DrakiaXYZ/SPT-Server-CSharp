@@ -171,35 +171,58 @@ public class LootGenerator(
 
     /// <summary>
     ///     Generate An array of items
-    ///     TODO - handle weapon presets/ammo packs
+    ///     TODO - handle ammo packs
     /// </summary>
-    /// <param name="forcedLootDict">Dictionary of item tpls with minmax values</param>
+    /// <param name="forcedLootToAdd">Dictionary of item tpls with minmax values</param>
     /// <returns>Array of Item</returns>
-    public List<List<Item>> CreateForcedLoot(Dictionary<string, MinMax<int>> forcedLootDict)
+    public List<List<Item>> CreateForcedLoot(Dictionary<string, MinMax<int>> forcedLootToAdd)
     {
         var result = new List<List<Item>>();
 
-        var forcedItems = forcedLootDict;
-
-        foreach (var forcedItemKvP in forcedItems)
+        var defaultPresets = _presetHelper.GetDefaultPresetsByTplKey();
+        foreach (var (itemTpl, details) in forcedLootToAdd)
         {
-            var details = forcedLootDict[forcedItemKvP.Key];
+            // How many of this item we want
             var randomisedItemCount = _randomUtil.GetInt(details.Min, details.Max);
 
-            // Add forced loot item to result
+            // Check if item being added has a preset and use that instead
+            if (defaultPresets.ContainsKey(itemTpl))
+            {
+                // Use default preset data
+                if (defaultPresets.TryGetValue(itemTpl, out var preset))
+                {
+                    // Add the chosen preset as many times as randomisedItemCount states
+                    for (var i = 0; i < randomisedItemCount; i++)
+                    {
+                        // Clone preset and alter Ids to be unique
+                        var presetWithUniqueIds = _itemHelper.ReplaceIDs(_cloner.Clone(preset.Items));
+
+                        // Add to results
+                        result.Add(presetWithUniqueIds);
+                    }
+                }
+
+                continue;
+
+            }
+
+            // Non-preset item to be added
             var newLootItem = new Item
             {
                 Id = _hashUtil.Generate(),
-                Template = forcedItemKvP.Key,
+                Template = itemTpl,
                 Upd = new Upd
                 {
                     StackObjectsCount = randomisedItemCount,
                     SpawnedInSession = true
                 }
             };
-
             var splitResults = _itemHelper.SplitStack(newLootItem);
-            result.Add(splitResults);
+            foreach (var splitItem in splitResults)
+            {
+                // Add as separate lists
+                result.Add([splitItem]);
+            }
         }
 
         return result;
