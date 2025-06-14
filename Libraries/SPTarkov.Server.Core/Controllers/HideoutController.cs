@@ -549,6 +549,7 @@ public class HideoutController(
             return output;
         }
 
+        // Add the item found in hideout area slot to player stash
         var request = new AddItemDirectRequest
         {
             ItemWithModsToAdd = [itemToReturn.ConvertToItem()],
@@ -564,7 +565,7 @@ public class HideoutController(
             return output;
         }
 
-        // Remove items from slot, locationIndex remains
+        // Remove items from slot, keep locationIndex object
         var hideoutSlotIndex = hideoutArea.Slots.FindIndex(slot => slot.LocationIndex == slotIndexToRemove);
         hideoutArea.Slots[hideoutSlotIndex].Items = null;
 
