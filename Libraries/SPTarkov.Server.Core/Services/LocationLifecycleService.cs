@@ -660,34 +660,41 @@ public class LocationLifecycleService
         EndLocalRaidRequestData request)
     {
         var postRaidProfile = request.Results.Profile;
+
         if (isTransfer || request.Results.Result == ExitStatus.RUNNER)
         {
+            // Transfer over hp and effects - not necessary for runthroughs, but it causes no issues
+            scavProfile.Health = postRaidProfile.Health;
+
+            // Apply minor healing to limb hp and effects
+            ResetLimbHpMidTransit(scavProfile.Health);
+
             // We want scav inventory to persist into next raid when pscav is moving between maps
-            // May have been run through, set gear to non-FiR
+            // Also adjust FiR status when exit was runthrough
             _inRaidHelper.SetInventory(sessionId, scavProfile, postRaidProfile, isSurvived, isTransfer);
         }
 
-        scavProfile.Info.Level = request.Results.Profile.Info.Level;
-        scavProfile.Skills = request.Results.Profile.Skills;
-        scavProfile.Stats = request.Results.Profile.Stats;
-        scavProfile.Encyclopedia = request.Results.Profile.Encyclopedia;
-        scavProfile.TaskConditionCounters = request.Results.Profile.TaskConditionCounters;
-        scavProfile.SurvivorClass = request.Results.Profile.SurvivorClass;
+        scavProfile.Info.Level = postRaidProfile.Info.Level;
+        scavProfile.Skills = postRaidProfile.Skills;
+        scavProfile.Stats = postRaidProfile.Stats;
+        scavProfile.Encyclopedia = postRaidProfile.Encyclopedia;
+        scavProfile.TaskConditionCounters = postRaidProfile.TaskConditionCounters;
+        scavProfile.SurvivorClass = postRaidProfile.SurvivorClass;
 
         // Scavs don't have achievements, but copy anyway
-        scavProfile.Achievements = request.Results.Profile.Achievements;
+        scavProfile.Achievements = postRaidProfile.Achievements;
 
-        scavProfile.Info.Experience = request.Results.Profile.Info.Experience;
+        scavProfile.Info.Experience = postRaidProfile.Info.Experience;
 
         // Must occur after experience is set and stats copied over
         scavProfile.Stats.Eft.TotalSessionExperience = 0;
 
-        ApplyTraderStandingAdjustments(scavProfile.TradersInfo, request.Results.Profile.TradersInfo);
+        ApplyTraderStandingAdjustments(scavProfile.TradersInfo, postRaidProfile.TradersInfo);
 
         // Clamp fence standing within -7 to 15 range
         var fenceMax = _traderConfig.Fence.PlayerRepMax; // 15
         var fenceMin = _traderConfig.Fence.PlayerRepMin; //-7
-        if (!request.Results.Profile.TradersInfo.TryGetValue(Traders.FENCE, out var postRaidFenceData))
+        if (!postRaidProfile.TradersInfo.TryGetValue(Traders.FENCE, out var postRaidFenceData))
         {
             _logger.Error($"post raid fence data not found for: {sessionId}");
         }
@@ -765,6 +772,28 @@ public class LocationLifecycleService
             // Update Status and StatusTimer properties
             pmcQuest.Status = scavQuest.Status;
             pmcQuest.StatusTimers = scavQuest.StatusTimers;
+        }
+    }
+
+    /// <summary>
+    /// Slightly fix broken limbs and remove effects
+    /// </summary>
+    /// <param name="profileHealth">Profile health data to adjust</param>
+    protected void ResetLimbHpMidTransit(BotBaseHealth? profileHealth)
+    {
+        foreach (var (limbId, hpValues) in profileHealth.BodyParts)
+        {
+            if (hpValues.Health.Minimum <= 0)
+            {
+                // Limb has been destroyed, reset to 30% TODO: Expose 30% in config
+                hpValues.Health.Current = _randomUtil.GetPercentOfValue(30, hpValues.Health.Maximum.Value);
+            }
+
+            // Limb has effects, remove them all
+            if (hpValues.Effects.Count > 0)
+            {
+                hpValues.Effects.Clear();
+            }
         }
     }
 
