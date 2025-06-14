@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Linq.Expressions;
 using System.Reflection;
 using SPTarkov.DI.Annotations;
@@ -7,11 +8,13 @@ using SPTarkov.Server.Core.Utils.Json;
 namespace SPTarkov.Server.Core.Utils;
 
 [Injectable(InjectionType.Singleton)]
-public class ImporterUtil(ISptLogger<ImporterUtil> _logger, FileUtil _fileUtil, JsonUtil _jsonUtil)
+public class ImporterUtil(
+    ISptLogger<ImporterUtil> _logger,
+    FileUtil _fileUtil,
+    JsonUtil _jsonUtil)
 {
-    protected HashSet<string> directoriesToIgnore = ["./Assets/database/locales/server"];
-
-    protected HashSet<string> filesToIgnore = ["bearsuits.json", "usecsuits.json", "archivedquests.json"];
+    private readonly FrozenSet<string> _directoriesToIgnore = ["./Assets/database/locales/server"];
+    private readonly FrozenSet<string> _filesToIgnore = ["bearsuits.json", "usecsuits.json", "archivedquests.json"];
 
     public async Task<T> LoadRecursiveAsync<T>(
         string filePath,
@@ -50,7 +53,7 @@ public class ImporterUtil(ISptLogger<ImporterUtil> _logger, FileUtil _fileUtil, 
         // Process files
         foreach (var file in files)
         {
-            if (_fileUtil.GetFileExtension(file) != "json" || filesToIgnore.Contains(_fileUtil.GetFileNameAndExtension(file).ToLower()))
+            if (_fileUtil.GetFileExtension(file) != "json" || _filesToIgnore.Contains(_fileUtil.GetFileNameAndExtension(file).ToLower()))
             {
                 continue;
             }
@@ -61,7 +64,7 @@ public class ImporterUtil(ISptLogger<ImporterUtil> _logger, FileUtil _fileUtil, 
         // Process directories
         foreach (var directory in directories)
         {
-            if (directoriesToIgnore.Contains(directory))
+            if (_directoriesToIgnore.Contains(directory))
             {
                 continue;
             }
