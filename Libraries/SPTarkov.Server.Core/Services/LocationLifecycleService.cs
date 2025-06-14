@@ -677,8 +677,8 @@ public class LocationLifecycleService
             // Transfer over hp and effects - not necessary for runthroughs, but it causes no issues
             scavProfile.Health = postRaidProfile.Health;
 
-            // Apply minor healing to limb hp and effects
-            ResetLimbHpMidTransit(scavProfile.Health);
+            // Adjust limb hp and effects while transiting
+            UpdateLimbValuesAfterTransit(scavProfile.Health);
 
             // We want scav inventory to persist into next raid when pscav is moving between maps
             // Also adjust FiR status when exit was runthrough
@@ -790,20 +790,42 @@ public class LocationLifecycleService
     /// Slightly fix broken limbs and remove effects
     /// </summary>
     /// <param name="profileHealth">Profile health data to adjust</param>
-    protected void ResetLimbHpMidTransit(BotBaseHealth? profileHealth)
+    protected void UpdateLimbValuesAfterTransit(BotBaseHealth? profileHealth)
     {
-        foreach (var (limbId, hpValues) in profileHealth.BodyParts)
+        var transitSettings = _locationConfig.TransitSettings;
+        if (transitSettings == null)
         {
-            if (hpValues.Health.Minimum <= 0)
+            _logger.Warning("Unable to find: _locationConfig.TransitSettings");
+
+            return;
+        }
+
+        // Check each body part
+        foreach (var (_, hpValues) in profileHealth.BodyParts)
+        {
+            if (transitSettings.AdjustLimbHealthPoints.GetValueOrDefault()
+                && hpValues.Health.Minimum <= 0)
             {
-                // Limb has been destroyed, reset to 30% TODO: Expose 30% in config
-                hpValues.Health.Current = _randomUtil.GetPercentOfValue(30, hpValues.Health.Maximum.Value);
+                    // Limb has been destroyed, reset
+                    hpValues.Health.Current = _randomUtil.GetPercentOfValue(
+                        transitSettings.LimbHealPercent.GetValueOrDefault(30),
+                        hpValues.Health.Maximum.Value);
             }
 
-            // Limb has effects, remove them all
-            if (hpValues.Effects.Count > 0)
+            if (!(hpValues.Effects?.Count > 0))
             {
-                hpValues.Effects.Clear();
+                // No effects on limb, skip
+                continue;
+            }
+
+            // Limb has effects, check for blacklisted values and remove
+            var keysToRemove = hpValues.Effects.Keys
+                .Where(key => transitSettings.EffectsToRemove.Contains(key))
+                .ToHashSet();
+
+            foreach (var key in keysToRemove)
+            {
+                hpValues.Effects.Remove(key);
             }
         }
     }
@@ -895,6 +917,12 @@ public class LocationLifecycleService
 
         // Handle temp, hydration, limb hp/effects
         _healthHelper.UpdateProfileHealthPostRaid(pmcProfile, postRaidProfile.Health, sessionId, isDead);
+
+        if (isTransfer)
+        {
+            // Adjust limb hp and effects while transiting
+            UpdateLimbValuesAfterTransit(pmcProfile.Health);
+        }
 
         // This must occur _BEFORE_ `deleteInventory`, as that method clears insured items
         HandleInsuredItemLostEvent(sessionId, pmcProfile, request, locationName);

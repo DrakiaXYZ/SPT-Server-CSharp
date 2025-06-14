@@ -233,6 +233,21 @@ public record LocationConfig : BaseConfig
         get;
         set;
     }
+
+    [JsonPropertyName("transitSettings")]
+    public TransitSettings? TransitSettings { get; set; }
+}
+
+public record TransitSettings
+{
+    [JsonPropertyName("effectsToRemove")]
+    public HashSet<string>? EffectsToRemove { get; set; }
+
+    [JsonPropertyName("adjustLimbHealthPoints")]
+    public bool? AdjustLimbHealthPoints { get; set; }
+
+    [JsonPropertyName("limbHealPercent")]
+    public int? LimbHealPercent { get; set; }
 }
 
 public record ReserveRaiderSpawnChanceOverrides
