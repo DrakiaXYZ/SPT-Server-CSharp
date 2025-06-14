@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Helpers;
