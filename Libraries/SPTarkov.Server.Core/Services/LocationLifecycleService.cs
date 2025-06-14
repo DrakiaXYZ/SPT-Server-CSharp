@@ -454,7 +454,15 @@ public class LocationLifecycleService
 
         if (!isPmc)
         {
-            HandlePostRaidPlayerScav(sessionId, pmcProfile, scavProfile, isDead, isTransfer, isSurvived, request);
+            HandlePostRaidPlayerScav(
+                sessionId,
+                pmcProfile,
+                scavProfile,
+                isDead,
+                isTransfer,
+                isSurvived,
+                request);
+
             return;
         }
 
@@ -487,21 +495,24 @@ public class LocationLifecycleService
         }
     }
 
-    private void SendCoopTakenFenceMessage(string sessionId)
+    /// <summary>
+    /// After taking a COOP extract, send player a gift via mail
+    /// </summary>
+    /// <param name="sessionId">Player/Session id</param>
+    protected void SendCoopTakenFenceMessage(string sessionId)
     {
-        // Generate reward for taking coop extract
+        // Generate randomised reward for taking coop extract
         var loot = _lootGenerator.CreateRandomLoot(_traderConfig.Fence.CoopExtractGift);
-        var mailableLoot = new List<Item>();
 
         var parentId = _hashUtil.Generate();
         foreach (var itemAndChildren in loot)
         {
             // Set all root items parent to new id
-            itemAndChildren[0].ParentId = parentId;
+            itemAndChildren.FirstOrDefault().ParentId = parentId;
         }
 
         // Flatten
-        mailableLoot.AddRange(loot.SelectMany(x => x));
+        List<Item> mailableLoot = [..loot.SelectMany(x => x)];
 
         // Send message from fence giving player reward generated above
         _mailSendService.SendLocalisedNpcMessageToPlayer(
@@ -522,7 +533,7 @@ public class LocationLifecycleService
     protected bool ExtractWasViaCar(string extractName)
     {
         // exit name is undefined on death
-        if (extractName is null)
+        if (string.IsNullOrEmpty(extractName))
         {
             return false;
         }

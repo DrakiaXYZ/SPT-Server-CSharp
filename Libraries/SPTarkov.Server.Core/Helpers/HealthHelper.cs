@@ -175,7 +175,7 @@ public class HealthHelper(
 
         TransferPostRaidLimbEffectsToProfile(postRaidHealth.BodyParts, pmcData);
 
-        // Adjust hydration/energy/temp and limb hp using temp storage hydated above
+        // Adjust hydration/energy/temp and limb hp using temp storage hydrated above
         SaveHealth(pmcData, sessionID);
 
         // Reset temp storage
@@ -189,11 +189,11 @@ public class HealthHelper(
         SptProfile fullProfile,
         double hydration,
         double energy,
-        double temprature)
+        double temperature)
     {
         fullProfile.VitalityData.Hydration = hydration;
         fullProfile.VitalityData.Energy = energy;
-        fullProfile.VitalityData.Temperature = temprature;
+        fullProfile.VitalityData.Temperature = temperature;
     }
 
     /// <summary>
@@ -209,27 +209,25 @@ public class HealthHelper(
         {
             // Get effects on body part from profile
             var bodyPartEffects = postRaidBodyParts[bodyPartId.Key].Effects;
-            foreach (var effect in bodyPartEffects)
+            foreach (var(key, effectDetails) in bodyPartEffects)
             {
-                var effectDetails = bodyPartEffects[effect.Key];
-
                 // Null guard
                 profileData.Health.BodyParts[bodyPartId.Key].Effects ??= new Dictionary<string, BodyPartEffectProperties>();
 
                 // Effect already exists on limb in server profile, skip
                 var profileBodyPartEffects = profileData.Health.BodyParts[bodyPartId.Key].Effects;
-                if (profileBodyPartEffects.TryGetValue(effect.Key, out _))
+                if (profileBodyPartEffects.ContainsKey(key))
                 {
-                    if (effectsToIgnore.Contains(effect.Key))
+                    if (effectsToIgnore.Contains(key))
                         // Get rid of certain effects we don't want to persist out of raid
                     {
-                        profileBodyPartEffects[effect.Key] = null;
+                        profileBodyPartEffects[key] = null;
                     }
 
                     continue;
                 }
 
-                if (effectsToIgnore.Contains(effect.Key))
+                if (effectsToIgnore.Contains(key))
                     // Do not pass some effects to out of raid profile
                 {
                     continue;
@@ -240,9 +238,9 @@ public class HealthHelper(
                     Time = effectDetails.Time ?? -1
                 };
                 // Add effect to server profile
-                if (profileBodyPartEffects.TryAdd(effect.Key, effectToAdd))
+                if (profileBodyPartEffects.TryAdd(key, effectToAdd))
                 {
-                    profileBodyPartEffects[effect.Key] = effectToAdd;
+                    profileBodyPartEffects[key] = effectToAdd;
                 }
             }
         }
