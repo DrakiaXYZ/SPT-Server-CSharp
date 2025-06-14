@@ -293,26 +293,36 @@ public class HideoutController(
         var childDbArea = _databaseService
             .GetHideout()
             .Areas.FirstOrDefault(area => area.ParentArea == dbHideoutArea.Id);
-        if (childDbArea is not null)
+        if (childDbArea is null)
         {
-            // Add key/value to `hideoutAreaStashes` dictionary - used to link hideout area to inventory stash by its id
-            var childAreaTypeKey = ((int) childDbArea.Type).ToString();
-            if (pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(childAreaTypeKey) is null)
-            {
-                pmcData.Inventory.HideoutAreaStashes[childAreaTypeKey] = childDbArea.Id;
-            }
-
-            // Set child area level to same as parent area
-            pmcData.Hideout.Areas.FirstOrDefault(hideoutArea => hideoutArea.Type == childDbArea.Type).Level =
-                pmcData.Hideout.Areas.FirstOrDefault(x => x.Type == profileParentHideoutArea.Type).Level;
-
-            // Add/upgrade stash item in player inventory
-            var childDbAreaStage = childDbArea.Stages[profileParentHideoutArea.Level.ToString()];
-            AddUpdateInventoryItemToProfile(sessionId, pmcData, childDbArea, childDbAreaStage);
-
-            // Inform client of the changes
-            AddContainerUpgradeToClientOutput(sessionId, childAreaTypeKey, childDbArea, childDbAreaStage, output);
+            // No child db area, we're complete
+            return;
         }
+
+        // Add key/value to `hideoutAreaStashes` dictionary - used to link hideout area to inventory stash by its id
+        var childAreaTypeKey = ((int) childDbArea.Type).ToString();
+        if (pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(childAreaTypeKey) is null)
+        {
+            pmcData.Inventory.HideoutAreaStashes[childAreaTypeKey] = childDbArea.Id;
+        }
+
+        // Set child area level to same as parent area
+        pmcData.Hideout.Areas.FirstOrDefault(hideoutArea => hideoutArea.Type == childDbArea.Type).Level =
+            pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == profileParentHideoutArea.Type).Level;
+
+        // Add/upgrade stash item in player inventory
+        if (!childDbArea.Stages.TryGetValue(profileParentHideoutArea.Level.ToString(), out var childDbAreaStage))
+        {
+            _logger.Error($"Unable to find stage: {profileParentHideoutArea.Level} of area: {dbHideoutArea.Id}");
+
+            return;
+        }
+
+        AddUpdateInventoryItemToProfile(sessionId, pmcData, childDbArea, childDbAreaStage);
+
+        // Inform client of the changes
+        AddContainerUpgradeToClientOutput(sessionId, childAreaTypeKey, childDbArea, childDbAreaStage, output);
+
     }
 
     /// <summary>
