@@ -708,13 +708,10 @@ public class RepeatableQuestController(
     /// <returns>Allowed quest pool</returns>
     protected QuestTypePool GenerateQuestPool(RepeatableQuestConfig repeatableConfig, int pmcLevel)
     {
-        var questPool = CreateBaseQuestPool(repeatableConfig);
-
-        // Get the allowed locations based on the PMC's level
-        var locations = GetAllowedLocationsForPmcLevel(repeatableConfig.Locations, pmcLevel);
+        var questPool = CreateEmptyQuestPool(repeatableConfig);
 
         // Populate Exploration and Pickup quest locations
-        foreach (var (location, value) in locations)
+        foreach (var (location, value) in repeatableConfig.Locations)
         {
             if (location != ELocationName.any)
             {
@@ -747,7 +744,7 @@ public class RepeatableQuestController(
             }
 
             // Target is not boss
-            var possibleLocations = locations.Keys;
+            var possibleLocations = repeatableConfig.Locations.Keys;
             var allowedLocations =
                 target.Key == "Savage"
                     ? possibleLocations.Where(location => location != ELocationName.laboratory
@@ -770,7 +767,7 @@ public class RepeatableQuestController(
     /// </summary>
     /// <param name="repeatableConfig">Main repeatable config</param>
     /// <returns>QuestTypePool</returns>
-    protected QuestTypePool CreateBaseQuestPool(RepeatableQuestConfig repeatableConfig)
+    protected QuestTypePool CreateEmptyQuestPool(RepeatableQuestConfig repeatableConfig)
     {
         return new QuestTypePool
         {
@@ -791,52 +788,6 @@ public class RepeatableQuestController(
                 }
             }
         };
-    }
-
-    /// <summary>
-    ///     Get a dictionary of map locations the player can access based on their current level
-    /// </summary>
-    /// <param name="locations"></param>
-    /// <param name="pmcLevel"></param>
-    /// <returns>Dictionary</returns>
-    protected Dictionary<ELocationName, List<string>> GetAllowedLocationsForPmcLevel(
-        Dictionary<ELocationName, List<string>> locations, int pmcLevel)
-    {
-        var allowedLocation = new Dictionary<ELocationName, List<string>>();
-        foreach (var (location, matchingLocations) in locations)
-        {
-            var playerAccessibleMapIds = matchingLocations
-                .Where(locationName => IsPmcLevelAllowedOnLocation(locationName, pmcLevel)).ToList();
-            if (playerAccessibleMapIds.Any())
-            {
-                allowedLocation.Add(location, playerAccessibleMapIds);
-            }
-        }
-
-        return allowedLocation;
-    }
-
-    /// <summary>
-    ///     Return true if the given pmcLevel is allowed on the given location
-    /// </summary>
-    /// <param name="location">location name to check</param>
-    /// <param name="pmcLevel">level of the pmc</param>
-    /// <returns>True if the given pmc level is allowed to access the given location</returns>
-    protected bool IsPmcLevelAllowedOnLocation(string location, int pmcLevel)
-    {
-        // All PMC levels are allowed for 'any' location requirement
-        if (location == nameof(ELocationName.any))
-        {
-            return true;
-        }
-
-        var locationBase = _databaseService.GetLocation(location)?.Base;
-        if (locationBase is null)
-        {
-            return true;
-        }
-
-        return pmcLevel <= locationBase.RequiredPlayerLevelMax && pmcLevel >= locationBase.RequiredPlayerLevelMin;
     }
 
     /// <summary>
