@@ -1050,7 +1050,7 @@
                 "laboratory": ["laboratory"],
                 "RezervBase": ["RezervBase"],
                 "TarkovStreets": ["TarkovStreets"],
-                "Sandbox": ["Sandbox"]
+                "Sandbox": ["Sandbox", "Sandbox_high"]
             },
             "traderWhitelist": [
                 {
