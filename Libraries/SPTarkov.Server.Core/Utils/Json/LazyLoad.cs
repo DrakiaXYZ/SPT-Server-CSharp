@@ -46,6 +46,10 @@ public class LazyLoad<T>(Func<T> deserialize)
                         _result = transform(_result);
                     }
                 }
+                catch(Exception)
+                {
+                    throw;
+                }
                 finally
                 {
                     _lazyLoadTransformersLock.ExitReadLock();
