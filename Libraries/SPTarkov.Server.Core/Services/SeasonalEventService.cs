@@ -1030,8 +1030,16 @@ public class SeasonalEventService(
 
     protected void RenameBitcoin()
     {
-        _localeService.AddCustomClientLocale("en", $"{ItemTpl.BARTER_PHYSICAL_BITCOIN} Name", "Physical SPT Coin");
-        _localeService.AddCustomClientLocale("en", $"{ItemTpl.BARTER_PHYSICAL_BITCOIN} ShortName", "0.2SPT");
+        if(_databaseService.GetLocales().Global.TryGetValue("en", out var lazyLoad))
+        {
+            lazyLoad.AddTransformer(localeData =>
+            {
+                localeData[$"{ItemTpl.BARTER_PHYSICAL_BITCOIN} Name"] = "Physical SPT Coin";
+                localeData[$"{ItemTpl.BARTER_PHYSICAL_BITCOIN} ShortName"] = "0.2SPT";
+
+                return localeData;
+            });
+        }
     }
 
     /// <summary>

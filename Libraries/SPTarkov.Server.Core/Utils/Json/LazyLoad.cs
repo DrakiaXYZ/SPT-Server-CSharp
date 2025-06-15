@@ -2,6 +2,8 @@
 
 public class LazyLoad<T>(Func<T> deserialize)
 {
+    private readonly List<Func<T?, T?>> _lazyLoadTransformers = [];
+    private readonly ReaderWriterLockSlim _lazyLoadTransformersLock = new();
     private static readonly TimeSpan _autoCleanerTimeout = TimeSpan.FromSeconds(30);
     private bool _isLoaded;
     private T? _result;
@@ -9,10 +11,23 @@ public class LazyLoad<T>(Func<T> deserialize)
     private Timer? autoCleanerTimeout;
 
     /// <summary>
-    /// <see cref="OnLazyLoad" /> can be subscribed to for mods to modify. It is fired right after lazy loading is complete
-    /// and any modification passed to <see cref="OnLazyLoadEventArgs.Value" /> will stay for the duration of this <see cref="LazyLoad{T}"/>'s lifecycle
+    /// Adds a transformer to modify the value during lazy loading. Transformers execute 
+    /// in registration order and the final result is cached until auto-cleanup.
     /// </summary>
-    public event EventHandler<OnLazyLoadEventArgs<T>>? OnLazyLoad;
+    /// <param name="transformer">Function that transforms the value</param>
+    public void AddTransformer(Func<T?, T?> transformer)
+    {
+        _lazyLoadTransformersLock.EnterWriteLock();
+
+        try
+        {
+            _lazyLoadTransformers.Add(transformer);
+        }
+        finally
+        {
+            _lazyLoadTransformersLock.ExitWriteLock();
+        }
+    }
 
     public T? Value
     {
@@ -23,12 +38,17 @@ public class LazyLoad<T>(Func<T> deserialize)
                 _result = deserialize();
                 _isLoaded = true;
 
-                OnLazyLoadEventArgs<T> args = new(_result);
-                OnLazyLoad?.Invoke(this, args);
-
-                if (args.Value != null)
+                _lazyLoadTransformersLock.EnterReadLock();
+                try
                 {
-                    _result = args.Value;
+                    foreach (var transform in _lazyLoadTransformers)
+                    {
+                        _result = transform(_result);
+                    }
+                }
+                finally
+                {
+                    _lazyLoadTransformersLock.ExitReadLock();
                 }
 
                 autoCleanerTimeout = new Timer(
@@ -43,15 +63,10 @@ public class LazyLoad<T>(Func<T> deserialize)
                     _autoCleanerTimeout,
                     Timeout.InfiniteTimeSpan
                 );
-            }
+            }   
 
             autoCleanerTimeout?.Change(_autoCleanerTimeout, Timeout.InfiniteTimeSpan);
             return _result;
         }
     }
-}
-
-public class OnLazyLoadEventArgs<T>(T value) : EventArgs
-{
-    public T Value { get; set; } = value;
 }
