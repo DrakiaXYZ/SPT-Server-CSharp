@@ -243,9 +243,17 @@ public class CustomItemService(
 
             newLocaleDetails ??= localeDetails[localeDetails.Keys.FirstOrDefault()];
 
-            localeService.AddCustomClientLocale(shortNameKey.Key, $"{newItemId} Name", newLocaleDetails.Name);
-            localeService.AddCustomClientLocale(shortNameKey.Key, $"{newItemId} ShortName", newLocaleDetails.ShortName);
-            localeService.AddCustomClientLocale(shortNameKey.Key, $"{newItemId} Description", newLocaleDetails.Description);
+            if (databaseService.GetLocales().Global.TryGetValue(shortNameKey.Key, out var lazyLoad))
+            {
+                lazyLoad.AddTransformer(localeData =>
+                {
+                    localeData.Add($"{newItemId} Name", newLocaleDetails.Name);
+                    localeData.Add($"{newItemId} ShortName", newLocaleDetails.ShortName);
+                    localeData.Add($"{newItemId} Description", newLocaleDetails.Description);
+
+                    return localeData;
+                });
+            }
         }
     }
 

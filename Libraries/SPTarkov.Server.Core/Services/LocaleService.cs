@@ -13,13 +13,10 @@ public class LocaleService(
     ConfigServer _configServer
 )
 {
-    // we have to LazyLoad the data from the database and then combine it with the custom data before returning it
     protected readonly LocaleConfig _localeConfig = _configServer.GetConfig<LocaleConfig>();
-    protected readonly Dictionary<string, Dictionary<string, string>> customClientLocales = new();
 
     /// <summary>
     ///     Get the eft globals db file based on the configured locale in config/locale.json, if not found, fall back to 'en'
-    ///     This will contain Custom locales added by mods
     /// </summary>
     /// <returns> Dictionary of locales for desired language - en/fr/cn </returns>
     public Dictionary<string, string> GetLocaleDb(string? language = null)
@@ -29,23 +26,21 @@ public class LocaleService(
             : language;
 
         // if it can't get locales for language provided, default to en
-        if (TryGetLocaleDbWithCustomLocales(languageToUse, out var localeToReturn) ||
-            TryGetLocaleDbWithCustomLocales("en", out localeToReturn))
+        if (TryGetLocaleDb(languageToUse, out var localeToReturn) || TryGetLocaleDb("en", out localeToReturn))
         {
-            // TODO: need to see if this needs to be cloned
-            return RemovePraporTestMessage(localeToReturn);
+            return localeToReturn;
         }
 
         throw new Exception($"unable to get locales from either {languageToUse} or en");
     }
 
     /// <summary>
-    ///     Attempts to retrieve the locale database for the specified language key, including custom locales if available.
+    ///     Attempts to retrieve the locale database for the specified language key
     /// </summary>
     /// <param name="languageKey">The language key for which the locale database should be retrieved.</param>
     /// <param name="localeToReturn">The resulting locale database as a dictionary, or null if the operation fails.</param>
     /// <returns>True if the locale database was successfully retrieved, otherwise false.</returns>
-    protected bool TryGetLocaleDbWithCustomLocales(string languageKey, out Dictionary<string, string>? localeToReturn)
+    protected bool TryGetLocaleDb(string languageKey, out Dictionary<string, string>? localeToReturn)
     {
         localeToReturn = null;
         if (!_databaseServer.GetTables().Locales.Global.TryGetValue(languageKey, out var keyedLocales))
@@ -55,40 +50,7 @@ public class LocaleService(
 
         localeToReturn = keyedLocales.Value;
 
-        if (customClientLocales.TryGetValue(languageKey, out var customClientLocale))
-        {
-            // there were custom locales for this language
-            localeToReturn = CombineDbWithCustomLocales(localeToReturn, customClientLocale);
-        }
-
         return true;
-    }
-
-
-    /// <summary>
-    ///     Combines the provided database locales with custom locales, ensuring that all entries are merged into a single dictionary.
-    ///     Custom locale entries will overwrite existing keys from the database locales if conflicts occur.
-    /// </summary>
-    /// <param name="dbLocales">The dictionary containing locale entries from the database.</param>
-    /// <param name="customLocales">The dictionary containing custom locale entries to be merged.</param>
-    /// <returns>A dictionary representing the merged result of database and custom locales.</returns>
-    protected Dictionary<string, string> CombineDbWithCustomLocales(Dictionary<string, string> dbLocales, Dictionary<string, string> customLocales)
-    {
-        try
-        {
-            return dbLocales
-                .Concat(customLocales)
-                .GroupBy(kvp => kvp.Key)
-                .ToDictionary(
-                    group => group.Key,
-                    group => group.Last().Value
-                );
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
     }
 
     /// <summary>
@@ -237,33 +199,6 @@ public class LocaleService(
     public List<string> GetLocaleKeysThatStartsWithValue(string partialKey)
     {
         return GetLocaleDb().Keys.Where(x => x.StartsWith(partialKey)).ToList();
-    }
-
-    public void AddCustomClientLocale(string locale, string localeKey, string localeValue)
-    {
-        AddToDictionary(locale, localeKey, localeValue, customClientLocales);
-    }
-
-    public void RemoveCustomClientLocale(string locale, string localeKey)
-    {
-        customClientLocales.Remove(localeKey);
-    }
-
-    private void AddToDictionary(string locale, string localeKey, string localeValue,
-        Dictionary<string, Dictionary<string, string>> dictionaryToAddTo)
-    {
-        dictionaryToAddTo.TryAdd(locale, new Dictionary<string, string>());
-        if (!dictionaryToAddTo.TryGetValue(locale, out var localeDictToAddTo))
-        {
-            _logger.Error($"Unable to get custom locale dictionary keyed by: {locale}");
-
-            return;
-        }
-
-        if (!localeDictToAddTo.TryAdd(localeKey, localeValue))
-        {
-            localeDictToAddTo[localeKey] = localeValue;
-        }
     }
 
     /// <summary>
