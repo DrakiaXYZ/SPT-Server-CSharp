@@ -271,7 +271,7 @@ public class BackupService
             return dateTime;
         }
 
-        _logger.Warning($"Invalid backup folder name format: {folderPath}");
+        _logger.Warning($"Invalid backup folder name format: {folderPath}, [{folderName}]");
         return null;
     }
 
