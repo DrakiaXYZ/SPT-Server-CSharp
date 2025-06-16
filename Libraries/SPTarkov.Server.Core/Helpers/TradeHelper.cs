@@ -32,7 +32,7 @@ public class TradeHelper(
     ICloner _cloner
 )
 {
-    protected static Lock buyLock = new();
+    protected static readonly Lock buyLock = new();
 
     /// <summary>
     ///     Buy item from flea or trader

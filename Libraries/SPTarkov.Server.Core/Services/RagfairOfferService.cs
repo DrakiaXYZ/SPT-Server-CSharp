@@ -157,10 +157,10 @@ public class RagfairOfferService(
     public void RemoveExpiredOffers()
     {
         // Gather all stale offers
-        var staleOffersIds = ragfairOfferHolder.GetStaleOfferIds();
-        foreach (var offerId in staleOffersIds)
+        var staleOfferIds = ragfairOfferHolder.GetStaleOfferIds();
+        foreach (var offerId in staleOfferIds)
         {
-            ProcessStaleOffer(offerId);
+            ProcessStaleOffer(offerId, false);
         }
 
         // Clear out expired offer ids now we've processed them above
@@ -173,9 +173,14 @@ public class RagfairOfferService(
     /// Skip trader offers - we want those to remain in 'expired' state until trader refresh
     /// </summary>
     /// <param name="staleOfferId"> Stale offer id to process </param>
-    protected void ProcessStaleOffer(string staleOfferId)
+    /// <param name="flagOfferAsExpired">OPTIONAL - Flag the passed in offer as expired default = true</param>
+    protected void ProcessStaleOffer(string staleOfferId, bool flagOfferAsExpired = true)
     {
         var staleOffer = ragfairOfferHolder.GetOfferById(staleOfferId);
+        if (staleOffer is null)
+        {
+            return;
+        }
 
         // Skip trader offers, managed by RagfairServer.Update() + should remain on flea as 'expired'
         if (ragfairServerHelper.IsTrader(staleOffer.User.Id))
@@ -185,7 +190,7 @@ public class RagfairOfferService(
 
         // Handle dynamic offer from PMCs
         var isPlayer = profileHelper.IsPlayer(staleOffer.User.Id.RegexReplace("^pmc", ""));
-        if (!isPlayer)
+        if (flagOfferAsExpired && !isPlayer)
         {
             // Not trader/player offer
             ragfairOfferHolder.FlagOfferAsExpired(staleOffer.Id);
