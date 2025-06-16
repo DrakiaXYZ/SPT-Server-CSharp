@@ -57,11 +57,13 @@ public class RagfairServer(
             // Must occur BEFORE "RemoveExpiredOffers"
             var expiredAssortsWithChildren = _ragfairOfferHolder.GetExpiredOfferItems();
 
+            _ragfairOfferService.RemoveExpiredOffers();
+
+            // Force a cleanup+compact now all the expired offers are gone
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized, true, true);
+
             // Replace the expired offers with new ones
             _ragfairOfferGenerator.GenerateDynamicOffers(expiredAssortsWithChildren);
-
-            _ragfairOfferService.RemoveExpiredOffers();
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized, true, true);
         }
 
         _ragfairRequiredItemsService.BuildRequiredItemTable();

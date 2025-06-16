@@ -168,31 +168,30 @@ public class RagfairOfferHelper(
     public List<RagfairOffer> GetOffersThatRequireItem(SearchRequestData searchRequest, PmcData pmcData)
     {
         // Get all offers that require the desired item and filter out offers from non traders if player below ragfair unlock
-        var requiredOffers = _ragfairRequiredItemsService.GetRequiredItemsById(searchRequest.NeededSearchId);
+        var offerIDsForItem = _ragfairRequiredItemsService.GetRequiredOffersById(searchRequest.NeededSearchId);
 
         var tieredFlea = _ragfairConfig.TieredFlea;
         var tieredFleaLimitTypes = tieredFlea.UnlocksType;
-        return requiredOffers.Where(offer =>
-                {
-                    if (!PassesSearchFilterCriteria(searchRequest, offer, pmcData))
-                    {
-                        return false;
-                    }
 
-                    if (tieredFlea.Enabled && !OfferIsFromTrader(offer))
-                    {
-                        CheckAndLockOfferFromPlayerTieredFlea(
-                            tieredFlea,
-                            offer,
-                            tieredFleaLimitTypes.Keys.ToList(),
-                            pmcData.Info.Level.Value
-                        );
-                    }
+        var result = new List<RagfairOffer>();
+        foreach (var offer in offerIDsForItem
+                     .Select(_ragfairOfferService.GetOfferByOfferId)
+                     .Where(offer => PassesSearchFilterCriteria(searchRequest, offer, pmcData)))
+        {
+            if (tieredFlea.Enabled && !OfferIsFromTrader(offer))
+            {
+                CheckAndLockOfferFromPlayerTieredFlea(
+                    tieredFlea,
+                    offer,
+                    tieredFleaLimitTypes.Keys.ToList(),
+                    pmcData.Info.Level.Value
+                );
+            }
 
-                    return true;
-                }
-            )
-            .ToList();
+            result.Add(offer);
+        }
+
+        return result;
     }
 
     /// <summary>

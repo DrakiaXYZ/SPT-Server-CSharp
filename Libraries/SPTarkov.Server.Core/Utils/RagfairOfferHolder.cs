@@ -42,7 +42,10 @@ public class RagfairOfferHolder(
     /// <returns>RagfairOffer</returns>
     public HashSet<string> GetStaleOfferIds()
     {
-        return _expiredOfferIds;
+        lock (_expiredOfferIdsLock)
+        {
+            return _expiredOfferIds;
+        }
     }
 
     /// <summary>
@@ -90,7 +93,7 @@ public class RagfairOfferHolder(
     /// <returns>RagfairOffer list</returns>
     public List<RagfairOffer> GetOffers()
     {
-        if (_offersById.Count > 0)
+        if (!_offersById.IsEmpty)
         {
             return _offersById.Values.ToList();
         }
@@ -342,7 +345,7 @@ public class RagfairOfferHolder(
     }
 
     /// <summary>
-    ///     Flag offers with an expiry before the passed in timestamp
+    ///     Flag offers with a end date set before the passed in timestamp
     /// </summary>
     /// <param name="timestamp">Timestamp at point offer is 'expired'</param>
     public void FlagExpiredOffersAfterDate(long timestamp)
