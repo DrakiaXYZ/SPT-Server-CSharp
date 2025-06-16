@@ -1,3 +1,4 @@
+using System.Globalization;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Mod;
@@ -262,23 +263,16 @@ public class BackupService
     /// <returns> A DateTime object if the folder name is in the correct format, otherwise null. </returns>
     private DateTime? ExtractDateFromFolderName(string folderPath)
     {
-        // backup
         var folderName = Path.GetFileName(folderPath);
-        var parts = folderName.Split('-', '_');
-        if (parts.Length != 6)
+
+        const string format = "yyyy-M-dd_HH-mm-ss";
+        if (DateTime.TryParseExact(folderName, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))
         {
-            _logger.Warning($"Invalid backup folder name format: {folderPath}");
-            return null;
+            return dateTime;
         }
 
-        var year = int.Parse(parts[0]);
-        var month = int.Parse(parts[1]);
-        var day = int.Parse(parts[2]);
-        var hour = int.Parse(parts[3]);
-        var minute = int.Parse(parts[4]);
-        var second = int.Parse(parts[5]);
-
-        return new DateTime(year, month, day, hour, minute, second);
+        _logger.Warning($"Invalid backup folder name format: {folderPath}");
+        return null;
     }
 
     /// <summary>
