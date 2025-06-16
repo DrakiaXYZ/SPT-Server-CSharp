@@ -39,7 +39,7 @@
   </PropertyGroup>
 
   <Target Name="AfterEverythingDone" AfterTargets="PostBuildEvent">
-    <Exec ConsoleToMsBuild="true" Condition="'$(IsPublish)' == 'true'" Command='dotnet build -c Release $(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/Ceciler.Virtualizer.csproj' />
+    <Exec ConsoleToMsBuild="true" Condition="'$(IsPublish)' == 'true'" Command='dotnet build -c $(Configuration) $(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/Ceciler.Virtualizer.csproj' />
     <Exec ConsoleToMsBuild="true" Command='dotnet "$(MSBuildProjectDirectory)/../../Ceciler/Ceciler.Launcher.dll" "$(OutDir)SPTarkov.Server.Core.dll" "$(MSBuildProjectDirectory)/../../Patches/Ceciler.Virtualizer/bin/$(Configuration)/$(TargetFramework)/Ceciler.Virtualizer.dll"' />
   </Target>
 
