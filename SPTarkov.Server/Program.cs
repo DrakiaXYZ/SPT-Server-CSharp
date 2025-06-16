@@ -168,7 +168,7 @@ public static class Program
         var dirFiles =  Directory.GetFiles(Directory.GetCurrentDirectory());
 
         // This file is guaranteed to exist if ran from the correct location, even if the game does not exist here.
-        return dirFiles.Any(dirFile => dirFile.EndsWith("sptLogger.json"));
+        return dirFiles.Any(dirFile => dirFile.EndsWith("sptLogger.json") || dirFile.EndsWith("sptLogger.Development.json"));
     }
 
     [DllImport("kernel32.dll", SetLastError = true)]
