@@ -265,7 +265,7 @@ public class BackupService
     {
         var folderName = Path.GetFileName(folderPath);
 
-        const string format = "yyyy-M-dd_HH-mm-ss";
+        const string format = "yyyy-M-d_H-m-s";
         if (DateTime.TryParseExact(folderName, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))
         {
             return dateTime;
