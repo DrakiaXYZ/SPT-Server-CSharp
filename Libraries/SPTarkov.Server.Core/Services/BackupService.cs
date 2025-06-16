@@ -182,9 +182,7 @@ public class BackupService
     /// <returns> The formatted backup date string. </returns>
     protected string GenerateBackupDate()
     {
-        var date = _timeUtil.GetDateTimeNow();
-
-        return $"{date.Year}-{date.Month}-{date.Day}_{date.Hour}-{date.Minute}-{date.Second}";
+        return _timeUtil.GetDateTimeNow().ToString("yyyy-MM-dd_HH-mm-ss");
     }
 
     /// <summary>
@@ -265,7 +263,7 @@ public class BackupService
     {
         var folderName = Path.GetFileName(folderPath);
 
-        const string format = "yyyy-M-d_H-m-s";
+        const string format = "yyyy-MM-dd_HH-mm-ss";
         if (DateTime.TryParseExact(folderName, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))
         {
             return dateTime;
