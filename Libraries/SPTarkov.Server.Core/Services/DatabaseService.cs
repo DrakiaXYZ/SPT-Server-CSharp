@@ -26,7 +26,7 @@ public class DatabaseService(
     HashUtil _hashUtil
 )
 {
-    protected bool isDataValid = true;
+    private bool _isDataValid = true;
 
     /// <returns> assets/database/ </returns>
     public DatabaseTables GetTables()
@@ -105,13 +105,15 @@ public class DatabaseService(
     /// </summary>
     /// <param name="locationId"> Desired location ID </param>
     /// <returns> assets/database/locations/ </returns>
-    public Location GetLocation(string locationId)
+    public Location? GetLocation(string locationId)
     {
         var locations = GetLocations();
         var desiredLocation = locations.GetByJsonProp<Location>(locationId.ToLower());
         if (desiredLocation == null)
         {
-            throw new Exception(_localisationService.GetText("database-no_location_found_with_id", locationId));
+            _logger.Error(_localisationService.GetText("database-no_location_found_with_id", locationId));
+
+            return null;
         }
 
         return desiredLocation;
@@ -297,12 +299,14 @@ public class DatabaseService(
     /// </summary>
     /// <param name="traderId"> Desired trader ID </param>
     /// <returns> assets/database/traders/ </returns>
-    public Trader GetTrader(string traderId)
+    public Trader? GetTrader(string traderId)
     {
         var traders = GetTraders();
         if (!traders.TryGetValue(traderId, out var desiredTrader))
         {
-            throw new Exception(_localisationService.GetText("database-no_trader_found_with_id", traderId));
+            _logger.Error(_localisationService.GetText("database-no_trader_found_with_id", traderId));
+
+            return null;
         }
 
         return desiredTrader;
@@ -326,13 +330,13 @@ public class DatabaseService(
     {
         var start = Stopwatch.StartNew();
 
-        isDataValid =
+        _isDataValid =
             ValidateTable(GetQuests(), "quest") &&
             ValidateTable(GetTraders(), "trader") &&
             ValidateTable(GetItems(), "item") &&
             ValidateTable(GetCustomization(), "customization");
 
-        if (!isDataValid)
+        if (!_isDataValid)
         {
             _logger.Error(_localisationService.GetText("database-invalid_data"));
         }
@@ -370,6 +374,6 @@ public class DatabaseService(
     /// <returns> True if the database contains valid data, false otherwise </returns>
     public bool IsDatabaseValid()
     {
-        return isDataValid;
+        return _isDataValid;
     }
 }
