@@ -18,13 +18,28 @@ public class RagfairOfferHolder(
     ItemHelper _itemHelper
 )
 {
-    protected readonly Lock _expiredOfferIdsLock = new();
-    protected readonly Lock _ragfairOperationLock = new();
+    /// <summary>
+    /// Expired offer Ids
+    /// </summary>
+    private readonly HashSet<string> _expiredOfferIds = [];
 
-    protected readonly HashSet<string> _expiredOfferIds = [];
-    protected readonly ConcurrentDictionary<string, RagfairOffer> _offersById = new();
-    protected readonly ConcurrentDictionary<string, HashSet<string>> _offersByTemplate = new(); // key = tplId, value = list of offerIds
-    protected readonly ConcurrentDictionary<string, HashSet<string>> _offersByTrader = new(); // key = traderId, value = list of offerIds
+    /// <summary>
+    /// Ragfair offer cache, keyed by offer Id
+    /// </summary>
+    private readonly ConcurrentDictionary<string, RagfairOffer> _offersById = new();
+
+    /// <summary>
+    /// Offer Ids keyed by tpl
+    /// </summary>
+    private readonly ConcurrentDictionary<string, HashSet<string>> _offersByTemplate = new();
+
+    /// <summary>
+    /// Offer ids keyed by trader Id
+    /// </summary>
+    private readonly ConcurrentDictionary<string, HashSet<string>> _offersByTrader = new();
+
+    private readonly Lock _expiredOfferIdsLock = new();
+    private readonly Lock _ragfairOperationLock = new();
 
     /// <summary>
     ///     Get a ragfair offer by its id
@@ -228,19 +243,26 @@ public class RagfairOfferHolder(
     /// </summary>
     /// <param name="template">Tpl to store offer against</param>
     /// <param name="offerId">Offer to store against tpl</param>
-    protected void AddOfferByTemplates(string template, string offerId)
+    /// <returns>True - offer was added</returns>
+    protected bool AddOfferByTemplates(string template, string offerId)
     {
+        // Look for hashset for tpl first
         if (_offersByTemplate.TryGetValue(template, out var offerIds))
         {
             offerIds.Add(offerId);
 
-            return;
+            return true;
         }
 
-        if (!_offersByTemplate.TryAdd(template, [offerId]))
+        // Add new KvP of tpl and offer id in new hashset
+        if (_offersByTemplate.TryAdd(template, [offerId]))
         {
-            _logger.Warning($"Unable to add offer: {offerId} to offersByTemplate");
+            return true;
         }
+
+        _logger.Warning($"Unable to add offer: {offerId} to _offersByTemplate");
+
+        return false;
     }
 
     /// <summary>
@@ -248,19 +270,27 @@ public class RagfairOfferHolder(
     /// </summary>
     /// <param name="trader">Trader id to store offer against</param>
     /// <param name="offerId">Offer to store against</param>
-    protected void AddOfferByTrader(string trader, string offerId)
+    /// <returns>True - offer was added</returns>
+    protected bool AddOfferByTrader(string trader, string offerId)
     {
+        // Look for hashset for trader first
         if (_offersByTrader.TryGetValue(trader, out var traderOfferIds))
         {
             traderOfferIds.Add(offerId);
 
-            return;
+            return true;
         }
 
-        if (!_offersByTrader.TryAdd(trader, [offerId]))
+        // Add new KvP of trader and offer id in new hashset
+        if (_offersByTrader.TryAdd(trader, [offerId]))
         {
-            _logger.Error($"Unable to add offer: {offerId} to offersByTrader");
+            return true;
         }
+
+        _logger.Error($"Unable to add offer: {offerId} to _offersByTrader");
+
+        return false;
+
     }
 
     /// <summary>
@@ -320,7 +350,7 @@ public class RagfairOfferHolder(
                     continue;
                 }
 
-                if (offer?.Items?.Count == 0)
+                if (offer.Items?.Count == 0)
                 {
                     _logger.Error($"Unable to process expired offer: {expiredOfferId}, it has no items");
                     continue;
@@ -364,7 +394,7 @@ public class RagfairOfferHolder(
                 {
                     if (!_expiredOfferIds.Add(offer.Id))
                     {
-                        _logger.Warning($"Unable to add offer: {offer.Id} to expired offers");
+                        _logger.Warning($"Unable to add offer: {offer.Id} to expired offers as it already exists");
                     }
                 }
             }
