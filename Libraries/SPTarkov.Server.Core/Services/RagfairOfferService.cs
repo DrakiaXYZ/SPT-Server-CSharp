@@ -151,11 +151,16 @@ public class RagfairOfferService(
     }
 
     /// <summary>
-    ///     Process stored offer ids and remove expired
+    ///     Process cached expired offer ids
     /// </summary>
     public void RemoveExpiredOffers()
     {
-        ragfairOfferHolder.RemoveExpiredOffers();
+        // Gather all stale offers
+        var staleOffersIds = ragfairOfferHolder.GetStaleOfferIds();
+        foreach (var offerId in staleOffersIds)
+        {
+            ProcessStaleOffer(offerId);
+        }
 
         // Clear out expired offer ids now we've regenerated them
         ragfairOfferHolder.ResetExpiredOfferIds();

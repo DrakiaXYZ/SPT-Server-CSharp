@@ -37,6 +37,15 @@ public class RagfairOfferHolder(
     }
 
     /// <summary>
+    ///     Get a ragfair offer by its id
+    /// </summary>
+    /// <returns>RagfairOffer</returns>
+    public HashSet<string> GetStaleOfferIds()
+    {
+        return _expiredOfferIds;
+    }
+
+    /// <summary>
     ///     Get ragfair offers that match the passed in tpl
     /// </summary>
     /// <param name="templateId">Tpl to get offers for</param>
