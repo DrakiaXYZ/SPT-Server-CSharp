@@ -258,24 +258,25 @@ public class BackupService
     /// <summary>
     ///     Extracts a date from a folder name string formatted as `YYYY-MM-DD_hh-mm-ss`.
     /// </summary>
-    /// <param name="folderName"> The name of the folder from which to extract the date. </param>
+    /// <param name="folderPath"> The name of the folder from which to extract the date. </param>
     /// <returns> A DateTime object if the folder name is in the correct format, otherwise null. </returns>
-    private DateTime? ExtractDateFromFolderName(string folderName)
+    private DateTime? ExtractDateFromFolderName(string folderPath)
     {
         // backup
-        var parts = folderName.Split('\\', '-', '_');
-        if (parts.Length != 7)
+        var folderName = Path.GetFileName(folderPath);
+        var parts = folderName.Split('-', '_');
+        if (parts.Length != 6)
         {
-            _logger.Warning($"Invalid backup folder name format: {folderName}");
+            _logger.Warning($"Invalid backup folder name format: {folderPath}");
             return null;
         }
 
-        var year = int.Parse(parts[1]);
-        var month = int.Parse(parts[2]);
-        var day = int.Parse(parts[3]);
-        var hour = int.Parse(parts[4]);
-        var minute = int.Parse(parts[5]);
-        var second = int.Parse(parts[6]);
+        var year = int.Parse(parts[0]);
+        var month = int.Parse(parts[1]);
+        var day = int.Parse(parts[2]);
+        var hour = int.Parse(parts[3]);
+        var minute = int.Parse(parts[4]);
+        var second = int.Parse(parts[5]);
 
         return new DateTime(year, month, day, hour, minute, second);
     }
