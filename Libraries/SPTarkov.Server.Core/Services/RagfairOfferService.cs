@@ -8,6 +8,7 @@ using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
+using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Services;
 
@@ -92,7 +93,7 @@ public class RagfairOfferService(
         if (offer.Quantity <= 0)
         {
             // Offer is gone and now 'stale', need to be flagged as stale or removed if PMC offer
-            ProcessStaleOffer(offerId);
+            ProcessStaleOffer(offer.Id);
         }
     }
 
@@ -162,34 +163,35 @@ public class RagfairOfferService(
             ProcessStaleOffer(offerId);
         }
 
-        // Clear out expired offer ids now we've regenerated them
+        // Clear out expired offer ids now we've processed them above
         ragfairOfferHolder.ResetExpiredOfferIds();
     }
 
     /// <summary>
-    ///     Remove stale offer from flea
+    /// Remove stale offer from flea
+    /// Send offer items back when its player offer
+    /// Skip trader offers - we want those to remain in 'expired' state until trader refresh
     /// </summary>
     /// <param name="staleOfferId"> Stale offer id to process </param>
     protected void ProcessStaleOffer(string staleOfferId)
     {
         var staleOffer = ragfairOfferHolder.GetOfferById(staleOfferId);
-        var isTrader = ragfairServerHelper.IsTrader(staleOffer.User.Id);
-        var isPlayer = profileHelper.IsPlayer(staleOffer.User.Id.RegexReplace("^pmc", ""));
 
         // Skip trader offers, managed by RagfairServer.Update() + should remain on flea as 'expired'
-        if (isTrader)
+        if (ragfairServerHelper.IsTrader(staleOffer.User.Id))
         {
             return;
         }
 
         // Handle dynamic offer from PMCs
+        var isPlayer = profileHelper.IsPlayer(staleOffer.User.Id.RegexReplace("^pmc", ""));
         if (!isPlayer)
         {
             // Not trader/player offer
-            ragfairOfferHolder.FlagOfferAsExpired(staleOfferId);
+            ragfairOfferHolder.FlagOfferAsExpired(staleOffer.Id);
         }
 
-        // Handle player offer - item(s) need returning/XP/rep adjusting. Checking if offer has actually expired or not.
+        // Handle player offer: item(s) need returning/XP/rep adjusting. Checking if offer has actually expired or not.
         if (isPlayer && staleOffer.EndTime <= timeUtil.GetTimeStamp())
         {
             ReturnUnsoldPlayerOffer(staleOffer);
@@ -198,7 +200,7 @@ public class RagfairOfferService(
         }
 
         // Remove expired offer from global flea pool
-        RemoveOfferById(staleOfferId);
+        RemoveOfferById(staleOffer.Id);
     }
 
     /// <summary>
@@ -268,6 +270,11 @@ public class RagfairOfferService(
 
         ragfairServerHelper.ReturnItems(offerCreatorProfile.SessionId, unstackedItems);
         offerCreatorProfile.RagfairInfo.Offers.Splice(indexOfOfferInProfile, 1);
+
+        if (logger.IsLogEnabled(LogLevel.Debug))
+        {
+            logger.Debug($"Returned offer: {{playerOffer.Id}} items to player");
+        }
     }
 
     /// <summary>
@@ -318,7 +325,7 @@ public class RagfairOfferService(
 
             // Ensure items IDs are unique to prevent collisions when added to player inventory
             var reparentedItemAndChildren = itemHelper.ReparentItemAndChildren(
-                itemAndChildrenClone[0],
+                itemAndChildrenClone.FirstOrDefault(),
                 itemAndChildrenClone
             );
             itemHelper.RemapRootItemId(reparentedItemAndChildren);

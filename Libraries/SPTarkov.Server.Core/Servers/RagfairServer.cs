@@ -22,7 +22,7 @@ public class RagfairServer(
     ConfigServer _configServer
 )
 {
-    protected RagfairConfig _ragfairConfig = _configServer.GetConfig<RagfairConfig>();
+    protected readonly RagfairConfig _ragfairConfig = _configServer.GetConfig<RagfairConfig>();
 
     public void Load()
     {
@@ -33,7 +33,7 @@ public class RagfairServer(
 
     public void Update()
     {
-        // Generate trader offers
+        // Generate/refresh trader offers
         var traders = GetUpdateableTraders();
         foreach (var traderId in traders)
         {
@@ -45,6 +45,7 @@ public class RagfairServer(
 
             if (_ragfairOfferService.TraderOffersNeedRefreshing(traderId))
             {
+                // Trader has passed its offer cycle time, update stock and set offer times
                 _ragfairOfferGenerator.GenerateFleaOffersForTrader(traderId);
             }
         }

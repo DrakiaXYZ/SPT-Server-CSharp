@@ -599,7 +599,7 @@ public class RagfairOfferHelper(
      */
     public bool ProcessOffersOnProfile(string sessionId)
     {
-        var timestamp = _timeUtil.GetTimeStamp();
+        var currentTimestamp = _timeUtil.GetTimeStamp();
         var profileOffers = GetProfileOffers(sessionId);
 
         // No offers, don't do anything
@@ -612,56 +612,59 @@ public class RagfairOfferHelper(
         for (var index = profileOffers.Count - 1; index >= 0; index--)
         {
             var offer = profileOffers[index];
-            var firstSellResult = offer.SellResults?.FirstOrDefault();
-            if (offer.SellResults?.Count > 0 && timestamp >= offer.SellResults[0].SellTime)
+            if (offer.SellResults is null || offer.SellResults.Count == 0 || currentTimestamp < offer.SellResults.FirstOrDefault()?.SellTime)
             {
-                // Checks first item, first is spliced out of array after being processed
-                // Item sold
-                var totalItemsCount = 1d;
-                var boughtAmount = 1;
-
-                if (!offer.SellInOnePiece.GetValueOrDefault(false))
-                {
-                    // offer.items.reduce((sum, item) => sum + item.upd?.StackObjectsCount ?? 0, 0);
-                    totalItemsCount = GetTotalStackCountSize([offer.Items]);
-                    boughtAmount = firstSellResult.Amount.Value;
-                }
-
-                var ratingToAdd = offer.SummaryCost / totalItemsCount * boughtAmount;
-                IncreaseProfileRagfairRating(_profileHelper.GetFullProfile(sessionId), ratingToAdd.Value);
-
-                offer.SellResults.Remove(firstSellResult); // Remove the sell result object now it has been processed
-
-                // Can delete offer object, must run last
-                CompleteOffer(sessionId, offer, boughtAmount);
+                // Not sold / too early to check
+                continue;
             }
+
+            var firstSellResult = offer.SellResults?.FirstOrDefault();
+            if (firstSellResult is null)
+            {
+                continue;
+            }
+
+            // Checks first item, first is spliced out of array after being processed
+            // Item sold
+            var totalItemsCount = 1d;
+            var boughtAmount = 1;
+
+            // Does item need to be re-stacked
+            if (!offer.SellInOnePiece.GetValueOrDefault(false))
+            {
+                // offer.items.reduce((sum, item) => sum + item.upd?.StackObjectsCount ?? 0, 0);
+                totalItemsCount = GetTotalStackCountSize([offer.Items]);
+                boughtAmount = firstSellResult.Amount ?? boughtAmount;
+            }
+
+            var ratingToAdd = offer.SummaryCost / totalItemsCount * boughtAmount;
+            IncreaseProfileRagfairRating(_profileHelper.GetFullProfile(sessionId), ratingToAdd.Value);
+
+            // Remove the sell result object now it has been processed
+            offer.SellResults.Remove(firstSellResult); 
+
+            // Can delete offer object, must run last
+            CompleteOffer(sessionId, offer, boughtAmount);
         }
 
         return true;
     }
 
-    /**
-     * Count up all rootitem StackObjectsCount properties of an array of items
-     * @param itemsInInventoryToList items to sum up
-     * @returns Total stack count
-     */
-    public double GetTotalStackCountSize(List<List<Item>> itemsInInventoryToList)
+    /// <summary>
+    /// Count up all root item StackObjectsCount properties of an array of items
+    /// </summary>
+    /// <param name="itemsInInventoryToSumStackCount">items to sum up</param>
+    /// <returns>Total stack count</returns>
+    public double GetTotalStackCountSize(List<List<Item>> itemsInInventoryToSumStackCount)
     {
-        var total = 0d;
-        foreach (var itemAndChildren in itemsInInventoryToList)
-            // Only count the root items stack count in total
-        {
-            total += itemAndChildren[0]?.Upd?.StackObjectsCount.GetValueOrDefault(1) ?? 1;
-        }
-
-        return total;
+        return itemsInInventoryToSumStackCount.Sum(itemAndChildren => itemAndChildren.FirstOrDefault()?.Upd?.StackObjectsCount.GetValueOrDefault(1) ?? 1);
     }
 
-    /**
-     * Add amount to players ragfair rating
-     * @param sessionId Profile to update
-     * @param amountToIncrementBy Raw amount to add to players ragfair rating (excluding the reputation gain multiplier)
-     */
+    /// <summary>
+    /// Add amount to players ragfair rating
+    /// </summary>
+    /// <param name="profile">Profile to update</param>
+    /// <param name="amountToIncrementBy">Raw amount to add to players ragfair rating (excluding the reputation gain multiplier)</param>
     public void IncreaseProfileRagfairRating(SptProfile profile, double? amountToIncrementBy)
     {
         var ragfairGlobalsConfig = _databaseService.GetGlobals().Configuration.RagFair;
@@ -680,11 +683,11 @@ public class RagfairOfferHelper(
             amountToIncrementBy;
     }
 
-    /**
-     * Return all offers a player has listed on a desired profile
-     * @param sessionId Session id
-     * @returns List of ragfair offers
-     */
+    /// <summary>
+    /// Return all offers a player has listed on a desired profile
+    /// </summary>
+    /// <param name="sessionId">Session/Player id</param>
+    /// <returns>List of ragfair offers</returns>
     protected List<RagfairOffer> GetProfileOffers(string sessionId)
     {
         var profile = _profileHelper.GetPmcProfile(sessionId);
@@ -721,21 +724,15 @@ public class RagfairOfferHelper(
         _ragfairOfferService.RemoveOfferById(offerId);
     }
 
-    /**
-     * Complete the selling of players' offer
-     * @param sessionID Session id
-     * @param offer Sold offer details
-     * @param boughtAmount Amount item was purchased for
-     * @returns ItemEventRouterResponse
-     */
+    /// <summary>
+    /// Complete the selling of players' offer
+    /// </summary>
+    /// <param name="offerOwnerSessionId">Session/Player id</param>
+    /// <param name="offer">Sold offer details</param>
+    /// <param name="boughtAmount">Amount item was purchased for</param>
+    /// <returns>ItemEventRouterResponse</returns>
     public ItemEventRouterResponse CompleteOffer(string offerOwnerSessionId, RagfairOffer offer, int boughtAmount)
     {
-        var rootItem = offer.Items.FirstOrDefault();
-        var itemTpl = rootItem.Template;
-        var paymentItemsToSendToPlayer = new List<Item>();
-        var offerStackCount = rootItem.Upd.StackObjectsCount;
-        var sellerProfile = _profileHelper.GetPmcProfile(offerOwnerSessionId);
-
         // Pack or ALL items of a multi-offer were bought - remove entire offer
         if (offer.SellInOnePiece.GetValueOrDefault(false) || boughtAmount == offer.Quantity)
         {
@@ -748,6 +745,11 @@ public class RagfairOfferHelper(
         }
 
         // Assemble payment to send to seller now offer was purchased
+        var sellerProfile = _profileHelper.GetPmcProfile(offerOwnerSessionId);
+        var rootItem = offer.Items.FirstOrDefault();
+        var itemTpl = rootItem.Template;
+        var offerStackCount = rootItem.Upd.StackObjectsCount;
+        var paymentItemsToSendToPlayer = new List<Item>();
         foreach (var requirement in offer.Requirements)
         {
             // Create an item template item
@@ -792,14 +794,14 @@ public class RagfairOfferHelper(
             HandbookId = itemTpl
         };
 
-        var storagetime = _timeUtil.GetHoursAsSeconds((int) _questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile));
+        var storageTimeSeconds = _timeUtil.GetHoursAsSeconds((int) _questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile));
         _mailSendService.SendDirectNpcMessageToPlayer(
             offerOwnerSessionId,
             Traders.RAGMAN,
             MessageType.FleamarketMessage,
             GetLocalisedOfferSoldMessage(itemTpl, boughtAmount),
             paymentItemsToSendToPlayer,
-            storagetime,
+            storageTimeSeconds,
             null,
             ragfairDetails
         );

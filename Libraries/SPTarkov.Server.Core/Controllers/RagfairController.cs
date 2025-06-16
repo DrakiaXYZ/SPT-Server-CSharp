@@ -1088,7 +1088,7 @@ public class RagfairController
         var output = _eventOutputHolder.GetOutput(sessionId);
 
         var pmcData = _profileHelper.GetPmcProfile(sessionId);
-        var playerProfileOffers = pmcData.RagfairInfo.Offers;
+        var playerProfileOffers = pmcData?.RagfairInfo?.Offers;
         if (playerProfileOffers is null)
         {
             _logger.Warning(
@@ -1132,6 +1132,8 @@ public class RagfairController
             var newEndTime = _ragfairConfig.Sell.ExpireSeconds + _timeUtil.GetTimeStamp();
             playerOffer.EndTime = (long?) Math.Round((double) newEndTime);
         }
+
+        _logger.Debug($"Flagged player offer: {offerId} for expiry in: {TimeSpan.FromTicks(playerOffer.EndTime.Value).ToString()}");
 
         return output;
     }
