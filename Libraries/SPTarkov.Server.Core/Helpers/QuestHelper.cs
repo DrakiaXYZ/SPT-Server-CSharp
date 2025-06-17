@@ -353,17 +353,25 @@ public class QuestHelper(
                 {
                     // Quest is accessible to player when the accepted quest passed into param is started
                     // e.g. Quest A passed in, quest B is looped over and has requirement of A to be started, include it
-                    var acceptedQuestCondition = quest.Conditions.AvailableForStart.FirstOrDefault(condition =>
+                    var matchingQuestCondition = quest.Conditions.AvailableForStart
+                        .FirstOrDefault(condition => condition.ConditionType == "Quest"
+                                                     && ((condition.Target?.Item?.Contains(startedQuestId) ?? false)
+                                                         || (condition.Target?.List?.Contains(startedQuestId) ?? false))
+                                                     && (condition.Status?.Contains(QuestStatusEnum.Started) ?? false));
+
+                    // Has a matching quest condition in another quest (Accepting this quest gives access to found quest too) check if it also has a level requirement that passes
+                    if (matchingQuestCondition is not null)
+                    {
+                        var matchingLevelRequirement = quest.Conditions.AvailableForStart.FirstOrDefault(condition => condition.ConditionType == "Level");
+                        if (matchingLevelRequirement is not null && profile.Info.Level < matchingLevelRequirement.Value)
                         {
-                            return condition.ConditionType == "Quest" &&
-                                   ((condition.Target?.Item?.Contains(startedQuestId) ?? false) ||
-                                    (condition.Target?.List?.Contains(startedQuestId) ?? false)) &&
-                                   (condition.Status?.Contains(QuestStatusEnum.Started) ?? false);
+                            // Player doesn't fulfil level requirement for quest, don't show it to player
+                            return false;
                         }
-                    );
+                    }
 
                     // Not found, skip quest
-                    if (acceptedQuestCondition is null)
+                    if (matchingQuestCondition is null)
                     {
                         return false;
                     }
