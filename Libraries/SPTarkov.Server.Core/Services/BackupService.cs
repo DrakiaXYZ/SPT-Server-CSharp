@@ -227,7 +227,7 @@ public class BackupService
     /// </summary>
     /// <param name="dir"> The directory to search for backup files. </param>
     /// <returns> List of sorted backup file paths. </returns>
-    private List<string> GetBackupPaths(string dir)
+    protected List<string> GetBackupPaths(string dir)
     {
         var backups = _fileUtil.GetDirectories(dir).ToList();
         backups.Sort(CompareBackupDates);
@@ -241,7 +241,7 @@ public class BackupService
     /// <param name="a"> The name of the first backup folder. </param>
     /// <param name="b"> The name of the second backup folder. </param>
     /// <returns> The difference in time between the two dates in milliseconds, or `null` if either date is invalid. </returns>
-    private int CompareBackupDates(string a, string b)
+    protected int CompareBackupDates(string a, string b)
     {
         var dateA = ExtractDateFromFolderName(a);
         var dateB = ExtractDateFromFolderName(b);
@@ -253,13 +253,13 @@ public class BackupService
 
         return (int) (dateA.Value.ToFileTimeUtc() - dateB.Value.ToFileTimeUtc());
     }
-
+    
     /// <summary>
     ///     Extracts a date from a folder name string formatted as `YYYY-MM-DD_hh-mm-ss`.
     /// </summary>
     /// <param name="folderPath"> The name of the folder from which to extract the date. </param>
     /// <returns> A DateTime object if the folder name is in the correct format, otherwise null. </returns>
-    private DateTime? ExtractDateFromFolderName(string folderPath)
+    protected DateTime? ExtractDateFromFolderName(string folderPath)
     {
         var folderName = Path.GetFileName(folderPath);
 
@@ -278,7 +278,7 @@ public class BackupService
     /// </summary>
     /// <param name="backupFilenames"> List of backup file names to be removed. </param>
     /// <returns> A promise that resolves when all specified backups have been removed. </returns>
-    private void RemoveExcessBackups(List<string> backupFilenames)
+    protected void RemoveExcessBackups(List<string> backupFilenames)
     {
         var filePathsToDelete = backupFilenames.Select(x => x);
         foreach (var pathToDelete in filePathsToDelete)
