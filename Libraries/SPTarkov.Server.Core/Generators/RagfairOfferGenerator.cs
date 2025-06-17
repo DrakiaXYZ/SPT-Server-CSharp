@@ -358,7 +358,7 @@ public class RagfairOfferGenerator(
             ? expiredOffers ?? []
             : ragfairAssortGenerator.GetAssortItems();
         stopwatch.Stop();
-        if (logger.IsLogEnabled(LogLevel.Debug))
+        if (logger.IsLogEnabled(LogLevel.Debug) && stopwatch.ElapsedMilliseconds > 0)
         {
             logger.Debug($"Took {stopwatch.ElapsedMilliseconds}ms to GetRagfairAssorts - {assortItemsToProcess.Count} items");
         }
