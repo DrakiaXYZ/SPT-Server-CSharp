@@ -205,7 +205,7 @@ public class BackupService
         }
     }
 
-    private SortedDictionary<long, string> GetBackupPathsWithCreationTimestamp(List<string> backupPaths)
+    protected SortedDictionary<long, string> GetBackupPathsWithCreationTimestamp(List<string> backupPaths)
     {
         var result = new SortedDictionary<long, string>();
         foreach (var backupPath in backupPaths)

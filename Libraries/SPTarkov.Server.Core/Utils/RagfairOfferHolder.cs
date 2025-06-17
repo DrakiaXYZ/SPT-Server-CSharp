@@ -375,7 +375,7 @@ public class RagfairOfferHolder(
     }
 
     /// <summary>
-    ///     Flag offers with a end date set before the passed in timestamp
+    ///     Flag offers with an end date set before the passed in timestamp
     /// </summary>
     /// <param name="timestamp">Timestamp at point offer is 'expired'</param>
     public void FlagExpiredOffersAfterDate(long timestamp)
