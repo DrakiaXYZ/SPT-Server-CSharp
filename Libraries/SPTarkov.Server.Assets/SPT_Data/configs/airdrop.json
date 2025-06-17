@@ -5,7 +5,7 @@
         "foodMedical": 100,
         "barter": 100,
         "radar": 0,
-		"toiletPaper": 1
+        "toiletPaper": 1
     },
     "loot": {
         "mixed": {

@@ -50,7 +50,7 @@ public class AirdropService(
     /// <returns>List of LootItem objects</returns>
     public GetAirdropLootResponse GenerateAirdropLoot(SptAirdropTypeEnum? forcedAirdropType = null)
     {
-        var airdropType = SptAirdropTypeEnum.toiletPaper;
+        var airdropType = forcedAirdropType ?? ChooseAirdropType();
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
             _logger.Debug($"Chose: {airdropType} for airdrop loot");
@@ -164,7 +164,7 @@ public class AirdropService(
         var airdropContainer = new Item
         {
             Id = _hashUtil.Generate(),
-            Template = string.Empty, // Chosen below later 
+            Template = string.Empty, // Chosen below later
             Upd = new Upd
             {
                 SpawnedInSession = true,
