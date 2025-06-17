@@ -330,7 +330,6 @@
                         "5485a8684bdc2da71d8b4567",
                         "55818b224bdc2dde698b456f",
                         "57864a66245977548f04a81f",
-                        "55818af64bdc2d5b648b4570",
                         "550aa4dd4bdc2dc9348b4569",
                         "55818a594bdc2db9688b456a",
                         "55818a104bdc2db9688b4569"
@@ -1216,7 +1215,10 @@
                     "requiredItemMinDurabilityMinMax": {
                         "min": 60,
                         "max": 80
-                    }
+                    },
+                    "requiredItemTypeBlacklist": [
+                        "5485a8684bdc2da71d8b4567"
+                    ]
                 },
                 "Elimination": [
                     {

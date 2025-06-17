@@ -600,6 +600,16 @@ public record Completion : BaseQuestConfig
         get;
         set;
     }
+
+    /// <summary>
+    ///     Blacklisted item types to not collect
+    /// </summary>
+    [JsonPropertyName("requiredItemTypeBlacklist")]
+    public HashSet<string>? RequiredItemTypeBlacklist
+    {
+        get;
+        set;
+    }
 }
 
 public record Pickup : BaseQuestConfig

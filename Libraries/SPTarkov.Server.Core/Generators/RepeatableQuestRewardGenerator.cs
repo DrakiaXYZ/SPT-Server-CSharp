@@ -693,7 +693,7 @@ public class RepeatableQuestRewardGenerator(
         // Get an array of seasonal items that should not be shown right now as seasonal event is not active
         var seasonalItems = _seasonalEventService.GetInactiveSeasonalEventItems();
 
-        // Check for specific baseclasses which don't make sense as reward item
+        // Check for specific base classes which don't make sense as reward item
         // also check if the price is greater than 0; there are some items whose price can not be found
         // those are not in the game yet (e.g. AGS grenade launcher)
         return _databaseService.GetItems()
@@ -715,7 +715,8 @@ public class RepeatableQuestRewardGenerator(
 
                     return IsValidRewardItem(
                         itemTemplate.Id,
-                        repeatableQuestConfig,
+                        repeatableQuestConfig.RewardBlacklist,
+                        repeatableQuestConfig.RewardBaseTypeBlacklist,
                         traderWhitelist?.RewardBaseWhitelist
                     );
                 }
@@ -728,10 +729,13 @@ public class RepeatableQuestRewardGenerator(
     ///     or content of bot loot. Items that are tested as valid may be in a player backpack or stash.
     /// </summary>
     /// <param name="tpl"> Template id of item to check</param>
-    /// <param name="repeatableQuestConfig"> Config </param>
+    /// <param name="itemTplBlacklist"> Specific item tpls to ignore </param>
+    /// <param name="itemTypeBlacklist"> Specific item base types to ignore </param>
     /// <param name="itemBaseWhitelist"> Default null, specific trader item base classes</param>
     /// <returns> True if item is valid reward </returns>
-    protected bool IsValidRewardItem(string tpl, RepeatableQuestConfig repeatableQuestConfig,
+    public bool IsValidRewardItem(string tpl,
+        HashSet<string> itemTplBlacklist,
+        HashSet<string> itemTypeBlacklist,
         List<string>? itemBaseWhitelist = null)
     {
         // Return early if not valid item to give as reward
@@ -744,7 +748,7 @@ public class RepeatableQuestRewardGenerator(
         if (
             _itemFilterService.IsItemBlacklisted(tpl) ||
             _itemFilterService.IsItemRewardBlacklisted(tpl) ||
-            repeatableQuestConfig.RewardBlacklist.Contains(tpl) ||
+            itemTplBlacklist.Contains(tpl) ||
             _itemFilterService.IsItemBlacklisted(tpl)
         )
         {
@@ -752,7 +756,7 @@ public class RepeatableQuestRewardGenerator(
         }
 
         // Item has blacklisted base types
-        if (_itemHelper.IsOfBaseclasses(tpl, repeatableQuestConfig.RewardBaseTypeBlacklist))
+        if (_itemHelper.IsOfBaseclasses(tpl, itemTypeBlacklist))
         {
             return false;
         }
