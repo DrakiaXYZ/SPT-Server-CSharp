@@ -9,23 +9,15 @@ namespace SPTarkov.Server.Core.Routers.Static;
 [Injectable]
 public class BundleStaticRouter : StaticRouter
 {
-    public BundleStaticRouter(
-        JsonUtil jsonUtil,
-        BundleCallbacks bundleCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
-                "/singleplayer/bundles",
-                async (
-                    url,
-                    info,
-                    sessionID,
-                    output
-                ) => await bundleCallbacks.GetBundles(url, info as EmptyRequestData, sessionID)
-            )
-        ]
-    )
-    {
-    }
+    public BundleStaticRouter(JsonUtil jsonUtil, BundleCallbacks bundleCallbacks)
+        : base(
+            jsonUtil,
+            [
+                new RouteAction(
+                    "/singleplayer/bundles",
+                    async (url, info, sessionID, output) =>
+                        await bundleCallbacks.GetBundles(url, info as EmptyRequestData, sessionID)
+                ),
+            ]
+        ) { }
 }

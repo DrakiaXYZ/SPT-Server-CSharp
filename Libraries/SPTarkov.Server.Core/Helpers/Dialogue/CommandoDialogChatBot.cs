@@ -32,8 +32,8 @@ public class CommandoDialogChatBot(
                 MemberCategory = MemberCategory.Developer,
                 SelectedMemberCategory = MemberCategory.Developer,
                 Nickname = "Commando",
-                Side = "Usec"
-            }
+                Side = "Usec",
+            },
         };
     }
 

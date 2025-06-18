@@ -14,8 +14,9 @@ public abstract class AbstractDialogChatBot(
     IEnumerable<IChatCommand> chatCommands
 ) : IDialogueChatBot
 {
-    protected IDictionary<string, IChatCommand> _chatCommands =
-        chatCommands.ToDictionary(command => command.GetCommandPrefix());
+    protected IDictionary<string, IChatCommand> _chatCommands = chatCommands.ToDictionary(command =>
+        command.GetCommandPrefix()
+    );
 
     public abstract UserDialogInfo GetChatBot();
 
@@ -30,14 +31,18 @@ public abstract class AbstractDialogChatBot(
 
         var splitCommand = request.Text.Split(" ");
 
-        if (splitCommand.Length > 1 &&
-            _chatCommands.TryGetValue(splitCommand[0], out var commando) &&
-            commando.GetCommands().Contains(splitCommand[1]))
+        if (
+            splitCommand.Length > 1
+            && _chatCommands.TryGetValue(splitCommand[0], out var commando)
+            && commando.GetCommands().Contains(splitCommand[1])
+        )
         {
             return commando.Handle(splitCommand[1], GetChatBot(), sessionId, request);
         }
 
-        if (string.Equals(splitCommand.FirstOrDefault(), "help", StringComparison.OrdinalIgnoreCase))
+        if (
+            string.Equals(splitCommand.FirstOrDefault(), "help", StringComparison.OrdinalIgnoreCase)
+        )
         {
             return SendPlayerHelpMessage(sessionId, request);
         }
@@ -105,7 +110,9 @@ public abstract class AbstractDialogChatBot(
         var prefix = chatCommand.GetCommandPrefix();
         if (!_chatCommands.TryAdd(prefix, chatCommand))
         {
-            throw new Exception($"The command \"{prefix}\" attempting to be registered already exists.");
+            throw new Exception(
+                $"The command \"{prefix}\" attempting to be registered already exists."
+            );
         }
     }
 

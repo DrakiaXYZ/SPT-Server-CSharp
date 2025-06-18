@@ -140,7 +140,7 @@ public class RagfairOfferService(
         {
             var pmcData = saveServer.GetProfile(sessionId)?.CharacterData?.PmcData;
             if (pmcData?.RagfairInfo?.Offers == null)
-                // Profile has been wiped, ignore
+            // Profile has been wiped, ignore
             {
                 continue;
             }
@@ -221,21 +221,32 @@ public class RagfairOfferService(
         var offerCreatorProfile = profileHelper.GetProfileByPmcId(offerCreatorId);
         if (offerCreatorProfile == null)
         {
-            logger.Error($"Unable to return flea offer: {playerOffer.Id} as the profile: {offerCreatorId} could not be found");
+            logger.Error(
+                $"Unable to return flea offer: {playerOffer.Id} as the profile: {offerCreatorId} could not be found"
+            );
 
             return;
         }
 
-        var indexOfOfferInProfile = offerCreatorProfile.RagfairInfo.Offers.FindIndex(o => o.Id == playerOffer.Id);
+        var indexOfOfferInProfile = offerCreatorProfile.RagfairInfo.Offers.FindIndex(o =>
+            o.Id == playerOffer.Id
+        );
         if (indexOfOfferInProfile == -1)
         {
-            logger.Warning(localisationService.GetText("ragfair-unable_to_find_offer_to_remove", playerOffer.Id));
+            logger.Warning(
+                localisationService.GetText(
+                    "ragfair-unable_to_find_offer_to_remove",
+                    playerOffer.Id
+                )
+            );
 
             return;
         }
 
         // Reduce player ragfair rep
-        offerCreatorProfile.RagfairInfo.Rating -= databaseService.GetGlobals().Configuration.RagFair.RatingDecreaseCount;
+        offerCreatorProfile.RagfairInfo.Rating -= databaseService
+            .GetGlobals()
+            .Configuration.RagFair.RatingDecreaseCount;
         offerCreatorProfile.RagfairInfo.IsRatingGrowing = false;
 
         // Increment players 'notSellSum' value
@@ -270,7 +281,8 @@ public class RagfairOfferService(
         // Send toast notification to player
         var notificationMessage = notifierHelper.CreateRagfairNewRatingNotification(
             offerCreatorProfile.RagfairInfo.Rating.Value,
-            offerCreatorProfile.RagfairInfo.IsRatingGrowing.GetValueOrDefault(false));
+            offerCreatorProfile.RagfairInfo.IsRatingGrowing.GetValueOrDefault(false)
+        );
         notificationSendHelper.SendMessage(offerCreatorId, notificationMessage);
 
         ragfairServerHelper.ReturnItems(offerCreatorProfile.SessionId, unstackedItems);
@@ -347,6 +359,7 @@ public class RagfairOfferService(
     /// <returns>True if enough offers have expired</returns>
     public bool EnoughExpiredOffersExistToProcess()
     {
-        return ragfairOfferHolder.GetExpiredOfferCount() >= _ragfairConfig.Dynamic.ExpiredOfferThreshold;
+        return ragfairOfferHolder.GetExpiredOfferCount()
+            >= _ragfairConfig.Dynamic.ExpiredOfferThreshold;
     }
 }

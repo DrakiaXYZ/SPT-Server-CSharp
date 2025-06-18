@@ -8,5 +8,5 @@ public enum EventType
     None,
     Halloween,
     Christmas,
-    HalloweenIllumination
+    HalloweenIllumination,
 }

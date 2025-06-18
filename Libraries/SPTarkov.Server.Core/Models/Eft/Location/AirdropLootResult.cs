@@ -9,16 +9,8 @@ public record AirdropLootResult
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("dropType")]
-    public string? DropType
-    {
-        get;
-        set;
-    }
+    public string? DropType { get; set; }
 
     [JsonPropertyName("loot")]
-    public List<LootItem>? Loot
-    {
-        get;
-        set;
-    }
+    public List<LootItem>? Loot { get; set; }
 }

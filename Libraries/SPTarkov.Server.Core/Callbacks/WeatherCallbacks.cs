@@ -32,6 +32,8 @@ public class WeatherCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetLocalWeather(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_weatherController.GenerateLocal(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_weatherController.GenerateLocal(sessionID))
+        );
     }
 }

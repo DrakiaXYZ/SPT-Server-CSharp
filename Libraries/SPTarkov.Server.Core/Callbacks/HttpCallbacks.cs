@@ -3,6 +3,7 @@ using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Servers;
 
 namespace SPTarkov.Server.Core.Callbacks;
+
 [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.HttpCallbacks)]
 public class HttpCallbacks(HttpServer _httpServer) : IOnLoad
 {

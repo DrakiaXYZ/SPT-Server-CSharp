@@ -8,9 +8,5 @@ public record InventoryReadEncyclopediaRequestData : InventoryBaseActionRequestD
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("ids")]
-    public List<string> Ids
-    {
-        get;
-        set;
-    }
+    public List<string> Ids { get; set; }
 }

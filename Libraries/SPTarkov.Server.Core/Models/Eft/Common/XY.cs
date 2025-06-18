@@ -8,16 +8,8 @@ public record XY
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("x")]
-    public double? X
-    {
-        get;
-        set;
-    }
+    public double? X { get; set; }
 
     [JsonPropertyName("y")]
-    public double? Y
-    {
-        get;
-        set;
-    }
+    public double? Y { get; set; }
 }

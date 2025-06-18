@@ -11,11 +11,7 @@ public class WorkoutData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("skills")]
-    public WorkoutSkills? Skills
-    {
-        get;
-        set;
-    }
+    public WorkoutSkills? Skills { get; set; }
 }
 
 public record WorkoutSkills
@@ -24,30 +20,14 @@ public record WorkoutSkills
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Common")]
-    public List<CommonSkill> Common
-    {
-        get;
-        set;
-    }
+    public List<CommonSkill> Common { get; set; }
 
     [JsonPropertyName("Mastering")]
-    public List<Mastering>? Mastering
-    {
-        get;
-        set;
-    }
+    public List<Mastering>? Mastering { get; set; }
 
     [JsonPropertyName("Bonuses")]
-    public Bonus? Bonuses
-    {
-        get;
-        set;
-    }
+    public Bonus? Bonuses { get; set; }
 
     [JsonPropertyName("Points")]
-    public int? Points
-    {
-        get;
-        set;
-    }
+    public int? Points { get; set; }
 }

@@ -8,9 +8,5 @@ public record CompletedAchievementsResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("elements")]
-    public Dictionary<string, int>? Elements
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, int>? Elements { get; set; }
 }

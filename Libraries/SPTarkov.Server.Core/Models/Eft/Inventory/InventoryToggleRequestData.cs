@@ -8,16 +8,8 @@ public record InventoryToggleRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
-    public string? Item
-    {
-        get;
-        set;
-    }
+    public string? Item { get; set; }
 
     [JsonPropertyName("value")]
-    public bool? Value
-    {
-        get;
-        set;
-    }
+    public bool? Value { get; set; }
 }

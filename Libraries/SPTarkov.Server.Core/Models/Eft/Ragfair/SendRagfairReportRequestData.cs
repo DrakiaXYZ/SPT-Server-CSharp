@@ -8,9 +8,5 @@ public record SendRagfairReportRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("offerId")]
-    public int? OfferId
-    {
-        get;
-        set;
-    }
+    public int? OfferId { get; set; }
 }

@@ -9,23 +9,11 @@ public record GetMailDialogViewResponseData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("messages")]
-    public List<Message>? Messages
-    {
-        get;
-        set;
-    }
+    public List<Message>? Messages { get; set; }
 
     [JsonPropertyName("profiles")]
-    public List<UserDialogInfo>? Profiles
-    {
-        get;
-        set;
-    }
+    public List<UserDialogInfo>? Profiles { get; set; }
 
     [JsonPropertyName("hasMessagesWithRewards")]
-    public bool? HasMessagesWithRewards
-    {
-        get;
-        set;
-    }
+    public bool? HasMessagesWithRewards { get; set; }
 }

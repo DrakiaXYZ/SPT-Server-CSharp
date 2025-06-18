@@ -9,9 +9,5 @@ public record GameModeRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("sessionMode")]
-    public string? SessionMode
-    {
-        get;
-        set;
-    }
+    public string? SessionMode { get; set; }
 }

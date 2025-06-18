@@ -9,18 +9,10 @@ public record HideoutCustomisation
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("globals")]
-    public List<HideoutCustomisationGlobal>? Globals
-    {
-        get;
-        set;
-    }
+    public List<HideoutCustomisationGlobal>? Globals { get; set; }
 
     [JsonPropertyName("slots")]
-    public List<HideoutCustomisationSlot>? Slots
-    {
-        get;
-        set;
-    }
+    public List<HideoutCustomisationSlot>? Slots { get; set; }
 }
 
 public record HideoutCustomisationGlobal
@@ -29,53 +21,25 @@ public record HideoutCustomisationGlobal
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("conditions")]
-    public List<QuestCondition>? Conditions
-    {
-        get;
-        set;
-    }
+    public List<QuestCondition>? Conditions { get; set; }
 
     [JsonPropertyName("type")]
-    public string? Type
-    {
-        get;
-        set;
-    }
+    public string? Type { get; set; }
 
     [JsonPropertyName("index")]
-    public int? Index
-    {
-        get;
-        set;
-    }
+    public int? Index { get; set; }
 
     [JsonPropertyName("systemName")]
-    public string? SystemName
-    {
-        get;
-        set;
-    }
+    public string? SystemName { get; set; }
 
     [JsonPropertyName("isEnabled")]
-    public bool? IsEnabled
-    {
-        get;
-        set;
-    }
+    public bool? IsEnabled { get; set; }
 
     [JsonPropertyName("itemId")]
-    public string? ItemId
-    {
-        get;
-        set;
-    }
+    public string? ItemId { get; set; }
 }
 
 public record HideoutCustomisationSlot
@@ -84,58 +48,26 @@ public record HideoutCustomisationSlot
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("conditions")]
-    public List<QuestCondition>? Conditions
-    {
-        get;
-        set;
-    }
+    public List<QuestCondition>? Conditions { get; set; }
 
     [JsonPropertyName("type")]
-    public string? Type
-    {
-        get;
-        set;
-    }
+    public string? Type { get; set; }
 
     [JsonPropertyName("index")]
-    public int? Index
-    {
-        get;
-        set;
-    }
+    public int? Index { get; set; }
 
     [JsonPropertyName("systemName")]
-    public string? SystemName
-    {
-        get;
-        set;
-    }
+    public string? SystemName { get; set; }
 
     [JsonPropertyName("isEnabled")]
-    public bool? IsEnabled
-    {
-        get;
-        set;
-    }
+    public bool? IsEnabled { get; set; }
 
     [JsonPropertyName("slotId")]
-    public string? SlotId
-    {
-        get;
-        set;
-    }
+    public string? SlotId { get; set; }
 
     [JsonPropertyName("areaTypeId")]
-    public int? AreaTypeId
-    {
-        get;
-        set;
-    }
+    public int? AreaTypeId { get; set; }
 }

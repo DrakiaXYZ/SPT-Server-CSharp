@@ -20,9 +20,8 @@ public class ClonerBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var jsonUtil = new JsonUtil([ new SptJsonConverterRegistrator() ]);
-        var importer = new ImporterUtil(new MockLogger<ImporterUtil>(), new FileUtil(),
-            jsonUtil);
+        var jsonUtil = new JsonUtil([new SptJsonConverterRegistrator()]);
+        var importer = new ImporterUtil(new MockLogger<ImporterUtil>(), new FileUtil(), jsonUtil);
         var loadTask = importer.LoadRecursiveAsync<Templates>("./Assets/database/templates/");
         loadTask.Wait();
         _templates = loadTask.Result;

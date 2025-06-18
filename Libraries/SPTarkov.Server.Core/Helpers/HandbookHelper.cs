@@ -41,7 +41,7 @@ public class HandbookHelper(
                     {
                         Id = key,
                         ParentId = priceOverride.ParentId,
-                        Price = priceOverride.Price
+                        Price = priceOverride.Price,
                     }
                 );
                 itemToUpdate = handbook.Items.FirstOrDefault(item => item.Id == key);
@@ -98,7 +98,9 @@ public class HandbookHelper(
             return itemPrice;
         }
 
-        var handbookItem = _databaseService.GetHandbook().Items?.FirstOrDefault(item => item.Id == tpl);
+        var handbookItem = _databaseService
+            .GetHandbook()
+            .Items?.FirstOrDefault(item => item.Id == tpl);
         if (handbookItem is null)
         {
             const int newValue = 0;
@@ -198,14 +200,14 @@ public class HandbookHelper(
 
         // Get price of currency from handbook
         var price = GetTemplatePrice(currencyTypeTo);
-        return price > 0
-            ? Math.Max(1, Math.Round(roubleCurrencyCount / price))
-            : 0;
+        return price > 0 ? Math.Max(1, Math.Round(roubleCurrencyCount / price)) : 0;
     }
 
     public HandbookCategory GetCategoryById(string handbookId)
     {
-        return _databaseService.GetHandbook().Categories.FirstOrDefault(category => category.Id == handbookId);
+        return _databaseService
+            .GetHandbook()
+            .Categories.FirstOrDefault(category => category.Id == handbookId);
     }
 
     protected record LookupItem<T, I>
@@ -216,17 +218,9 @@ public class HandbookHelper(
             ByParent = new Dictionary<string, List<I>>();
         }
 
-        public Dictionary<string, T> ById
-        {
-            get;
-            set;
-        }
+        public Dictionary<string, T> ById { get; set; }
 
-        public Dictionary<string, List<I>> ByParent
-        {
-            get;
-            set;
-        }
+        public Dictionary<string, List<I>> ByParent { get; set; }
     }
 
     protected record LookupCollection
@@ -237,16 +231,8 @@ public class HandbookHelper(
             Categories = new LookupItem<string, string>();
         }
 
-        public LookupItem<double, string> Items
-        {
-            get;
-            set;
-        }
+        public LookupItem<double, string> Items { get; set; }
 
-        public LookupItem<string, string> Categories
-        {
-            get;
-            set;
-        }
+        public LookupItem<string, string> Categories { get; set; }
     }
 }

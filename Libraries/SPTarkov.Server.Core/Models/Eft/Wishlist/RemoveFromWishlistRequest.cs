@@ -9,9 +9,5 @@ public record RemoveFromWishlistRequest : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("items")]
-    public List<string>? Items
-    {
-        get;
-        set;
-    }
+    public List<string>? Items { get; set; }
 }

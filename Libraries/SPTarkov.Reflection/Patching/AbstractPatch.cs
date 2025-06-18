@@ -25,13 +25,17 @@ public abstract class AbstractPatch
         _finalizerList = GetPatchMethods(typeof(PatchFinalizerAttribute));
         _ilManipulatorList = GetPatchMethods(typeof(PatchIlManipulatorAttribute));
 
-        if (_prefixList.Count == 0
+        if (
+            _prefixList.Count == 0
             && _postfixList.Count == 0
             && _transpilerList.Count == 0
             && _finalizerList.Count == 0
-            && _ilManipulatorList.Count == 0)
+            && _ilManipulatorList.Count == 0
+        )
         {
-            throw new Exception($"{_harmony.Id}: At least one of the patch methods must be specified");
+            throw new Exception(
+                $"{_harmony.Id}: At least one of the patch methods must be specified"
+            );
         }
     }
 
@@ -51,8 +55,14 @@ public abstract class AbstractPatch
         var T = GetType();
         var methods = new List<HarmonyMethod>();
 
-        foreach (var method in T.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public |
-                                            BindingFlags.DeclaredOnly))
+        foreach (
+            var method in T.GetMethods(
+                BindingFlags.Static
+                    | BindingFlags.NonPublic
+                    | BindingFlags.Public
+                    | BindingFlags.DeclaredOnly
+            )
+        )
         {
             if (method.GetCustomAttribute(attributeType) != null)
             {

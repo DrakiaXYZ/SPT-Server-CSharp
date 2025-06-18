@@ -53,18 +53,18 @@ public class ModDllLoader
     /// <returns>SptMod</returns>
     private static SptMod LoadMod(string path)
     {
-        var result = new SptMod
-        {
-            Directory = path,
-            Assemblies = []
-        };
+        var result = new SptMod { Directory = path, Assemblies = [] };
         var assemblyCount = 0;
         foreach (var file in new DirectoryInfo(path).GetFiles()) // Only search top level
         {
             if (string.Equals(file.Extension, ".dll", StringComparison.OrdinalIgnoreCase))
             {
                 assemblyCount++;
-                result.Assemblies.Add(AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(file.FullName)));
+                result.Assemblies.Add(
+                    AssemblyLoadContext.Default.LoadFromAssemblyPath(
+                        Path.GetFullPath(file.FullName)
+                    )
+                );
             }
         }
 
@@ -77,14 +77,22 @@ public class ModDllLoader
 
         if (result.ModMetadata == null)
         {
-            throw new Exception($"Failed to load mod metadata for: {Path.GetFullPath(path)} \ndid you override `AbstractModMetadata`?");
+            throw new Exception(
+                $"Failed to load mod metadata for: {Path.GetFullPath(path)} \ndid you override `AbstractModMetadata`?"
+            );
         }
 
-        if (result.ModMetadata?.Name == null || result.ModMetadata?.Author == null ||
-            result.ModMetadata?.Version == null || result.ModMetadata?.Licence == null ||
-            result.ModMetadata?.SptVersion == null)
+        if (
+            result.ModMetadata?.Name == null
+            || result.ModMetadata?.Author == null
+            || result.ModMetadata?.Version == null
+            || result.ModMetadata?.Licence == null
+            || result.ModMetadata?.SptVersion == null
+        )
         {
-            throw new Exception($"The mod metadata for: {Path.GetFullPath(path)} is missing one of these properties: name, author, licence, version or sptVersion");
+            throw new Exception(
+                $"The mod metadata for: {Path.GetFullPath(path)} is missing one of these properties: name, author, licence, version or sptVersion"
+            );
         }
 
         return result;
@@ -105,11 +113,15 @@ public class ModDllLoader
         {
             foreach (var module in allAsmModules)
             {
-                var modMetadata = module.GetTypes().SingleOrDefault(t => typeof(AbstractModMetadata).IsAssignableFrom(t));
+                var modMetadata = module
+                    .GetTypes()
+                    .SingleOrDefault(t => typeof(AbstractModMetadata).IsAssignableFrom(t));
 
                 if (result != null && modMetadata != null)
                 {
-                    throw new Exception($"Duplicate mod metadata found for mod at path: {Path.GetFullPath(path)}");
+                    throw new Exception(
+                        $"Duplicate mod metadata found for mod at path: {Path.GetFullPath(path)}"
+                    );
                 }
 
                 if (modMetadata != null)

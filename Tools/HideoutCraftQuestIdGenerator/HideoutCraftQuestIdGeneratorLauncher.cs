@@ -12,7 +12,9 @@ public class HideoutCraftQuestIdGeneratorLauncher
         {
             var serviceCollection = new ServiceCollection();
             var diHandler = new DependencyInjectionHandler(serviceCollection);
-            diHandler.AddInjectableTypesFromTypeAssembly(typeof(HideoutCraftQuestIdGeneratorLauncher));
+            diHandler.AddInjectableTypesFromTypeAssembly(
+                typeof(HideoutCraftQuestIdGeneratorLauncher)
+            );
             diHandler.AddInjectableTypesFromTypeAssembly(typeof(App));
             diHandler.InjectAll();
             var serviceProvider = serviceCollection.BuildServiceProvider();

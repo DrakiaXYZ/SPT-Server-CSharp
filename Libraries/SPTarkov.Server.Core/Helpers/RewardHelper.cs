@@ -84,11 +84,7 @@ public class RewardHelper(
                     pmcProfile.Info.Level = _playerService.CalculateLevel(pmcProfile);
                     break;
                 case RewardType.TraderStanding:
-                    _traderHelper.AddStandingToTrader(
-                        sessionId,
-                        reward.Target,
-                        reward.Value.Value
-                    );
+                    _traderHelper.AddStandingToTrader(sessionId, reward.Target, reward.Value.Value);
                     break;
                 case RewardType.TraderUnlock:
                     _traderHelper.SetTraderUnlockedState(reward.Target, true, sessionId);
@@ -260,10 +256,7 @@ public class RewardHelper(
     /// <param name="rewards">Array of rewards to get the items from.</param>
     /// <param name="gameVersion">The game version of the profile.</param>
     /// <returns>Array of items with the correct maxStack.</returns>
-    protected List<Item> GetRewardItems(
-        List<Reward> rewards,
-        string gameVersion
-    )
+    protected List<Item> GetRewardItems(List<Reward> rewards, string gameVersion)
     {
         // Iterate over all rewards with the desired status, flatten out items that have a type of Item
         var rewardItems = rewards.SelectMany(reward =>

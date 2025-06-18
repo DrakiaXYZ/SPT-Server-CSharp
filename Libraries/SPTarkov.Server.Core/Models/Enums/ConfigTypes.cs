@@ -36,7 +36,7 @@ public static class ConfigTypesExtension
             ConfigTypes.SEASONAL_EVENT => "spt-seasonalevents",
             ConfigTypes.LOST_ON_DEATH => "spt-lostondeath",
             ConfigTypes.GIFTS => "spt-gifts",
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }
 
@@ -72,7 +72,7 @@ public static class ConfigTypesExtension
             ConfigTypes.SEASONAL_EVENT => typeof(SeasonalEventConfig),
             ConfigTypes.LOST_ON_DEATH => typeof(LostOnDeathConfig),
             ConfigTypes.GIFTS => typeof(GiftsConfig),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
         };
     }
 }
@@ -106,5 +106,5 @@ public enum ConfigTypes
     WEATHER,
     SEASONAL_EVENT,
     LOST_ON_DEATH,
-    GIFTS
+    GIFTS,
 }

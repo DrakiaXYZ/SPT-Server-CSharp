@@ -9,16 +9,8 @@ public record InsureRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("tid")]
-    public string? TransactionId
-    {
-        get;
-        set;
-    }
+    public string? TransactionId { get; set; }
 
     [JsonPropertyName("items")]
-    public List<string>? Items
-    {
-        get;
-        set;
-    }
+    public List<string>? Items { get; set; }
 }

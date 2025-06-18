@@ -11,7 +11,8 @@ namespace SPTarkov.Server.Core.Generators;
 public class PmcWaveGenerator(
     ISptLogger<PmcWaveGenerator> logger,
     DatabaseService databaseService,
-    ConfigServer configServer)
+    ConfigServer configServer
+)
 {
     protected readonly PmcConfig _pmcConfig = configServer.GetConfig<PmcConfig>();
 

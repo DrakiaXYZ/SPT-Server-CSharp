@@ -8,5 +8,5 @@ public enum CurrencyType
     RUB,
     USD,
     EUR,
-    GP
+    GP,
 }

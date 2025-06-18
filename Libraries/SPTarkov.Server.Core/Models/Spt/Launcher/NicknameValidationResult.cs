@@ -4,6 +4,6 @@
     {
         Taken,
         Short,
-        Valid
+        Valid,
     }
 }

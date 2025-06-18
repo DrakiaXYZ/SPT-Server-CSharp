@@ -17,5 +17,5 @@ public enum QuestTypeEnum
     Merchant,
     Skill,
     Multi,
-    WeaponAssembly
+    WeaponAssembly,
 }

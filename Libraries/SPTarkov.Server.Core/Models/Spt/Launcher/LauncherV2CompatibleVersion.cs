@@ -8,15 +8,7 @@ public class LauncherV2CompatibleVersion : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public required string SptVersion
-    {
-        get;
-        set;
-    }
+    public required string SptVersion { get; set; }
 
-    public required string EftVersion
-    {
-        get;
-        set;
-    }
+    public required string EftVersion { get; set; }
 }

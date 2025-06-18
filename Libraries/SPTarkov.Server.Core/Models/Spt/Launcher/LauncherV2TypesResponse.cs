@@ -8,9 +8,5 @@ public class LauncherV2TypesResponse : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public required Dictionary<string, string> Response
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, string> Response { get; set; }
 }

@@ -9,16 +9,8 @@ public record GetLocalWeatherResponseData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("season")]
-    public Season? Season
-    {
-        get;
-        set;
-    }
+    public Season? Season { get; set; }
 
     [JsonPropertyName("weather")]
-    public List<Eft.Weather.Weather>? Weather
-    {
-        get;
-        set;
-    }
+    public List<Eft.Weather.Weather>? Weather { get; set; }
 }

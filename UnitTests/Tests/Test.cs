@@ -13,9 +13,12 @@ public class Test
     [TestInitialize]
     public async Task Setup()
     {
-        var importer = new ImporterUtil(new MockLogger<ImporterUtil>(), new FileUtil(), DI.GetService<JsonUtil>());
+        var importer = new ImporterUtil(
+            new MockLogger<ImporterUtil>(),
+            new FileUtil(),
+            DI.GetService<JsonUtil>()
+        );
         _templates = await importer.LoadRecursiveAsync<Templates>("./TestAssets/");
-
     }
 
     [TestMethod]

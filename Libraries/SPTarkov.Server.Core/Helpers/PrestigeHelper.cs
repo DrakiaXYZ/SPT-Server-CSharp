@@ -24,7 +24,8 @@ public class PrestigeHelper
         DatabaseService databaseService,
         MailSendService mailSendService,
         ProfileHelper profileHelper,
-        RewardHelper rewardHelper)
+        RewardHelper rewardHelper
+    )
     {
         _logger = logger;
         _timeUtil = timeUtil;
@@ -34,7 +35,11 @@ public class PrestigeHelper
         _rewardHelper = rewardHelper;
     }
 
-    public void ProcessPendingPrestige(SptProfile oldProfile, SptProfile newProfile, PendingPrestige prestige)
+    public void ProcessPendingPrestige(
+        SptProfile oldProfile,
+        SptProfile newProfile,
+        PendingPrestige prestige
+    )
     {
         var prePrestigePmc = oldProfile.CharacterData.PmcData;
         var sessionId = newProfile.ProfileInfo.ProfileId;
@@ -48,7 +53,9 @@ public class PrestigeHelper
             {
                 // Set progress 5% of what it was
                 skillToCopy.Progress = skillToCopy.Progress * 0.05;
-                var existingSkill = newProfile.CharacterData.PmcData.Skills.Common.FirstOrDefault(skill => skill.Id == skillToCopy.Id);
+                var existingSkill = newProfile.CharacterData.PmcData.Skills.Common.FirstOrDefault(
+                    skill => skill.Id == skillToCopy.Id
+                );
                 if (existingSkill is not null)
                 {
                     existingSkill.Progress = skillToCopy.Progress;
@@ -64,7 +71,10 @@ public class PrestigeHelper
             {
                 // Set progress 5% of what it was
                 skillToCopy.Progress = skillToCopy.Progress * 0.05;
-                var existingSkill = newProfile.CharacterData.PmcData.Skills.Mastering.FirstOrDefault(skill => skill.Id == skillToCopy.Id);
+                var existingSkill =
+                    newProfile.CharacterData.PmcData.Skills.Mastering.FirstOrDefault(skill =>
+                        skill.Id == skillToCopy.Id
+                    );
                 if (existingSkill is not null)
                 {
                     existingSkill.Progress = skillToCopy.Progress;
@@ -85,7 +95,9 @@ public class PrestigeHelper
         }
 
         // Assumes Prestige data is in descending order
-        var currentPrestigeData = _databaseService.GetTemplates().Prestige.Elements[indexOfPrestigeObtained];
+        var currentPrestigeData = _databaseService.GetTemplates().Prestige.Elements[
+            indexOfPrestigeObtained
+        ];
         var prestigeRewards = _databaseService
             .GetTemplates()
             .Prestige.Elements.Slice(0, indexOfPrestigeObtained + 1)
@@ -94,17 +106,22 @@ public class PrestigeHelper
         AddPrestigeRewardsToProfile(sessionId, newProfile, prestigeRewards);
 
         // Flag profile as having achieved this prestige level
-        newProfile.CharacterData.PmcData.Prestige[currentPrestigeData.Id] = _timeUtil.GetTimeStamp();
+        newProfile.CharacterData.PmcData.Prestige[currentPrestigeData.Id] =
+            _timeUtil.GetTimeStamp();
 
         var itemsToTransfer = new List<Item>();
 
         // Copy transferred items
         foreach (var transferRequest in prestige.Items ?? [])
         {
-            var item = prePrestigePmc.Inventory.Items.FirstOrDefault(item => item.Id == transferRequest.Id);
+            var item = prePrestigePmc.Inventory.Items.FirstOrDefault(item =>
+                item.Id == transferRequest.Id
+            );
             if (item is null)
             {
-                _logger.Error($"Unable to find item with id: {transferRequest.Id} in profile: {sessionId}, skipping");
+                _logger.Error(
+                    $"Unable to find item with id: {transferRequest.Id} in profile: {sessionId}, skipping"
+                );
                 continue;
             }
 
@@ -116,7 +133,11 @@ public class PrestigeHelper
         newProfile.CharacterData.PmcData.Info.PrestigeLevel = prestige.PrestigeLevel;
     }
 
-    private void AddPrestigeRewardsToProfile(string sessionId, SptProfile newProfile, IEnumerable<Reward> rewards)
+    private void AddPrestigeRewardsToProfile(
+        string sessionId,
+        SptProfile newProfile,
+        IEnumerable<Reward> rewards
+    )
     {
         var itemsToSend = new List<Item>();
 
@@ -125,10 +146,14 @@ public class PrestigeHelper
             switch (reward.Type)
             {
                 case RewardType.CustomizationDirect:
-                    {
-                        _profileHelper.AddHideoutCustomisationUnlock(newProfile, reward, CustomisationSource.PRESTIGE);
-                        break;
-                    }
+                {
+                    _profileHelper.AddHideoutCustomisationUnlock(
+                        newProfile,
+                        reward,
+                        CustomisationSource.PRESTIGE
+                    );
+                    break;
+                }
                 case RewardType.Skill:
                     if (Enum.TryParse(reward.Target, out SkillTypes result))
                     {
@@ -145,15 +170,19 @@ public class PrestigeHelper
 
                     break;
                 case RewardType.Item:
-                    {
-                        itemsToSend.AddRange(reward.Items);
-                        break;
-                    }
+                {
+                    itemsToSend.AddRange(reward.Items);
+                    break;
+                }
                 case RewardType.ExtraDailyQuest:
-                    {
-                        _profileHelper.AddExtraRepeatableQuest(newProfile, reward.Target, (double) reward.Value);
-                        break;
-                    }
+                {
+                    _profileHelper.AddExtraRepeatableQuest(
+                        newProfile,
+                        reward.Target,
+                        (double)reward.Value
+                    );
+                    break;
+                }
                 default:
                     _logger.Error($"Unhandled prestige reward type: {reward.Type}");
                     break;

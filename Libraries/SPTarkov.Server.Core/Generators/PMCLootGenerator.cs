@@ -18,7 +18,8 @@ public class PMCLootGenerator(
     RagfairPriceService ragfairPriceService,
     SeasonalEventService seasonalEventService,
     WeightedRandomHelper weightedRandomHelper,
-    ConfigServer configServer)
+    ConfigServer configServer
+)
 {
     private readonly PmcConfig _pmcConfig = configServer.GetConfig<PmcConfig>();
 
@@ -53,7 +54,12 @@ public class PMCLootGenerator(
             var blacklist = GetContainerLootBlacklist();
 
             // Generate loot and cache - Also pass check to ensure only 1x2 items are allowed (Unheard bots have big pockets, hence the need for 1x2)
-            var pool = GenerateLootPool(pmcRole, allowedItemTypeWhitelist, blacklist, ItemFitsInto1By2Slot);
+            var pool = GenerateLootPool(
+                pmcRole,
+                allowedItemTypeWhitelist,
+                blacklist,
+                ItemFitsInto1By2Slot
+            );
             _pocketLootPool.TryAdd(pmcRole, pool);
 
             return pool;
@@ -83,7 +89,12 @@ public class PMCLootGenerator(
             blacklist.UnionWith(_pmcConfig.VestLoot.Blacklist); // Include vest-specific blacklist
 
             // Generate loot and cache - Also pass check to ensure items up to 2x2 are allowed, some vests have big slots
-            var pool = GenerateLootPool(pmcRole, allowedItemTypeWhitelist, blacklist, ItemFitsInto2By2Slot);
+            var pool = GenerateLootPool(
+                pmcRole,
+                allowedItemTypeWhitelist,
+                blacklist,
+                ItemFitsInto2By2Slot
+            );
             _vestLootPool.TryAdd(pmcRole, pool);
 
             return pool;
@@ -99,7 +110,6 @@ public class PMCLootGenerator(
     {
         lock (BackpackLock)
         {
-
             // Already exists, return values
             if (_backpackLootPool.TryGetValue(pmcRole, out var existingLootPool))
             {
@@ -126,7 +136,12 @@ public class PMCLootGenerator(
     /// <param name="itemTplAndParentBlacklist">Item and parent blacklist</param>
     /// <param name="genericItemCheck">An optional delegate to validate the TemplateItem object being processed</param>
     /// <returns>Dictionary of items and weights inversely tied to the items price</returns>
-    protected Dictionary<string, double> GenerateLootPool(string pmcRole, HashSet<string> allowedItemTypeWhitelist, HashSet<string> itemTplAndParentBlacklist, Func<TemplateItem, bool>? genericItemCheck)
+    protected Dictionary<string, double> GenerateLootPool(
+        string pmcRole,
+        HashSet<string> allowedItemTypeWhitelist,
+        HashSet<string> itemTplAndParentBlacklist,
+        Func<TemplateItem, bool>? genericItemCheck
+    )
     {
         var lootPool = new Dictionary<string, double>();
         var items = databaseService.GetItems();
@@ -136,13 +151,15 @@ public class PMCLootGenerator(
 
         // Filter all items in DB to ones we want with passed in whitelist + blacklist + generic 'IsValidItem' check
         // Also run Delegate if it's not null
-        var itemTplsToAdd = items.Where(item =>
-            allowedItemTypeWhitelist.Contains(item.Value.Parent) &&
-            itemHelper.IsValidItem(item.Value.Id) &&
-            !itemTplAndParentBlacklist.Contains(item.Value.Id) &&
-            !itemTplAndParentBlacklist.Contains(item.Value.Parent) &&
-            (genericItemCheck?.Invoke(item.Value) ?? true) // if delegate is null, force check to be true
-        ).Select(x => x.Key);
+        var itemTplsToAdd = items
+            .Where(item =>
+                allowedItemTypeWhitelist.Contains(item.Value.Parent)
+                && itemHelper.IsValidItem(item.Value.Id)
+                && !itemTplAndParentBlacklist.Contains(item.Value.Id)
+                && !itemTplAndParentBlacklist.Contains(item.Value.Parent)
+                && (genericItemCheck?.Invoke(item.Value) ?? true) // if delegate is null, force check to be true
+            )
+            .Select(x => x.Key);
 
         // Store all items + price in above lootPool dictionary
         foreach (var tpl in itemTplsToAdd)
@@ -202,7 +219,6 @@ public class PMCLootGenerator(
         logger.Error($"Unable to find price overrides for PMC: {pmcRole}");
 
         return null;
-
     }
 
     /// <summary>
@@ -213,7 +229,10 @@ public class PMCLootGenerator(
     /// <returns>Rouble price</returns>
     protected double GetItemPrice(string tpl, Dictionary<string, double>? pmcPriceOverrides = null)
     {
-        if (pmcPriceOverrides is not null && pmcPriceOverrides.TryGetValue(tpl, out var overridePrice))
+        if (
+            pmcPriceOverrides is not null
+            && pmcPriceOverrides.TryGetValue(tpl, out var overridePrice)
+        )
         {
             // There's a price override for this item, use override instead of default price
             return overridePrice;
@@ -245,7 +264,7 @@ public class PMCLootGenerator(
         return $"{item.Properties.Width}x{item.Properties.Height}" switch
         {
             "1x1" or "1x2" or "2x1" => true,
-            _ => false
+            _ => false,
         };
     }
 }

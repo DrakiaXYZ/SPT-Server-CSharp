@@ -19,9 +19,15 @@ public class CustomizationCallbacks(
     ///     Handle client/trading/customization/storage
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GetCustomisationUnlocks(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetCustomisationUnlocks(
+        string url,
+        EmptyRequestData _,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_saveServer.GetProfile(sessionID).CustomisationUnlocks));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_saveServer.GetProfile(sessionID).CustomisationUnlocks)
+        );
     }
 
     /// <summary>
@@ -33,14 +39,20 @@ public class CustomizationCallbacks(
         var splitUrl = url.Split('/');
         var traderId = splitUrl[^3];
 
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_customizationController.GetTraderSuits(traderId, sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_customizationController.GetTraderSuits(traderId, sessionID))
+        );
     }
 
     /// <summary>
     ///     Handle CustomizationBuy event
     /// </summary>
     /// <returns></returns>
-    public ItemEventRouterResponse BuyCustomisation(PmcData pmcData, BuyClothingRequestData request, string sessionID)
+    public ItemEventRouterResponse BuyCustomisation(
+        PmcData pmcData,
+        BuyClothingRequestData request,
+        string sessionID
+    )
     {
         return _customizationController.BuyCustomisation(pmcData, request, sessionID);
     }
@@ -49,9 +61,15 @@ public class CustomizationCallbacks(
     ///     Handle client/hideout/customization/offer/list
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GetHideoutCustomisation(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetHideoutCustomisation(
+        string url,
+        EmptyRequestData _,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_customizationController.GetHideoutCustomisation(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_customizationController.GetHideoutCustomisation(sessionID))
+        );
     }
 
     /// <summary>
@@ -60,14 +78,20 @@ public class CustomizationCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetStorage(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_customizationController.GetCustomisationStorage(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_customizationController.GetCustomisationStorage(sessionID))
+        );
     }
 
     /// <summary>
     ///     Handle CustomizationSet
     /// </summary>
     /// <returns></returns>
-    public ItemEventRouterResponse SetCustomisation(PmcData pmcData, CustomizationSetRequest request, string sessionID)
+    public ItemEventRouterResponse SetCustomisation(
+        PmcData pmcData,
+        CustomizationSetRequest request,
+        string sessionID
+    )
     {
         return _customizationController.SetCustomisation(sessionID, request, pmcData);
     }

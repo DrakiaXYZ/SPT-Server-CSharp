@@ -16,5 +16,4 @@ namespace SPTarkov.Server.Core.Models.Spt.Services
         public RaidChanges? RaidAdjustments { get; set; } = null;
         public LocationTransit? LocationTransit { get; set; } = null;
     }
-
 }

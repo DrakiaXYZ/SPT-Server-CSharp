@@ -9,24 +9,12 @@ public record GetBodyResponseData<T>
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("err")]
-    public BackendErrorCodes? Err
-    {
-        get;
-        set;
-    }
+    public BackendErrorCodes? Err { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     [JsonPropertyName("errmsg")]
-    public string? ErrMsg
-    {
-        get;
-        set;
-    }
+    public string? ErrMsg { get; set; }
 
     [JsonPropertyName("data")]
-    public T? Data
-    {
-        get;
-        set;
-    }
+    public T? Data { get; set; }
 }

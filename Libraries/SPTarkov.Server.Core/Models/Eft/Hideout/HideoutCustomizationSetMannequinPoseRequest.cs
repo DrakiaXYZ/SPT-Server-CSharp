@@ -9,16 +9,8 @@ public record HideoutCustomizationSetMannequinPoseRequest : InventoryBaseActionR
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("poses")]
-    public Dictionary<string, string>? Poses
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, string>? Poses { get; set; }
 
     [JsonPropertyName("timestamp")]
-    public double? Timestamp
-    {
-        get;
-        set;
-    }
+    public double? Timestamp { get; set; }
 }

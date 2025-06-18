@@ -9,11 +9,7 @@ public record GenerateBotsRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("conditions")]
-    public List<GenerateCondition>? Conditions
-    {
-        get;
-        set;
-    }
+    public List<GenerateCondition>? Conditions { get; set; }
 }
 
 public record GenerateCondition
@@ -25,23 +21,11 @@ public record GenerateCondition
     ///     e.g. assault/pmcBot/bossKilla
     /// </summary>
     [JsonPropertyName("Role")]
-    public string? Role
-    {
-        get;
-        set;
-    }
+    public string? Role { get; set; }
 
     [JsonPropertyName("Limit")]
-    public int Limit
-    {
-        get;
-        set;
-    }
+    public int Limit { get; set; }
 
     [JsonPropertyName("Difficulty")]
-    public string? Difficulty
-    {
-        get;
-        set;
-    }
+    public string? Difficulty { get; set; }
 }

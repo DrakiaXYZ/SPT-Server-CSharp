@@ -7,10 +7,7 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Callbacks;
 
 [Injectable]
-public class InraidCallbacks(
-    InRaidController _inRaidController,
-    HttpResponseUtil _httpResponseUtil
-)
+public class InraidCallbacks(InRaidController _inRaidController, HttpResponseUtil _httpResponseUtil)
 {
     /// <summary>
     ///     Handle client/location/getLocalloot
@@ -20,7 +17,11 @@ public class InraidCallbacks(
     /// <param name="info">register player request</param>
     /// <param name="sessionID">Session id</param>
     /// <returns>Null http response</returns>
-    public ValueTask<string> RegisterPlayer(string url, RegisterPlayerRequestData info, string sessionID)
+    public ValueTask<string> RegisterPlayer(
+        string url,
+        RegisterPlayerRequestData info,
+        string sessionID
+    )
     {
         _inRaidController.AddPlayer(sessionID, info);
         return new ValueTask<string>(_httpResponseUtil.NullResponse());
@@ -45,16 +46,24 @@ public class InraidCallbacks(
     /// <returns>JSON as string</returns>
     public ValueTask<string> GetRaidMenuSettings()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_inRaidController.GetInRaidConfig().RaidMenuSettings));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_inRaidController.GetInRaidConfig().RaidMenuSettings)
+        );
     }
 
     /// <summary>
     ///     Handle singleplayer/scav/traitorscavhostile
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GetTraitorScavHostileChance(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetTraitorScavHostileChance(
+        string url,
+        EmptyRequestData _,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_inRaidController.GetTraitorScavHostileChance(url, sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_inRaidController.GetTraitorScavHostileChance(url, sessionID))
+        );
     }
 
     /// <summary>
@@ -63,6 +72,8 @@ public class InraidCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetBossTypes(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_inRaidController.GetBossTypes(url, sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_inRaidController.GetBossTypes(url, sessionID))
+        );
     }
 }

@@ -9,37 +9,17 @@ public record ProfileCreateRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("side")]
-    public string? Side
-    {
-        get;
-        set;
-    }
+    public string? Side { get; set; }
 
     [JsonPropertyName("nickname")]
-    public string? Nickname
-    {
-        get;
-        set;
-    }
+    public string? Nickname { get; set; }
 
     [JsonPropertyName("headId")]
-    public string? HeadId
-    {
-        get;
-        set;
-    }
+    public string? HeadId { get; set; }
 
     [JsonPropertyName("voiceId")]
-    public string? VoiceId
-    {
-        get;
-        set;
-    }
+    public string? VoiceId { get; set; }
 
     [JsonPropertyName("sptForcePrestigeLevel")]
-    public int? SptForcePrestigeLevel
-    {
-        get;
-        set;
-    }
+    public int? SptForcePrestigeLevel { get; set; }
 }

@@ -12,9 +12,7 @@ public class JsonUtil
     private static JsonSerializerOptions? jsonSerializerOptionsIndented;
     private static JsonSerializerOptions jsonSerializerOptionsNoIndent;
 
-    public JsonUtil(
-        IEnumerable<IJsonConverterRegistrator> registrators
-        )
+    public JsonUtil(IEnumerable<IJsonConverterRegistrator> registrators)
     {
         jsonSerializerOptionsNoIndent = new JsonSerializerOptions()
         {
@@ -34,7 +32,7 @@ public class JsonUtil
 
         jsonSerializerOptionsIndented = new JsonSerializerOptions(jsonSerializerOptionsNoIndent)
         {
-            WriteIndented = true
+            WriteIndented = true,
         };
     }
 
@@ -46,7 +44,9 @@ public class JsonUtil
     /// <returns>Deserialized object or null</returns>
     public T? Deserialize<T>(string? json)
     {
-        return string.IsNullOrEmpty(json) ? default : JsonSerializer.Deserialize<T>(json, jsonSerializerOptionsNoIndent);
+        return string.IsNullOrEmpty(json)
+            ? default
+            : JsonSerializer.Deserialize<T>(json, jsonSerializerOptionsNoIndent);
     }
 
     /// <summary>
@@ -57,7 +57,9 @@ public class JsonUtil
     /// <returns></returns>
     public object? Deserialize(string? json, Type type)
     {
-        return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize(json, type, jsonSerializerOptionsNoIndent);
+        return string.IsNullOrEmpty(json)
+            ? null
+            : JsonSerializer.Deserialize(json, type, jsonSerializerOptionsNoIndent);
     }
 
     /// <summary>
@@ -90,7 +92,14 @@ public class JsonUtil
             return default;
         }
 
-        await using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+        await using FileStream fs = new(
+            file,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: 4096,
+            useAsync: true
+        );
 
         return await JsonSerializer.DeserializeAsync<T>(fs, jsonSerializerOptionsNoIndent);
     }
@@ -127,7 +136,14 @@ public class JsonUtil
             return default;
         }
 
-        await using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+        await using FileStream fs = new(
+            file,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: 4096,
+            useAsync: true
+        );
 
         return await JsonSerializer.DeserializeAsync(fs, type, jsonSerializerOptionsNoIndent);
     }
@@ -173,7 +189,12 @@ public class JsonUtil
     /// <returns>Serialised object as JSON, or null</returns>
     public string? Serialize<T>(T? obj, bool indented = false)
     {
-        return obj == null ? null : JsonSerializer.Serialize(obj, indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent);
+        return obj == null
+            ? null
+            : JsonSerializer.Serialize(
+                obj,
+                indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent
+            );
     }
 
     /// <summary>
@@ -185,6 +206,12 @@ public class JsonUtil
     /// <returns>Serialized text</returns>
     public string? Serialize(object? obj, Type type, bool indented = false)
     {
-        return obj == null ? null : JsonSerializer.Serialize(obj, type, indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent);
+        return obj == null
+            ? null
+            : JsonSerializer.Serialize(
+                obj,
+                type,
+                indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent
+            );
     }
 }

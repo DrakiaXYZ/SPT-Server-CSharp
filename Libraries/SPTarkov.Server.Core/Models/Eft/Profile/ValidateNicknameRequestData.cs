@@ -9,9 +9,5 @@ public record ValidateNicknameRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("nickname")]
-    public string? Nickname
-    {
-        get;
-        set;
-    }
+    public string? Nickname { get; set; }
 }

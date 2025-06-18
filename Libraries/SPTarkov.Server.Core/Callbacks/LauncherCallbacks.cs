@@ -68,21 +68,33 @@ public class LauncherCallbacks(
 
     public ValueTask<string> RemoveProfile(string url, RemoveProfileData info, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_saveServer.RemoveProfile(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_saveServer.RemoveProfile(sessionID))
+        );
     }
 
     public ValueTask<string> GetCompatibleTarkovVersion()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_launcherController.GetCompatibleTarkovVersion()));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_launcherController.GetCompatibleTarkovVersion())
+        );
     }
 
     public ValueTask<string> GetLoadedServerMods()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_launcherController.GetLoadedServerMods()));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_launcherController.GetLoadedServerMods())
+        );
     }
 
-    public ValueTask<string> GetServerModsProfileUsed(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetServerModsProfileUsed(
+        string url,
+        EmptyRequestData _,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_launcherController.GetServerModsProfileUsed(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_launcherController.GetServerModsProfileUsed(sessionID))
+        );
     }
 }

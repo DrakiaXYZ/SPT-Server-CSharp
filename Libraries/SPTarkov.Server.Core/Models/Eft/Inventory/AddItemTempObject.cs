@@ -9,40 +9,20 @@ public record AddItemTempObject
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("itemRef")]
-    public Item? ItemReference
-    {
-        get;
-        set;
-    }
+    public Item? ItemReference { get; set; }
 
     [JsonPropertyName("count")]
-    public int? ItemCount
-    {
-        get;
-        set;
-    }
+    public int? ItemCount { get; set; }
 
     [JsonPropertyName("isPreset")]
-    public bool? IsPresetItem
-    {
-        get;
-        set;
-    }
+    public bool? IsPresetItem { get; set; }
 
     [JsonPropertyName("location")]
-    public ItemLocation? ItemLocation
-    {
-        get;
-        set;
-    }
+    public ItemLocation? ItemLocation { get; set; }
 
     /// <summary>
     ///     Container item will be placed in - stash or sorting table
     /// </summary>
     [JsonPropertyName("containerId")]
-    public string? ContainerIdentifier
-    {
-        get;
-        set;
-    }
+    public string? ContainerIdentifier { get; set; }
 }

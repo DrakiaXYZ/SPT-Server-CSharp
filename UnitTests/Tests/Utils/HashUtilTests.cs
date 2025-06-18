@@ -27,11 +27,7 @@ public class HashUtilTests
             // Invalid mongoId length
             var test = _hashUtil.IsValidMongoId(result);
 
-            Assert.AreEqual(
-                true,
-                test,
-                $"IsValidMongoId() `{result}` is not a valid MongoId."
-            );
+            Assert.AreEqual(true, test, $"IsValidMongoId() `{result}` is not a valid MongoId.");
         }
     }
 
@@ -41,7 +37,11 @@ public class HashUtilTests
         false,
         "677ddb67406e9918a0264bbz contains invalid char `z`, but result was true"
     )]
-    [DataRow("677ddb67406e9918a0264bbcc", false, "677ddb67406e9918a0264bbcc is 25 characters, but result was true")]
+    [DataRow(
+        "677ddb67406e9918a0264bbcc",
+        false,
+        "677ddb67406e9918a0264bbcc is 25 characters, but result was true"
+    )]
     [DataRow(
         "677ddb67406e9918a0264bbc",
         true,
@@ -50,24 +50,19 @@ public class HashUtilTests
     public void IsValidMongoIdTest(string mongoId, bool passes, string failMessage)
     {
         var result = _hashUtil.IsValidMongoId(mongoId);
-        Assert.AreEqual(
-            passes,
-            result,
-            failMessage
-        );
+        Assert.AreEqual(passes, result, failMessage);
     }
 
-
     [TestMethod]
-    [DataRow("123456789", "25F9E794323B453885F5181F1B624D0B", "Not valid output, expected '25F9E794323B453885F5181F1B624D0B'")]
+    [DataRow(
+        "123456789",
+        "25F9E794323B453885F5181F1B624D0B",
+        "Not valid output, expected '25F9E794323B453885F5181F1B624D0B'"
+    )]
     public void GenerateValidMd5Test(string input, string expectedOutput, string failMessage)
     {
-        var result = _hashUtil.GenerateHashForData(HashingAlgorithm.MD5,input);
-        Assert.AreEqual(
-            expectedOutput,
-            result,
-            failMessage
-        );
+        var result = _hashUtil.GenerateHashForData(HashingAlgorithm.MD5, input);
+        Assert.AreEqual(expectedOutput, result, failMessage);
     }
 
     [TestMethod]
@@ -78,12 +73,16 @@ public class HashUtilTests
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        Parallel.For(0, 1000, i =>
-        {
-            Thread.Sleep(random.Next(0, 10));
-            var mongoId = _hashUtil.Generate();
-            concurrentBag.Add(mongoId);
-        });
+        Parallel.For(
+            0,
+            1000,
+            i =>
+            {
+                Thread.Sleep(random.Next(0, 10));
+                var mongoId = _hashUtil.Generate();
+                concurrentBag.Add(mongoId);
+            }
+        );
 
         stopwatch.Stop();
         Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");

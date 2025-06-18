@@ -13,9 +13,15 @@ public class StringToNumberFactoryConverter : JsonConverterFactory
         return true;
     }
 
-    public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+    public override JsonConverter? CreateConverter(
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
     {
-        return (JsonConverter) Activator.CreateInstance(typeof(StringToNumberConverter<>).MakeGenericType(typeToConvert));
+        return (JsonConverter)
+            Activator.CreateInstance(
+                typeof(StringToNumberConverter<>).MakeGenericType(typeToConvert)
+            );
     }
 
     private class StringToNumberConverter<T> : JsonConverter<T>
@@ -28,11 +34,18 @@ public class StringToNumberFactoryConverter : JsonConverterFactory
             if (_stringParseMethod == null)
             {
                 var underlyingType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-                _stringParseMethod = underlyingType.GetMethod("Parse", [typeof(string), typeof(IFormatProvider)]);
+                _stringParseMethod = underlyingType.GetMethod(
+                    "Parse",
+                    [typeof(string), typeof(IFormatProvider)]
+                );
             }
         }
 
-        public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override T? Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options
+        )
         {
             if (reader.TokenType == JsonTokenType.String)
             {
@@ -49,12 +62,15 @@ public class StringToNumberFactoryConverter : JsonConverterFactory
 
                     if (_stringParseMethod != null)
                     {
-                        return (T) _stringParseMethod.Invoke(null, [value, CultureInfo.InvariantCulture]);
+                        return (T)
+                            _stringParseMethod.Invoke(null, [value, CultureInfo.InvariantCulture]);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Failed to parse '{value}' into {typeToConvert.Name}, returning null.");
+                    Debug.WriteLine(
+                        $"Failed to parse '{value}' into {typeToConvert.Name}, returning null."
+                    );
                     return default;
                 }
             }

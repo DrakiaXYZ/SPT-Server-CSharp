@@ -12,16 +12,8 @@ public record CompleteQuestRequestData : InventoryBaseActionRequestData
     ///     Quest Id
     /// </summary>
     [JsonPropertyName("qid")]
-    public string? QuestId
-    {
-        get;
-        set;
-    }
+    public string? QuestId { get; set; }
 
     [JsonPropertyName("removeExcessItems")]
-    public bool? RemoveExcessItems
-    {
-        get;
-        set;
-    }
+    public bool? RemoveExcessItems { get; set; }
 }

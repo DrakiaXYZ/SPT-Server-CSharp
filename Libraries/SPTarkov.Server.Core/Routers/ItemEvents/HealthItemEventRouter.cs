@@ -14,10 +14,7 @@ public class HealthItemEventRouter : ItemEventRouterDefinition
 {
     protected HealthCallbacks _healthCallbacks;
 
-    public HealthItemEventRouter
-    (
-        HealthCallbacks healthCallbacks
-    )
+    public HealthItemEventRouter(HealthCallbacks healthCallbacks)
     {
         _healthCallbacks = healthCallbacks;
     }
@@ -28,23 +25,40 @@ public class HealthItemEventRouter : ItemEventRouterDefinition
         [
             new HandledRoute(ItemEventActions.EAT, false),
             new HandledRoute(ItemEventActions.HEAL, false),
-            new HandledRoute(ItemEventActions.RESTORE_HEALTH, false)
+            new HandledRoute(ItemEventActions.RESTORE_HEALTH, false),
         ];
     }
 
-    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
-        ItemEventRouterResponse output)
+    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(
+        string url,
+        PmcData pmcData,
+        BaseInteractionRequestData body,
+        string sessionID,
+        ItemEventRouterResponse output
+    )
     {
         switch (url)
         {
             case ItemEventActions.EAT:
-                return new ValueTask<ItemEventRouterResponse>(_healthCallbacks.OffraidEat(pmcData, body as OffraidEatRequestData, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _healthCallbacks.OffraidEat(pmcData, body as OffraidEatRequestData, sessionID)
+                );
             case ItemEventActions.HEAL:
-                return new ValueTask<ItemEventRouterResponse>(_healthCallbacks.OffraidHeal(pmcData, body as OffraidHealRequestData, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _healthCallbacks.OffraidHeal(pmcData, body as OffraidHealRequestData, sessionID)
+                );
             case ItemEventActions.RESTORE_HEALTH:
-                return new ValueTask<ItemEventRouterResponse>(_healthCallbacks.HealthTreatment(pmcData, body as HealthTreatmentRequestData, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _healthCallbacks.HealthTreatment(
+                        pmcData,
+                        body as HealthTreatmentRequestData,
+                        sessionID
+                    )
+                );
             default:
-                throw new Exception($"HealthItemEventRouter being used when it cant handle route {url}");
+                throw new Exception(
+                    $"HealthItemEventRouter being used when it cant handle route {url}"
+                );
         }
     }
 }

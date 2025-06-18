@@ -11,18 +11,10 @@ public record AddItemRequestData
     ///     Trader id
     /// </summary>
     [JsonPropertyName("tid")]
-    public string? TraderId
-    {
-        get;
-        set;
-    }
+    public string? TraderId { get; set; }
 
     [JsonPropertyName("items")]
-    public List<ItemToAdd>? Items
-    {
-        get;
-        set;
-    }
+    public List<ItemToAdd>? Items { get; set; }
 }
 
 public record ItemToAdd
@@ -31,23 +23,11 @@ public record ItemToAdd
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("count")]
-    public int? Count
-    {
-        get;
-        set;
-    }
+    public int? Count { get; set; }
 
     [JsonPropertyName("sptIsPreset")]
-    public bool? IsPreset
-    {
-        get;
-        set;
-    }
+    public bool? IsPreset { get; set; }
 
     [JsonPropertyName("item_id")]
-    public string? ItemId
-    {
-        get;
-        set;
-    }
+    public string? ItemId { get; set; }
 }

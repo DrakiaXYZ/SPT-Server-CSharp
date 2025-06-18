@@ -11,23 +11,11 @@ public record HideoutPutItemInRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("areaType")]
-    public HideoutAreas? AreaType
-    {
-        get;
-        set;
-    }
+    public HideoutAreas? AreaType { get; set; }
 
     [JsonPropertyName("items")]
-    public Dictionary<string, IdWithCount>? Items
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, IdWithCount>? Items { get; set; }
 
     [JsonPropertyName("timestamp")]
-    public long? Timestamp
-    {
-        get;
-        set;
-    }
+    public long? Timestamp { get; set; }
 }

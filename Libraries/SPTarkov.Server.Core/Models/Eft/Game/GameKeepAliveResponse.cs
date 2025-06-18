@@ -8,16 +8,8 @@ public record GameKeepAliveResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("msg")]
-    public string? Message
-    {
-        get;
-        set;
-    }
+    public string? Message { get; set; }
 
     [JsonPropertyName("utc_time")]
-    public double? UtcTime
-    {
-        get;
-        set;
-    }
+    public double? UtcTime { get; set; }
 }

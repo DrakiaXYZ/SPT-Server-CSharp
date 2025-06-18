@@ -8,70 +8,34 @@ public record ChatServer
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("_id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("RegistrationId")]
-    public int? RegistrationId
-    {
-        get;
-        set;
-    }
+    public int? RegistrationId { get; set; }
 
     [JsonPropertyName("VersionId")]
-    public string? VersionId
-    {
-        get;
-        set;
-    }
+    public string? VersionId { get; set; }
 
     [JsonPropertyName("Ip")]
-    public string? Ip
-    {
-        get;
-        set;
-    }
+    public string? Ip { get; set; }
 
     [JsonPropertyName("Port")]
-    public int? Port
-    {
-        get;
-        set;
-    }
+    public int? Port { get; set; }
 
     [JsonPropertyName("DateTime")]
-    public long? DateTime
-    {
-        get;
-        set;
-    }
+    public long? DateTime { get; set; }
 
     [JsonPropertyName("Chats")]
-    public List<Chat>? Chats
-    {
-        get;
-        set;
-    }
+    public List<Chat>? Chats { get; set; }
 
     [JsonPropertyName("Regions")]
-    public List<string>? Regions
-    {
-        get;
-        set;
-    }
+    public List<string>? Regions { get; set; }
 
     /// <summary>
     ///     Possibly removed
     /// </summary>
     [JsonPropertyName("IsDeveloper")]
-    public bool? IsDeveloper
-    {
-        get;
-        set;
-    }
+    public bool? IsDeveloper { get; set; }
 }
 
 public record Chat
@@ -80,16 +44,8 @@ public record Chat
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("_id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("Members")]
-    public int? Members
-    {
-        get;
-        set;
-    }
+    public int? Members { get; set; }
 }

@@ -7,5 +7,5 @@ public enum PlayersSpawnPlace
 {
     SamePlace,
     DifferentPlaces,
-    AtTheEndsOfTheMap
+    AtTheEndsOfTheMap,
 }

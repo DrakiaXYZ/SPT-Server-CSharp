@@ -32,14 +32,10 @@ public abstract class Router
     {
         if (partialMatch)
         {
-            return GetInternalHandledRoutes()
-                .Where(r => r.dynamic)
-                .Any(r => url.Contains(r.route));
+            return GetInternalHandledRoutes().Where(r => r.dynamic).Any(r => url.Contains(r.route));
         }
 
-        return GetInternalHandledRoutes()
-            .Where(r => !r.dynamic)
-            .Any(r => r.route == url);
+        return GetInternalHandledRoutes().Where(r => !r.dynamic).Any(r => r.route == url);
     }
 }
 
@@ -54,14 +50,19 @@ public abstract class StaticRouter : Router
         _jsonUtil = jsonUtil;
     }
 
-    public async ValueTask<object> HandleStatic(string url, string? body, string sessionID, string output)
+    public async ValueTask<object> HandleStatic(
+        string url,
+        string? body,
+        string sessionID,
+        string output
+    )
     {
         var action = _actions.Single(route => route.url == url);
         var type = action.bodyType;
         IRequestData? info = null;
         if (type != null && !string.IsNullOrEmpty(body))
         {
-            info = (IRequestData?) _jsonUtil.Deserialize(body, type);
+            info = (IRequestData?)_jsonUtil.Deserialize(body, type);
         }
 
         return await action.action(url, info, sessionID, output);
@@ -84,14 +85,19 @@ public abstract class DynamicRouter : Router
         _jsonUtil = jsonUtil;
     }
 
-    public async ValueTask<object> HandleDynamic(string url, string? body, string sessionID, string output)
+    public async ValueTask<object> HandleDynamic(
+        string url,
+        string? body,
+        string sessionID,
+        string output
+    )
     {
         var action = actions.First(r => url.Contains(r.url));
         var type = action.bodyType;
         IRequestData? info = null;
         if (type != null && !string.IsNullOrEmpty(body))
         {
-            info = (IRequestData?) _jsonUtil.Deserialize(body, type);
+            info = (IRequestData?)_jsonUtil.Deserialize(body, type);
         }
 
         return await action.action(url, info, sessionID, output);
@@ -107,11 +113,13 @@ public abstract class DynamicRouter : Router
 // So instead I added the definition
 public abstract class ItemEventRouterDefinition : Router
 {
-    public abstract ValueTask<ItemEventRouterResponse> HandleItemEvent(string url,
+    public abstract ValueTask<ItemEventRouterResponse> HandleItemEvent(
+        string url,
         PmcData pmcData,
         BaseInteractionRequestData body,
         string sessionID,
-        ItemEventRouterResponse output);
+        ItemEventRouterResponse output
+    );
 }
 
 public abstract class SaveLoadRouter : Router

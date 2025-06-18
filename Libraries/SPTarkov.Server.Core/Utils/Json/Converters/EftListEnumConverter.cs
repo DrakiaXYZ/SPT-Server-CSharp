@@ -7,13 +7,14 @@ public class EftListEnumConverter<T> : JsonConverter<List<T>>
 {
     private static readonly JsonSerializerOptions _options = new()
     {
-        Converters =
-        {
-            new JsonStringEnumConverter()
-        }
+        Converters = { new JsonStringEnumConverter() },
     };
 
-    public override List<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override List<T>? Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
     {
         if (reader.TokenType == JsonTokenType.StartArray)
         {
@@ -39,5 +40,4 @@ public class EftListEnumConverter<T> : JsonConverter<List<T>>
 /// This attribute should be applied to enums which should be added as a converter to the json converter
 /// </summary>
 [AttributeUsage(AttributeTargets.Enum)]
-public class EftListEnumConverterAttribute : Attribute
-{ }
+public class EftListEnumConverterAttribute : Attribute { }

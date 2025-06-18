@@ -7,7 +7,8 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Loaders;
 
 [Obsolete(
-    "This mod loader is obsolete and will be removed in 4.1.0. See documentation in IPreSptLoadModAsync for more information.")]
+    "This mod loader is obsolete and will be removed in 4.1.0. See documentation in IPreSptLoadModAsync for more information."
+)]
 [Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.PreSptModLoader)]
 public class PreSptModLoader(
     ISptLogger<PreSptModLoader> _logger,

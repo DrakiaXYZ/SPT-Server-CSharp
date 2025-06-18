@@ -9,9 +9,5 @@ public record SellScavItemsToFenceRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("totalValue")]
-    public double? TotalValue
-    {
-        get;
-        set;
-    }
+    public double? TotalValue { get; set; }
 }

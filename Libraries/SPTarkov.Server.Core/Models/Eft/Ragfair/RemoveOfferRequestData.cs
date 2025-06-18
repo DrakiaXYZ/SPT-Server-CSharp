@@ -9,9 +9,5 @@ public record RemoveOfferRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("offerId")]
-    public string? OfferId
-    {
-        get;
-        set;
-    }
+    public string? OfferId { get; set; }
 }

@@ -38,12 +38,8 @@ public class QuestRewardHelper(
     /// Value can be modified by modders by overriding this value with new traders.
     /// Ensure to add Lightkeeper's ID (638f541a29ffd1183d187f57) and BTR Driver's ID (656f0f98d80a697f855d34b1)
     /// </summary>
-    protected string[] InGameTraders =
-    [
-        Traders.LIGHTHOUSEKEEPER,
-        Traders.BTR
-    ];
-    
+    protected string[] InGameTraders = [Traders.LIGHTHOUSEKEEPER, Traders.BTR];
+
     /// <summary>
     /// Give player quest rewards - Skills/exp/trader standing/items/assort unlocks - Returns reward items player earned
     /// SKIP quests completed in-game
@@ -54,8 +50,13 @@ public class QuestRewardHelper(
     /// <param name="sessionId">Session id</param>
     /// <param name="questResponse">Response to send back to client</param>
     /// <returns>Array of reward items player was given</returns>
-    public IEnumerable<Item> ApplyQuestReward(PmcData profileData, string questId, QuestStatusEnum state, string sessionId,
-        ItemEventRouterResponse questResponse)
+    public IEnumerable<Item> ApplyQuestReward(
+        PmcData profileData,
+        string questId,
+        QuestStatusEnum state,
+        string sessionId,
+        ItemEventRouterResponse questResponse
+    )
     {
         // Repeatable quest base data is always in PMCProfile, `profileData` may be scav profile
         // TODO: Move repeatable quest data to profile-agnostic location
@@ -71,7 +72,12 @@ public class QuestRewardHelper(
         var questDetails = GetQuestFromDb(questId, pmcProfile);
         if (questDetails is null)
         {
-            _logger.Warning(_localisationService.GetText("quest-unable_to_find_quest_in_db_no_quest_rewards", questId));
+            _logger.Warning(
+                _localisationService.GetText(
+                    "quest-unable_to_find_quest_in_db_no_quest_rewards",
+                    questId
+                )
+            );
 
             return [];
         }
@@ -129,7 +135,10 @@ public class QuestRewardHelper(
         }
 
         // Group daily/weekly/scav repeatable subtypes into one collection and find first that matched desired quest id
-        return pmcData.RepeatableQuests?.SelectMany(repeatableQuestSubType => repeatableQuestSubType.ActiveQuests)
+        return pmcData
+            .RepeatableQuests?.SelectMany(repeatableQuestSubType =>
+                repeatableQuestSubType.ActiveQuests
+            )
             .FirstOrDefault(repeatableQuest => repeatableQuest.Id == questId);
     }
 
@@ -141,24 +150,30 @@ public class QuestRewardHelper(
     protected double GetQuestMoneyRewardBonusMultiplier(PmcData pmcData)
     {
         // Check player has intel center
-        var moneyRewardBonuses = pmcData.Bonuses.Where(bonus => bonus.Type == BonusType.QuestMoneyReward);
+        var moneyRewardBonuses = pmcData.Bonuses.Where(bonus =>
+            bonus.Type == BonusType.QuestMoneyReward
+        );
 
         // Get a total of the quest money reward percent bonuses
-        var moneyRewardBonusPercent = moneyRewardBonuses.Aggregate(0D, (accumulate, bonus) => accumulate + bonus.Value ?? 0);
+        var moneyRewardBonusPercent = moneyRewardBonuses.Aggregate(
+            0D,
+            (accumulate, bonus) => accumulate + bonus.Value ?? 0
+        );
 
         // Calculate hideout management bonus as a percentage (up to 51% bonus)
-        var hideoutManagementSkill = _profileHelper.GetSkillFromProfile(pmcData, SkillTypes.HideoutManagement);
+        var hideoutManagementSkill = _profileHelper.GetSkillFromProfile(
+            pmcData,
+            SkillTypes.HideoutManagement
+        );
 
         // 5100 becomes 0.51, add 1 to it, 1.51
         // We multiply the money reward bonuses by the hideout management skill multiplier, giving the new result
-        var hideoutManagementBonusMultiplier = hideoutManagementSkill != null
-            ? 2 + hideoutManagementSkill.Progress / 1000
-            : 1;
+        var hideoutManagementBonusMultiplier =
+            hideoutManagementSkill != null ? 2 + hideoutManagementSkill.Progress / 1000 : 1;
 
         // e.g 15% * 1.4
         return moneyRewardBonusPercent + hideoutManagementBonusMultiplier ?? 1;
     }
-
 
     /// <summary>
     /// Adjust a quests money rewards by supplied multiplier
@@ -176,12 +191,12 @@ public class QuestRewardHelper(
         }
 
         // Grab just the money rewards from quest reward pool
-        var moneyRewards = clonedQuest.Rewards.Success
-            .Where(reward =>
-                reward.Type == RewardType.Item &&
-                reward.Items != null && reward.Items.Count > 0 &&
-                _paymentHelper.IsMoneyTpl(reward.Items.FirstOrDefault().Template)
-            );
+        var moneyRewards = clonedQuest.Rewards.Success.Where(reward =>
+            reward.Type == RewardType.Item
+            && reward.Items != null
+            && reward.Items.Count > 0
+            && _paymentHelper.IsMoneyTpl(reward.Items.FirstOrDefault().Template)
+        );
 
         foreach (var moneyReward in moneyRewards)
         {
@@ -189,12 +204,16 @@ public class QuestRewardHelper(
             var rewardItem = moneyReward.Items?.FirstOrDefault();
             if (rewardItem is null)
             {
-                _logger.Error($"Unable to apply money reward bonus to quest: {quest.Name} as no money item found");
+                _logger.Error(
+                    $"Unable to apply money reward bonus to quest: {quest.Name} as no money item found"
+                );
 
                 continue;
             }
 
-            var newCurrencyAmount = Math.Floor((rewardItem.Upd.StackObjectsCount ?? 0) * (1 + (bonusPercent / 100)));
+            var newCurrencyAmount = Math.Floor(
+                (rewardItem.Upd.StackObjectsCount ?? 0) * (1 + (bonusPercent / 100))
+            );
             rewardItem.Upd.StackObjectsCount = newCurrencyAmount;
             moneyReward.Value = newCurrencyAmount;
         }

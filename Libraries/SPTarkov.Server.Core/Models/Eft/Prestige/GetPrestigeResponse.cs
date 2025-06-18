@@ -8,9 +8,5 @@ public record GetPrestigeResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("elements")]
-    public List<Common.Tables.Prestige>? Elements
-    {
-        get;
-        set;
-    }
+    public List<Common.Tables.Prestige>? Elements { get; set; }
 }

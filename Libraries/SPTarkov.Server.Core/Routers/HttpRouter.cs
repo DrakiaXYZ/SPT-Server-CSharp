@@ -71,11 +71,23 @@ public class HttpRouter
             {
                 if (dynamic)
                 {
-                    wrapper.Output = await (route as DynamicRouter).HandleDynamic(url, body, sessionID, wrapper.Output) as string;
+                    wrapper.Output =
+                        await (route as DynamicRouter).HandleDynamic(
+                            url,
+                            body,
+                            sessionID,
+                            wrapper.Output
+                        ) as string;
                 }
                 else
                 {
-                    wrapper.Output = await (route as StaticRouter).HandleStatic(url, body, sessionID, wrapper.Output) as string;
+                    wrapper.Output =
+                        await (route as StaticRouter).HandleStatic(
+                            url,
+                            body,
+                            sessionID,
+                            wrapper.Output
+                        ) as string;
                 }
 
                 matched = true;
@@ -87,10 +99,6 @@ public class HttpRouter
 
     protected class ResponseWrapper(string? output)
     {
-        public string? Output
-        {
-            get;
-            set;
-        } = output;
+        public string? Output { get; set; } = output;
     }
 }

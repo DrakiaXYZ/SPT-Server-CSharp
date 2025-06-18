@@ -14,10 +14,7 @@ public class TradeItemEventRouter : ItemEventRouterDefinition
 {
     protected TradeCallbacks _tradeCallbacks;
 
-    public TradeItemEventRouter
-    (
-        TradeCallbacks tradeCallbacks
-    )
+    public TradeItemEventRouter(TradeCallbacks tradeCallbacks)
     {
         _tradeCallbacks = tradeCallbacks;
     }
@@ -28,23 +25,48 @@ public class TradeItemEventRouter : ItemEventRouterDefinition
         {
             new(ItemEventActions.TRADING_CONFIRM, false),
             new(ItemEventActions.RAGFAIR_BUY_OFFER, false),
-            new(ItemEventActions.SELL_ALL_FROM_SAVAGE, false)
+            new(ItemEventActions.SELL_ALL_FROM_SAVAGE, false),
         };
     }
 
-    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
-        ItemEventRouterResponse output)
+    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(
+        string url,
+        PmcData pmcData,
+        BaseInteractionRequestData body,
+        string sessionID,
+        ItemEventRouterResponse output
+    )
     {
         switch (url)
         {
             case ItemEventActions.TRADING_CONFIRM:
-                return new ValueTask<ItemEventRouterResponse>(_tradeCallbacks.ProcessTrade(pmcData, body as ProcessBaseTradeRequestData, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _tradeCallbacks.ProcessTrade(
+                        pmcData,
+                        body as ProcessBaseTradeRequestData,
+                        sessionID
+                    )
+                );
             case ItemEventActions.RAGFAIR_BUY_OFFER:
-                return new ValueTask<ItemEventRouterResponse>(_tradeCallbacks.ProcessRagfairTrade(pmcData, body as ProcessRagfairTradeRequestData, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _tradeCallbacks.ProcessRagfairTrade(
+                        pmcData,
+                        body as ProcessRagfairTradeRequestData,
+                        sessionID
+                    )
+                );
             case ItemEventActions.SELL_ALL_FROM_SAVAGE:
-                return new ValueTask<ItemEventRouterResponse>(_tradeCallbacks.SellAllFromSavage(pmcData, body as SellScavItemsToFenceRequestData, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _tradeCallbacks.SellAllFromSavage(
+                        pmcData,
+                        body as SellScavItemsToFenceRequestData,
+                        sessionID
+                    )
+                );
             default:
-                throw new Exception($"TradeItemEventRouter being used when it cant handle route {url}");
+                throw new Exception(
+                    $"TradeItemEventRouter being used when it cant handle route {url}"
+                );
         }
     }
 }

@@ -37,8 +37,11 @@ public class LauncherController(
     public ConnectResponse Connect()
     {
         // Get all possible profile types + filter out any that are blacklisted
-        var profileTemplates = _databaseService.GetProfileTemplates()
-            .Where(profile => !_coreConfig.Features.CreateNewProfileTypesBlacklist.Contains(profile.Key))
+        var profileTemplates = _databaseService
+            .GetProfileTemplates()
+            .Where(profile =>
+                !_coreConfig.Features.CreateNewProfileTypesBlacklist.Contains(profile.Key)
+            )
             .ToDictionary();
 
         return new ConnectResponse
@@ -46,7 +49,7 @@ public class LauncherController(
             BackendUrl = _httpServerHelper.GetBackendUrl(),
             Name = _coreConfig.ServerName,
             Editions = profileTemplates.Select(x => x.Key).ToList(),
-            ProfileDescriptions = GetProfileDescriptions(profileTemplates)
+            ProfileDescriptions = GetProfileDescriptions(profileTemplates),
         };
     }
 
@@ -55,7 +58,9 @@ public class LauncherController(
     /// </summary>
     /// <param name="profileTemplates">Profiles to get descriptions of</param>
     /// <returns>Dictionary of profile types with related descriptive text</returns>
-    protected Dictionary<string, string> GetProfileDescriptions(Dictionary<string, ProfileSides> profileTemplates)
+    protected Dictionary<string, string> GetProfileDescriptions(
+        Dictionary<string, ProfileSides> profileTemplates
+    )
     {
         var result = new Dictionary<string, string>();
         foreach (var (profileKey, profile) in profileTemplates)
@@ -72,7 +77,11 @@ public class LauncherController(
     /// <returns></returns>
     public Info? Find(string? sessionId)
     {
-        return sessionId is not null && _saveServer.GetProfiles().TryGetValue(sessionId, out var profile) ? profile.ProfileInfo : null;
+        return
+            sessionId is not null
+            && _saveServer.GetProfiles().TryGetValue(sessionId, out var profile)
+            ? profile.ProfileInfo
+            : null;
     }
 
     /// <summary>
@@ -126,7 +135,7 @@ public class LauncherController(
             Username = info.Username,
             Password = info.Password,
             IsWiped = true,
-            Edition = info.Edition
+            Edition = info.Edition,
         };
         _saveServer.CreateProfile(newProfileDetails);
 
@@ -229,7 +238,10 @@ public class LauncherController(
     /// <returns>Dictionary of mod name and mod details</returns>
     public Dictionary<string, AbstractModMetadata> GetLoadedServerMods()
     {
-        return _loadedMods.ToDictionary(sptMod => sptMod.ModMetadata?.Name ?? "UNKNOWN MOD", sptMod => sptMod.ModMetadata);
+        return _loadedMods.ToDictionary(
+            sptMod => sptMod.ModMetadata?.Name ?? "UNKNOWN MOD",
+            sptMod => sptMod.ModMetadata
+        );
     }
 
     /// <summary>

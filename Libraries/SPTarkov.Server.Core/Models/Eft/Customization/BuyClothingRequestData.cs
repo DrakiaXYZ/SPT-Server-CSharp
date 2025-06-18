@@ -9,18 +9,10 @@ public record BuyClothingRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("offer")]
-    public string? Offer
-    {
-        get;
-        set;
-    }
+    public string? Offer { get; set; }
 
     [JsonPropertyName("items")]
-    public List<PaymentItemForClothing>? Items
-    {
-        get;
-        set;
-    }
+    public List<PaymentItemForClothing>? Items { get; set; }
 }
 
 public record PaymentItemForClothing
@@ -29,23 +21,11 @@ public record PaymentItemForClothing
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("del")]
-    public bool? Del
-    {
-        get;
-        set;
-    }
+    public bool? Del { get; set; }
 
     [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("count")]
-    public int? Count
-    {
-        get;
-        set;
-    }
+    public int? Count { get; set; }
 }

@@ -35,7 +35,9 @@ public class TraderCallbacks(
     /// </summary>
     public ValueTask<string> GetTraderSettings(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_traderController.GetAllTraders(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_traderController.GetAllTraders(sessionID))
+        );
     }
 
     /// <summary>
@@ -44,7 +46,9 @@ public class TraderCallbacks(
     public ValueTask<string> GetTrader(string url, EmptyRequestData _, string sessionID)
     {
         var traderID = url.Replace("/client/trading/api/getTrader/", "");
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_traderController.GetTrader(sessionID, traderID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_traderController.GetTrader(sessionID, traderID))
+        );
     }
 
     /// <summary>
@@ -54,7 +58,9 @@ public class TraderCallbacks(
     public ValueTask<string> GetAssort(string url, EmptyRequestData _, string sessionID)
     {
         var traderID = url.Replace("/client/trading/api/getTraderAssort/", "");
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_traderController.GetAssort(sessionID, traderID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_traderController.GetAssort(sessionID, traderID))
+        );
     }
 
     /// <summary>

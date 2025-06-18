@@ -8,16 +8,8 @@ public record LocationsGenerateAllResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("locations")]
-    public Dictionary<string, LocationBase> Locations
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, LocationBase> Locations { get; set; }
 
     [JsonPropertyName("paths")]
-    public List<Path>? Paths
-    {
-        get;
-        set;
-    }
+    public List<Path>? Paths { get; set; }
 }

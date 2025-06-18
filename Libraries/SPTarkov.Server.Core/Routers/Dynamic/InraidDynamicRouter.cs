@@ -9,26 +9,22 @@ namespace SPTarkov.Server.Core.Routers.Dynamic;
 [Injectable]
 public class InraidDynamicRouter : DynamicRouter
 {
-    public InraidDynamicRouter(
-        JsonUtil jsonUtil,
-        InraidCallbacks inraidCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
-                "/client/location/getLocalloot",
-                async (
-                    url,
-                    info,
-                    sessionID,
-                    output
-                ) => await inraidCallbacks.RegisterPlayer(url, info as RegisterPlayerRequestData, sessionID),
-                typeof(RegisterPlayerRequestData)
-            )
-        ]
-    )
-    {
-    }
+    public InraidDynamicRouter(JsonUtil jsonUtil, InraidCallbacks inraidCallbacks)
+        : base(
+            jsonUtil,
+            [
+                new RouteAction(
+                    "/client/location/getLocalloot",
+                    async (url, info, sessionID, output) =>
+                        await inraidCallbacks.RegisterPlayer(
+                            url,
+                            info as RegisterPlayerRequestData,
+                            sessionID
+                        ),
+                    typeof(RegisterPlayerRequestData)
+                ),
+            ]
+        ) { }
 
     public override string GetTopLevelRoute()
     {

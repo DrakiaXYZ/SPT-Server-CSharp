@@ -9,16 +9,8 @@ public record ItemDeliveryRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("items")]
-    public List<Item>? Items
-    {
-        get;
-        set;
-    }
+    public List<Item>? Items { get; set; }
 
     [JsonPropertyName("traderId")]
-    public string? TraderId
-    {
-        get;
-        set;
-    }
+    public string? TraderId { get; set; }
 }

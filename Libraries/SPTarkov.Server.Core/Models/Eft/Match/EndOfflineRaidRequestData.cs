@@ -8,30 +8,14 @@ public record EndOfflineRaidRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("crc")]
-    public int? Crc
-    {
-        get;
-        set;
-    }
+    public int? Crc { get; set; }
 
     [JsonPropertyName("exitStatus")]
-    public string? ExitStatus
-    {
-        get;
-        set;
-    }
+    public string? ExitStatus { get; set; }
 
     [JsonPropertyName("exitName")]
-    public string? ExitName
-    {
-        get;
-        set;
-    }
+    public string? ExitName { get; set; }
 
     [JsonPropertyName("raidSeconds")]
-    public int? RaidSeconds
-    {
-        get;
-        set;
-    }
+    public int? RaidSeconds { get; set; }
 }

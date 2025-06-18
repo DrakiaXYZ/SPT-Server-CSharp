@@ -8,9 +8,5 @@ public record MatchGroupCurrentResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("squad")]
-    public List<GroupCharacter>? Squad
-    {
-        get;
-        set;
-    }
+    public List<GroupCharacter>? Squad { get; set; }
 }

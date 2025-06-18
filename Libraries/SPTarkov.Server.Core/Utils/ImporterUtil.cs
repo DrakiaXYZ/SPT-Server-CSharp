@@ -8,13 +8,18 @@ using SPTarkov.Server.Core.Utils.Json;
 namespace SPTarkov.Server.Core.Utils;
 
 [Injectable(InjectionType.Singleton)]
-public class ImporterUtil(
-    ISptLogger<ImporterUtil> _logger,
-    FileUtil _fileUtil,
-    JsonUtil _jsonUtil)
+public class ImporterUtil(ISptLogger<ImporterUtil> _logger, FileUtil _fileUtil, JsonUtil _jsonUtil)
 {
-    private readonly FrozenSet<string> _directoriesToIgnore = ["./SPT_Data/database/locales/server"];
-    private readonly FrozenSet<string> _filesToIgnore = ["bearsuits.json", "usecsuits.json", "archivedquests.json"];
+    private readonly FrozenSet<string> _directoriesToIgnore =
+    [
+        "./SPT_Data/database/locales/server",
+    ];
+    private readonly FrozenSet<string> _filesToIgnore =
+    [
+        "bearsuits.json",
+        "usecsuits.json",
+        "archivedquests.json",
+    ];
 
     public async Task<T> LoadRecursiveAsync<T>(
         string filePath,
@@ -22,9 +27,14 @@ public class ImporterUtil(
         Func<string, object, Task>? onObjectDeserialized = null
     )
     {
-        var result = await LoadRecursiveAsync(filePath, typeof(T), onReadCallback, onObjectDeserialized);
+        var result = await LoadRecursiveAsync(
+            filePath,
+            typeof(T),
+            onReadCallback,
+            onObjectDeserialized
+        );
 
-        return (T) result;
+        return (T)result;
     }
 
     /// <summary>
@@ -53,12 +63,24 @@ public class ImporterUtil(
         // Process files
         foreach (var file in files)
         {
-            if (_fileUtil.GetFileExtension(file) != "json" || _filesToIgnore.Contains(_fileUtil.GetFileNameAndExtension(file).ToLower()))
+            if (
+                _fileUtil.GetFileExtension(file) != "json"
+                || _filesToIgnore.Contains(_fileUtil.GetFileNameAndExtension(file).ToLower())
+            )
             {
                 continue;
             }
 
-            tasks.Add(ProcessFileAsync(file, loadedType, onReadCallback, onObjectDeserialized, result, dictionaryLock));
+            tasks.Add(
+                ProcessFileAsync(
+                    file,
+                    loadedType,
+                    onReadCallback,
+                    onObjectDeserialized,
+                    result,
+                    dictionaryLock
+                )
+            );
         }
 
         // Process directories
@@ -69,7 +91,16 @@ public class ImporterUtil(
                 continue;
             }
 
-            tasks.Add(ProcessDirectoryAsync(directory, loadedType, result, onReadCallback, onObjectDeserialized, dictionaryLock));
+            tasks.Add(
+                ProcessDirectoryAsync(
+                    directory,
+                    loadedType,
+                    result,
+                    onReadCallback,
+                    onObjectDeserialized,
+                    dictionaryLock
+                )
+            );
         }
 
         // Wait for all tasks to finish
@@ -143,11 +174,19 @@ public class ImporterUtil(
                 out var isDictionary
             );
 
-            var loadedData = await LoadRecursiveAsync($"{directory}/", matchedProperty, onReadCallback, onObjectDeserialized);
+            var loadedData = await LoadRecursiveAsync(
+                $"{directory}/",
+                matchedProperty,
+                onReadCallback,
+                onObjectDeserialized
+            );
 
             lock (dictionaryLock)
             {
-                setMethod.Invoke(result, isDictionary ? [directory, loadedData] : new[] { loadedData });
+                setMethod.Invoke(
+                    result,
+                    isDictionary ? [directory, loadedData] : new[] { loadedData }
+                );
             }
         }
         catch (Exception ex)
@@ -158,7 +197,10 @@ public class ImporterUtil(
 
     private async Task<object> DeserializeFileAsync(string file, Type propertyType)
     {
-        if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(LazyLoad<>))
+        if (
+            propertyType.IsGenericType
+            && propertyType.GetGenericTypeDefinition() == typeof(LazyLoad<>)
+        )
         {
             return CreateLazyLoadDeserialization(file, propertyType);
         }
@@ -190,7 +232,12 @@ public class ImporterUtil(
         return Activator.CreateInstance(propertyType, expressionDelegate);
     }
 
-    public MethodInfo GetSetMethod(string propertyName, Type type, out Type propertyType, out bool isDictionary)
+    public MethodInfo GetSetMethod(
+        string propertyName,
+        Type type,
+        out Type propertyType,
+        out bool isDictionary
+    )
     {
         MethodInfo setMethod;
         isDictionary = false;

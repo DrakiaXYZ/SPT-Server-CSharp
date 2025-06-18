@@ -8,16 +8,8 @@ public record RandomisedBotLevelResult
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("level")]
-    public int? Level
-    {
-        get;
-        set;
-    }
+    public int? Level { get; set; }
 
     [JsonPropertyName("exp")]
-    public int? Exp
-    {
-        get;
-        set;
-    }
+    public int? Exp { get; set; }
 }

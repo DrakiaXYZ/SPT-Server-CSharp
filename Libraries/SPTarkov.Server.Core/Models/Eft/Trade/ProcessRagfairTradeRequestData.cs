@@ -10,11 +10,7 @@ public record ProcessRagfairTradeRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("offers")]
-    public List<OfferRequest>? Offers
-    {
-        get;
-        set;
-    }
+    public List<OfferRequest>? Offers { get; set; }
 }
 
 public record OfferRequest
@@ -23,23 +19,11 @@ public record OfferRequest
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("count")]
-    public int? Count
-    {
-        get;
-        set;
-    }
+    public int? Count { get; set; }
 
     [JsonPropertyName("items")]
-    public List<IdWithCount>? Items
-    {
-        get;
-        set;
-    }
+    public List<IdWithCount>? Items { get; set; }
 }

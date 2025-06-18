@@ -11,7 +11,7 @@ public class LazyLoad<T>(Func<T> deserialize)
     private Timer? autoCleanerTimeout;
 
     /// <summary>
-    /// Adds a transformer to modify the value during lazy loading. Transformers execute 
+    /// Adds a transformer to modify the value during lazy loading. Transformers execute
     /// in registration order and the final result is cached until auto-cleanup.
     /// </summary>
     /// <param name="transformer">Function that transforms the value</param>
@@ -46,7 +46,7 @@ public class LazyLoad<T>(Func<T> deserialize)
                         _result = transform(_result);
                     }
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     throw;
                 }
@@ -60,14 +60,17 @@ public class LazyLoad<T>(Func<T> deserialize)
                     {
                         _result = default;
                         _isLoaded = false;
-                        autoCleanerTimeout?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                        autoCleanerTimeout?.Change(
+                            Timeout.InfiniteTimeSpan,
+                            Timeout.InfiniteTimeSpan
+                        );
                         autoCleanerTimeout = null;
                     },
                     null,
                     _autoCleanerTimeout,
                     Timeout.InfiniteTimeSpan
                 );
-            }   
+            }
 
             autoCleanerTimeout?.Change(_autoCleanerTimeout, Timeout.InfiniteTimeSpan);
             return _result;

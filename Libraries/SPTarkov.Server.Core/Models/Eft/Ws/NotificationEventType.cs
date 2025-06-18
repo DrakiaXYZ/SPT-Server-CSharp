@@ -77,5 +77,5 @@ public enum NotificationEventType
     arenaCustomGameCountdownCanceled,
     arenaCustomGameTeamNameChanged,
     arenaCustomGameNewOwnerAppointed,
-    arenaAchievementObtain
+    arenaAchievementObtain,
 }

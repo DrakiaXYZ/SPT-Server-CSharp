@@ -24,8 +24,12 @@ public class SptCommandoCommands : IChatCommand
         _localisationService = localisationService;
         var coreConfigs = configServer.GetConfig<CoreConfig>();
         var commandoId = coreConfigs.Features?.ChatbotFeatures.Ids.GetValueOrDefault("commando");
-        if (!(coreConfigs.Features.ChatbotFeatures.CommandoFeatures.GiveCommandEnabled &&
-              coreConfigs.Features.ChatbotFeatures.EnabledBots.ContainsKey(commandoId)))
+        if (
+            !(
+                coreConfigs.Features.ChatbotFeatures.CommandoFeatures.GiveCommandEnabled
+                && coreConfigs.Features.ChatbotFeatures.EnabledBots.ContainsKey(commandoId)
+            )
+        )
         {
             _sptCommands.Remove("give");
         }
@@ -46,7 +50,12 @@ public class SptCommandoCommands : IChatCommand
         return _sptCommands.Keys.ToList();
     }
 
-    public string Handle(string command, UserDialogInfo commandHandler, string sessionId, SendMessageRequest request)
+    public string Handle(
+        string command,
+        UserDialogInfo commandHandler,
+        string sessionId,
+        SendMessageRequest request
+    )
     {
         return _sptCommands[command].PerformAction(commandHandler, sessionId, request);
     }
@@ -57,7 +66,10 @@ public class SptCommandoCommands : IChatCommand
         if (!_sptCommands.TryAdd(key, command))
         {
             throw new Exception(
-                _localisationService.GetText("chat-unable_to_register_command_already_registered", key)
+                _localisationService.GetText(
+                    "chat-unable_to_register_command_already_registered",
+                    key
+                )
             );
         }
     }

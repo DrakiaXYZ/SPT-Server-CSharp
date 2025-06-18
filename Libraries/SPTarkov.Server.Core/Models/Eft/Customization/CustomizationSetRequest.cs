@@ -9,11 +9,7 @@ public record CustomizationSetRequest : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("customizations")]
-    public List<CustomizationSetOption>? Customizations
-    {
-        get;
-        set;
-    }
+    public List<CustomizationSetOption>? Customizations { get; set; }
 }
 
 public record CustomizationSetOption
@@ -22,23 +18,11 @@ public record CustomizationSetOption
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("type")]
-    public string? Type
-    {
-        get;
-        set;
-    }
+    public string? Type { get; set; }
 
     [JsonPropertyName("source")]
-    public string? Source
-    {
-        get;
-        set;
-    }
+    public string? Source { get; set; }
 }

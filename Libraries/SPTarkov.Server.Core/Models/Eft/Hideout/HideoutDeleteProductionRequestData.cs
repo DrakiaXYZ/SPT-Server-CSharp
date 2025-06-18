@@ -9,16 +9,8 @@ public record HideoutDeleteProductionRequestData : InventoryBaseActionRequestDat
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("recipeId")]
-    public string? RecipeId
-    {
-        get;
-        set;
-    }
+    public string? RecipeId { get; set; }
 
     [JsonPropertyName("timestamp")]
-    public double? Timestamp
-    {
-        get;
-        set;
-    }
+    public double? Timestamp { get; set; }
 }

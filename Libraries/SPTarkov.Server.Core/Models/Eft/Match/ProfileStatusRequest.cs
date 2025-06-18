@@ -8,9 +8,5 @@ public record ProfileStatusRequest
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("groupId")]
-    public int? GroupId
-    {
-        get;
-        set;
-    }
+    public int? GroupId { get; set; }
 }

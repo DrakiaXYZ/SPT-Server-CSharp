@@ -9,7 +9,9 @@ public class ModLoadOrder(ICloner cloner)
     protected Dictionary<string, AbstractModMetadata> mods = new();
     protected Dictionary<string, AbstractModMetadata> modsAvailable = new();
 
-    public Dictionary<string, AbstractModMetadata> SetModList(Dictionary<string, AbstractModMetadata> mods)
+    public Dictionary<string, AbstractModMetadata> SetModList(
+        Dictionary<string, AbstractModMetadata> mods
+    )
     {
         this.mods = mods;
         modsAvailable = cloner.Clone(this.mods);
@@ -36,7 +38,7 @@ public class ModLoadOrder(ICloner cloner)
 
     public List<string> GetLoadOrder()
     {
-        return [..loadOrder.Keys];
+        return [.. loadOrder.Keys];
     }
 
     public HashSet<string> GetModsOnLoadBefore(string mod)

@@ -53,7 +53,8 @@ public class BotLootCacheService(
         bool isPmc,
         string lootType,
         BotType botJsonTemplate,
-        MinMax<double>? itemPriceMinMax = null)
+        MinMax<double>? itemPriceMinMax = null
+    )
     {
         if (!BotRoleExistsInCache(botRole))
         {
@@ -61,7 +62,7 @@ public class BotLootCacheService(
             AddLootToCache(botRole, isPmc, botJsonTemplate);
         }
 
-        if(!_lootCache.TryGetValue(botRole, out var botRoleCache))
+        if (!_lootCache.TryGetValue(botRole, out var botRoleCache))
         {
             _logger.Error($"Unable to find: {botRole} in loot cache");
             return [];
@@ -117,7 +118,7 @@ public class BotLootCacheService(
                         {
                             lootType,
                             botRole,
-                            isPmc
+                            isPmc,
                         }
                     )
                 );
@@ -139,29 +140,27 @@ public class BotLootCacheService(
 
         // Filter the loot pool prior to returning
         var filteredResult = result.Where(i =>
+        {
+            var itemPrice = _itemHelper.GetItemPrice(i.Key);
+            if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is not null)
             {
-                var itemPrice = _itemHelper.GetItemPrice(i.Key);
-                if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is not null)
-                {
-                    return itemPrice >= itemPriceMinMax?.Min && itemPrice <= itemPriceMinMax?.Max;
-                }
-
-                if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is null)
-                {
-                    return itemPrice >= itemPriceMinMax?.Min;
-                }
-
-                if (itemPriceMinMax?.Min is null && itemPriceMinMax?.Max is not null)
-                {
-                    return itemPrice <= itemPriceMinMax?.Max;
-                }
-
-                return false;
+                return itemPrice >= itemPriceMinMax?.Min && itemPrice <= itemPriceMinMax?.Max;
             }
-        );
+
+            if (itemPriceMinMax?.Min is not null && itemPriceMinMax?.Max is null)
+            {
+                return itemPrice >= itemPriceMinMax?.Min;
+            }
+
+            if (itemPriceMinMax?.Min is null && itemPriceMinMax?.Max is not null)
+            {
+                return itemPrice <= itemPriceMinMax?.Max;
+            }
+
+            return false;
+        });
 
         return _cloner.Clone(filteredResult.ToDictionary(pair => pair.Key, pair => pair.Value));
-
     }
 
     /// <summary>
@@ -186,22 +185,24 @@ public class BotLootCacheService(
         if (isPmc)
         {
             // Replace lootPool from bot json with our own generated list for PMCs
-            lootPool.Backpack = _cloner.Clone(_pmcLootGenerator.GeneratePMCBackpackLootPool(botRole));
+            lootPool.Backpack = _cloner.Clone(
+                _pmcLootGenerator.GeneratePMCBackpackLootPool(botRole)
+            );
             lootPool.Pockets = _cloner.Clone(_pmcLootGenerator.GeneratePMCPocketLootPool(botRole));
-            lootPool.TacticalVest = _cloner.Clone(_pmcLootGenerator.GeneratePMCVestLootPool(botRole));
+            lootPool.TacticalVest = _cloner.Clone(
+                _pmcLootGenerator.GeneratePMCVestLootPool(botRole)
+            );
         }
 
         // Backpack/Pockets etc
-        var poolsToProcess =
-            new Dictionary<string, Dictionary<string, double>>
-            {
-                { "Backpack", lootPool.Backpack },
-                { "Pockets", lootPool.Pockets },
-                { "SecuredContainer", lootPool.SecuredContainer },
-                { "SpecialLoot", lootPool.SpecialLoot },
-                { "TacticalVest", lootPool.TacticalVest }
-            };
-
+        var poolsToProcess = new Dictionary<string, Dictionary<string, double>>
+        {
+            { "Backpack", lootPool.Backpack },
+            { "Pockets", lootPool.Pockets },
+            { "SecuredContainer", lootPool.SecuredContainer },
+            { "SpecialLoot", lootPool.SpecialLoot },
+            { "TacticalVest", lootPool.TacticalVest },
+        };
 
         foreach (var (containerType, itemPool) in poolsToProcess)
         {
@@ -235,7 +236,10 @@ public class BotLootCacheService(
             }
 
             // If pool has items and items were going into a non-secure container pool, add to combined
-            if (itemPool.Count > 0 && !containerType.Equals("securedcontainer", StringComparison.OrdinalIgnoreCase))
+            if (
+                itemPool.Count > 0
+                && !containerType.Equals("securedcontainer", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 // fill up 'combined' pool of all loot
                 AddItemsToPool(combinedLootPool, itemPool);
@@ -243,14 +247,21 @@ public class BotLootCacheService(
         }
 
         // Assign whitelisted special items to bot if any exist
-        var (specialLootItems, addSpecialLootItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist);
+        var (specialLootItems, addSpecialLootItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.SpecialItems?.Whitelist
+        );
         if (addSpecialLootItems) // key = tpl, value = weight
         {
             // No whitelist, find and assign from combined item pool
             foreach (var itemKvP in specialLootPool)
             {
                 var itemTemplate = _itemHelper.GetItem(itemKvP.Key).Value;
-                if (!(IsBulletOrGrenade(itemTemplate.Properties) || IsMagazine(itemTemplate.Properties)))
+                if (
+                    !(
+                        IsBulletOrGrenade(itemTemplate.Properties)
+                        || IsMagazine(itemTemplate.Properties)
+                    )
+                )
                 {
                     lock (_specialLock)
                     {
@@ -260,13 +271,27 @@ public class BotLootCacheService(
             }
         }
 
-        var (healingItemsInWhitelist, addHealingItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist);
-        var (drugItemsInWhitelist, addDrugItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist);
-        var (foodItemsInWhitelist, addFoodItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
-        var (drinkItemsInWhitelist, addDrinkItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist);
-        var (currencyItemsInWhitelist, addCurrencyItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist);
-        var (stimItemsInWhitelist, addStimItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist);
-        var (grenadeItemsInWhitelist, addGrenadeItems) = GetGenerationWeights(botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist);
+        var (healingItemsInWhitelist, addHealingItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Healing?.Whitelist
+        );
+        var (drugItemsInWhitelist, addDrugItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Drugs?.Whitelist
+        );
+        var (foodItemsInWhitelist, addFoodItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist
+        );
+        var (drinkItemsInWhitelist, addDrinkItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Food?.Whitelist
+        );
+        var (currencyItemsInWhitelist, addCurrencyItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Currency?.Whitelist
+        );
+        var (stimItemsInWhitelist, addStimItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Stims?.Whitelist
+        );
+        var (grenadeItemsInWhitelist, addGrenadeItems) = GetGenerationWeights(
+            botJsonTemplate.BotGeneration?.Items?.Grenades?.Whitelist
+        );
 
         foreach (var itemKvP in combinedLootPool)
         {
@@ -280,9 +305,9 @@ public class BotLootCacheService(
             {
                 // Whitelist has no healing items, hydrate it using items from combinedLootPool that meet criteria
                 if (
-                    IsMedicalItem(itemTemplate.Properties) &&
-                    itemTemplate.Parent != BaseClasses.STIMULATOR &&
-                    itemTemplate.Parent != BaseClasses.DRUGS
+                    IsMedicalItem(itemTemplate.Properties)
+                    && itemTemplate.Parent != BaseClasses.STIMULATOR
+                    && itemTemplate.Parent != BaseClasses.DRUGS
                 )
                 {
                     lock (_healingLock)
@@ -294,7 +319,10 @@ public class BotLootCacheService(
 
             if (addDrugItems)
             {
-                if (itemTemplate.Parent == BaseClasses.DRUGS && IsMedicalItem(itemTemplate.Properties))
+                if (
+                    itemTemplate.Parent == BaseClasses.DRUGS
+                    && IsMedicalItem(itemTemplate.Properties)
+                )
                 {
                     lock (_drugLock)
                     {
@@ -338,7 +366,10 @@ public class BotLootCacheService(
 
             if (addStimItems)
             {
-                if (itemTemplate.Parent == BaseClasses.STIMULATOR && IsMedicalItem(itemTemplate.Properties))
+                if (
+                    itemTemplate.Parent == BaseClasses.STIMULATOR
+                    && IsMedicalItem(itemTemplate.Properties)
+                )
                 {
                     lock (_stimLock)
                     {
@@ -360,26 +391,33 @@ public class BotLootCacheService(
         }
 
         // Get backpack loot (excluding magazines, bullets, grenades, drink, food and healing/stim items)
-        var filteredBackpackItems = FilterItemPool(backpackLootPool, (itemTemplate) =>
-            IsBulletOrGrenade(itemTemplate.Properties) ||
-            IsMagazine(itemTemplate.Properties) ||
-            IsMedicalItem(itemTemplate.Properties) ||
-            IsGrenade(itemTemplate.Properties) ||
-            IsFood(itemTemplate.Id) ||
-            IsDrink(itemTemplate.Id) ||
-            IsCurrency(itemTemplate.Id));
+        var filteredBackpackItems = FilterItemPool(
+            backpackLootPool,
+            (itemTemplate) =>
+                IsBulletOrGrenade(itemTemplate.Properties)
+                || IsMagazine(itemTemplate.Properties)
+                || IsMedicalItem(itemTemplate.Properties)
+                || IsGrenade(itemTemplate.Properties)
+                || IsFood(itemTemplate.Id)
+                || IsDrink(itemTemplate.Id)
+                || IsCurrency(itemTemplate.Id)
+        );
 
         // Get pocket loot (excluding magazines, bullets, grenades, drink, food medical and healing/stim items)
-        var filteredPocketItems = FilterItemPool(pocketLootPool, (itemTemplate) =>
-            IsBulletOrGrenade(itemTemplate.Properties) ||
-            IsMagazine(itemTemplate.Properties) ||
-            IsMedicalItem(itemTemplate.Properties) ||
-            IsGrenade(itemTemplate.Properties) ||
-            IsFood(itemTemplate.Id) ||
-            IsDrink(itemTemplate.Id) ||
-            IsCurrency(itemTemplate.Id) ||
-            itemTemplate.Properties.Height is null || // lacks height
-            itemTemplate.Properties.Width is null); // lacks width
+        var filteredPocketItems = FilterItemPool(
+            pocketLootPool,
+            (itemTemplate) =>
+                IsBulletOrGrenade(itemTemplate.Properties)
+                || IsMagazine(itemTemplate.Properties)
+                || IsMedicalItem(itemTemplate.Properties)
+                || IsGrenade(itemTemplate.Properties)
+                || IsFood(itemTemplate.Id)
+                || IsDrink(itemTemplate.Id)
+                || IsCurrency(itemTemplate.Id)
+                || itemTemplate.Properties.Height is null
+                || // lacks height
+                itemTemplate.Properties.Width is null
+        ); // lacks width
 
         // Get vest loot (excluding magazines, bullets, grenades, medical and healing/stim items)
         var filteredVestItems = new Dictionary<string, double>();
@@ -393,13 +431,13 @@ public class BotLootCacheService(
 
             var itemTemplate = itemResult.Value;
             if (
-                IsBulletOrGrenade(itemTemplate.Properties) ||
-                IsMagazine(itemTemplate.Properties) ||
-                IsMedicalItem(itemTemplate.Properties) ||
-                IsGrenade(itemTemplate.Properties) ||
-                IsFood(itemTemplate.Id) ||
-                IsDrink(itemTemplate.Id) ||
-                IsCurrency(itemTemplate.Id)
+                IsBulletOrGrenade(itemTemplate.Properties)
+                || IsMagazine(itemTemplate.Properties)
+                || IsMedicalItem(itemTemplate.Properties)
+                || IsGrenade(itemTemplate.Properties)
+                || IsFood(itemTemplate.Id)
+                || IsDrink(itemTemplate.Id)
+                || IsCurrency(itemTemplate.Id)
             )
             {
                 continue;
@@ -409,11 +447,13 @@ public class BotLootCacheService(
         }
 
         // Get secure loot (excluding magazines, bullets)
-        var filteredSecureLoot = FilterItemPool(secureLootPool, (itemTemplate) =>
-            IsBulletOrGrenade(itemTemplate.Properties) ||
-            IsMagazine(itemTemplate.Properties));
+        var filteredSecureLoot = FilterItemPool(
+            secureLootPool,
+            (itemTemplate) =>
+                IsBulletOrGrenade(itemTemplate.Properties) || IsMagazine(itemTemplate.Properties)
+        );
 
-        if(!_lootCache.TryGetValue(botRole, out var cacheForRole))
+        if (!_lootCache.TryGetValue(botRole, out var cacheForRole))
         {
             _logger.Error($"Unable to get loot cache value using key: {botRole}");
 
@@ -440,7 +480,10 @@ public class BotLootCacheService(
     /// <param name="lootPool">Pool to filter</param>
     /// <param name="shouldBeSkipped">Delegate to filter pool by</param>
     /// <returns></returns>
-    protected Dictionary<string, double> FilterItemPool(Dictionary<string, double> lootPool, Func<TemplateItem, bool> shouldBeSkipped)
+    protected Dictionary<string, double> FilterItemPool(
+        Dictionary<string, double> lootPool,
+        Func<TemplateItem, bool> shouldBeSkipped
+    )
     {
         var filteredItems = new Dictionary<string, double>();
         foreach (var (itemTpl, itemWeight) in lootPool)
@@ -467,7 +510,10 @@ public class BotLootCacheService(
     /// </summary>
     /// <param name="weights">Weights to return</param>
     /// <returns>Dictionary and should pool be hydrated by items in combined loot pool</returns>
-    protected static (Dictionary<string, double>, bool populateFromCombinedPool) GetGenerationWeights(Dictionary<string, double>? weights)
+    protected static (
+        Dictionary<string, double>,
+        bool populateFromCombinedPool
+    ) GetGenerationWeights(Dictionary<string, double>? weights)
     {
         var result = weights ?? [];
         return (result, !result.Any()); // empty dict = should be populated from combined pool
@@ -479,7 +525,10 @@ public class BotLootCacheService(
     /// </summary>
     /// <param name="poolToAddTo">Dictionary to add item to</param>
     /// <param name="poolOfItemsToAdd">Dictionary of items to add</param>
-    protected void AddItemsToPool(Dictionary<string, double> poolToAddTo, Dictionary<string, double> poolOfItemsToAdd)
+    protected void AddItemsToPool(
+        Dictionary<string, double> poolToAddTo,
+        Dictionary<string, double> poolOfItemsToAdd
+    )
     {
         foreach (var (tpl, weight) in poolOfItemsToAdd)
         {

@@ -14,10 +14,7 @@ public class RepairItemEventRouter : ItemEventRouterDefinition
 {
     protected RepairCallbacks _repairCallbacks;
 
-    public RepairItemEventRouter
-    (
-        RepairCallbacks repairCallbacks
-    )
+    public RepairItemEventRouter(RepairCallbacks repairCallbacks)
     {
         _repairCallbacks = repairCallbacks;
     }
@@ -27,21 +24,36 @@ public class RepairItemEventRouter : ItemEventRouterDefinition
         return new List<HandledRoute>
         {
             new(ItemEventActions.REPAIR, false),
-            new(ItemEventActions.TRADER_REPAIR, false)
+            new(ItemEventActions.TRADER_REPAIR, false),
         };
     }
 
-    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
-        ItemEventRouterResponse output)
+    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(
+        string url,
+        PmcData pmcData,
+        BaseInteractionRequestData body,
+        string sessionID,
+        ItemEventRouterResponse output
+    )
     {
         switch (url)
         {
             case ItemEventActions.REPAIR:
-                return new ValueTask<ItemEventRouterResponse>(_repairCallbacks.Repair(pmcData, body as RepairActionDataRequest, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _repairCallbacks.Repair(pmcData, body as RepairActionDataRequest, sessionID)
+                );
             case ItemEventActions.TRADER_REPAIR:
-                return new ValueTask<ItemEventRouterResponse>(_repairCallbacks.TraderRepair(pmcData, body as TraderRepairActionDataRequest, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _repairCallbacks.TraderRepair(
+                        pmcData,
+                        body as TraderRepairActionDataRequest,
+                        sessionID
+                    )
+                );
             default:
-                throw new Exception($"RepairItemEventRouter being used when it cant handle route {url}");
+                throw new Exception(
+                    $"RepairItemEventRouter being used when it cant handle route {url}"
+                );
         }
     }
 }

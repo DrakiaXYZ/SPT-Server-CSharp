@@ -8,37 +8,17 @@ public record ChooseRandomCompatibleModResult
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("incompatible")]
-    public bool? Incompatible
-    {
-        get;
-        set;
-    }
+    public bool? Incompatible { get; set; }
 
     [JsonPropertyName("found")]
-    public bool? Found
-    {
-        get;
-        set;
-    }
+    public bool? Found { get; set; }
 
     [JsonPropertyName("chosenTpl")]
-    public string? ChosenTemplate
-    {
-        get;
-        set;
-    }
+    public string? ChosenTemplate { get; set; }
 
     [JsonPropertyName("reason")]
-    public string? Reason
-    {
-        get;
-        set;
-    }
+    public string? Reason { get; set; }
 
     [JsonPropertyName("slotBlocked")]
-    public bool? SlotBlocked
-    {
-        get;
-        set;
-    }
+    public bool? SlotBlocked { get; set; }
 }

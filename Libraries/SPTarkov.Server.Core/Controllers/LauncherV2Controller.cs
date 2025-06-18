@@ -48,7 +48,10 @@ public class LauncherV2Controller(
 
         foreach (var profileKvP in dbProfiles)
         {
-            result.TryAdd(profileKvP.Key, _localisationService.GetText(profileKvP.Value.DescriptionLocaleKey));
+            result.TryAdd(
+                profileKvP.Key,
+                _localisationService.GetText(profileKvP.Value.DescriptionLocaleKey)
+            );
         }
 
         return result;
@@ -174,7 +177,7 @@ public class LauncherV2Controller(
             Username = info.Username,
             Password = info.Password,
             IsWiped = true,
-            Edition = info.Edition
+            Edition = info.Edition,
         };
 
         _saveServer.CreateProfile(newProfileDetails);
@@ -204,7 +207,10 @@ public class LauncherV2Controller(
     {
         foreach (var profile in _saveServer.GetProfiles())
         {
-            if (info.Username == profile.Value.ProfileInfo!.Username && info.Password == profile.Value.ProfileInfo.Password)
+            if (
+                info.Username == profile.Value.ProfileInfo!.Username
+                && info.Password == profile.Value.ProfileInfo.Password
+            )
             {
                 return profile.Key;
             }

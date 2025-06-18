@@ -15,32 +15,29 @@ public class LauncherV2Callbacks(
 {
     public ValueTask<string> Ping()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2PingResponse
-            {
-                Response = _launcherV2Controller.Ping()
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2PingResponse { Response = _launcherV2Controller.Ping() }
+            )
+        );
     }
 
     public ValueTask<string> Types()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2TypesResponse
-            {
-                Response = _launcherV2Controller.Types()
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2TypesResponse { Response = _launcherV2Controller.Types() }
+            )
+        );
     }
 
     public ValueTask<string> Login(LoginRequestData info)
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2LoginResponse
-            {
-                Response = _launcherV2Controller.Login(info)
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2LoginResponse { Response = _launcherV2Controller.Login(info) }
+            )
+        );
     }
 
     public async ValueTask<string> Register(RegisterData info)
@@ -49,7 +46,7 @@ public class LauncherV2Callbacks(
             new LauncherV2RegisterResponse
             {
                 Response = await _launcherV2Controller.Register(info),
-                Profiles = _profileController.GetMiniProfiles()
+                Profiles = _profileController.GetMiniProfiles(),
             }
         );
     }
@@ -60,63 +57,67 @@ public class LauncherV2Callbacks(
             new LauncherV2PasswordChangeResponse
             {
                 Response = await _launcherV2Controller.PasswordChange(info),
-                Profiles = _profileController.GetMiniProfiles()
+                Profiles = _profileController.GetMiniProfiles(),
             }
         );
     }
 
     public ValueTask<string> Remove(LoginRequestData info)
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2RemoveResponse
-            {
-                Response = _launcherV2Controller.Remove(info),
-                Profiles = _profileController.GetMiniProfiles()
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2RemoveResponse
+                {
+                    Response = _launcherV2Controller.Remove(info),
+                    Profiles = _profileController.GetMiniProfiles(),
+                }
+            )
+        );
     }
 
     public ValueTask<string> CompatibleVersion()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2VersionResponse
-            {
-                Response = new LauncherV2CompatibleVersion
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2VersionResponse
                 {
-                    SptVersion = _launcherV2Controller.SptVersion(),
-                    EftVersion = _launcherV2Controller.EftVersion()
+                    Response = new LauncherV2CompatibleVersion
+                    {
+                        SptVersion = _launcherV2Controller.SptVersion(),
+                        EftVersion = _launcherV2Controller.EftVersion(),
+                    },
                 }
-            }
-        ));
+            )
+        );
     }
 
     public ValueTask<string> Mods()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2ModsResponse
-            {
-                Response = _launcherV2Controller.LoadedMods()
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2ModsResponse { Response = _launcherV2Controller.LoadedMods() }
+            )
+        );
     }
 
     public ValueTask<string> Profiles()
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2ProfilesResponse
-            {
-                Response = _profileController.GetMiniProfiles()
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2ProfilesResponse { Response = _profileController.GetMiniProfiles() }
+            )
+        );
     }
 
     public ValueTask<string> Profile(string? sessionId)
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(
-            new LauncherV2ProfileResponse
-            {
-                Response = _launcherV2Controller.GetProfile(sessionId)
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(
+                new LauncherV2ProfileResponse
+                {
+                    Response = _launcherV2Controller.GetProfile(sessionId),
+                }
+            )
+        );
     }
 }

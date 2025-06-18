@@ -7,5 +7,5 @@ public enum ExfiltrationType
 {
     Individual,
     SharedTimer,
-    Manual
+    Manual,
 }

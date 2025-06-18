@@ -8,9 +8,5 @@ public record GetRagfairOfferByIdRequest
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
-    public int? Id
-    {
-        get;
-        set;
-    }
+    public int? Id { get; set; }
 }

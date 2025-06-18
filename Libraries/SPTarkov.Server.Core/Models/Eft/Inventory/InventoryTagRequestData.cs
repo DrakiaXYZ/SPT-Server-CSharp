@@ -8,23 +8,11 @@ public record InventoryTagRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
-    public string? Item
-    {
-        get;
-        set;
-    }
+    public string? Item { get; set; }
 
     [JsonPropertyName("TagName")]
-    public string? TagName
-    {
-        get;
-        set;
-    }
+    public string? TagName { get; set; }
 
     [JsonPropertyName("TagColor")]
-    public int? TagColor
-    {
-        get;
-        set;
-    }
+    public int? TagColor { get; set; }
 }

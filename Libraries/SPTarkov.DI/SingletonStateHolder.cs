@@ -2,10 +2,7 @@
 
 public class SingletonStateHolder<T>
 {
-    public T State
-    {
-        get;
-    }
+    public T State { get; }
 
     public SingletonStateHolder(T state)
     {

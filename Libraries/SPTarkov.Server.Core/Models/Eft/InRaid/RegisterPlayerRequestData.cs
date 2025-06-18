@@ -9,23 +9,11 @@ public record RegisterPlayerRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("crc")]
-    public int? Crc
-    {
-        get;
-        set;
-    }
+    public int? Crc { get; set; }
 
     [JsonPropertyName("locationId")]
-    public string? LocationId
-    {
-        get;
-        set;
-    }
+    public string? LocationId { get; set; }
 
     [JsonPropertyName("variantId")]
-    public int? VariantId
-    {
-        get;
-        set;
-    }
+    public int? VariantId { get; set; }
 }

@@ -9,23 +9,15 @@ namespace SPTarkov.Server.Core.Routers.Dynamic;
 [Injectable]
 public class BundleDynamicRouter : DynamicRouter
 {
-    public BundleDynamicRouter(
-        JsonUtil jsonUtil,
-        BundleCallbacks bundleCallbacks
-    ) : base(
-        jsonUtil,
-        [
-            new RouteAction(
-                "/files/bundle",
-                async (
-                    url,
-                    info,
-                    sessionID,
-                    output
-                ) => await bundleCallbacks.GetBundle(url, info as EmptyRequestData, sessionID)
-            )
-        ]
-    )
-    {
-    }
+    public BundleDynamicRouter(JsonUtil jsonUtil, BundleCallbacks bundleCallbacks)
+        : base(
+            jsonUtil,
+            [
+                new RouteAction(
+                    "/files/bundle",
+                    async (url, info, sessionID, output) =>
+                        await bundleCallbacks.GetBundle(url, info as EmptyRequestData, sessionID)
+                ),
+            ]
+        ) { }
 }

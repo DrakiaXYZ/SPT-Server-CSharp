@@ -12,5 +12,5 @@ public enum ArmorMaterial
     Aluminium,
     ArmoredSteel,
     Ceramic,
-    Glass
+    Glass,
 }

@@ -8,33 +8,13 @@ public record BotDetailsForChatMessages
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public string Nickname
-    {
-        get;
-        set;
-    } = string.Empty;
+    public string Nickname { get; set; } = string.Empty;
 
-    public DogtagSide Side
-    {
-        get;
-        set;
-    }
+    public DogtagSide Side { get; set; }
 
-    public int? Aid
-    {
-        get;
-        set;
-    }
+    public int? Aid { get; set; }
 
-    public int? Level
-    {
-        get;
-        set;
-    }
+    public int? Level { get; set; }
 
-    public MemberCategory? Type
-    {
-        get;
-        set;
-    }
+    public MemberCategory? Type { get; set; }
 }

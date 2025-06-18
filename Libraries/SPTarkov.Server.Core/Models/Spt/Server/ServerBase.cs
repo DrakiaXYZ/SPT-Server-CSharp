@@ -11,16 +11,8 @@ public record ServerBase
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("ip")]
-    public required string Ip
-    {
-        get;
-        set;
-    }
+    public required string Ip { get; set; }
 
     [JsonPropertyName("port")]
-    public required int Port
-    {
-        get;
-        set;
-    }
+    public required int Port { get; set; }
 }

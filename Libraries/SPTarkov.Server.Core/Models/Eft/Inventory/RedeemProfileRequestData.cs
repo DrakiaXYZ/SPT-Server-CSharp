@@ -8,11 +8,7 @@ public record RedeemProfileRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("events")]
-    public List<RedeemProfileRequestEvent>? Events
-    {
-        get;
-        set;
-    }
+    public List<RedeemProfileRequestEvent>? Events { get; set; }
 }
 
 public record RedeemProfileRequestEvent
@@ -21,16 +17,8 @@ public record RedeemProfileRequestEvent
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("MessageId")]
-    public string? MessageId
-    {
-        get;
-        set;
-    }
+    public string? MessageId { get; set; }
 
     [JsonPropertyName("EventId")]
-    public string? EventId
-    {
-        get;
-        set;
-    }
+    public string? EventId { get; set; }
 }

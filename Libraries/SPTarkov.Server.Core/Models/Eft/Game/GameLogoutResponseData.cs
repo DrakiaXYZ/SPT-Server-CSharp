@@ -8,9 +8,5 @@ public record GameLogoutResponseData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("status")]
-    public string? Status
-    {
-        get;
-        set;
-    }
+    public string? Status { get; set; }
 }

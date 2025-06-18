@@ -9,16 +9,8 @@ public record CreateGroupMailRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Name")]
-    public string? Name
-    {
-        get;
-        set;
-    }
+    public string? Name { get; set; }
 
     [JsonPropertyName("Users")]
-    public List<string>? Users
-    {
-        get;
-        set;
-    }
+    public List<string>? Users { get; set; }
 }

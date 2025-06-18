@@ -9,16 +9,8 @@ public record GetInsuranceCostRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("traders")]
-    public List<string>? Traders
-    {
-        get;
-        set;
-    }
+    public List<string>? Traders { get; set; }
 
     [JsonPropertyName("items")]
-    public List<string>? Items
-    {
-        get;
-        set;
-    }
+    public List<string>? Items { get; set; }
 }

@@ -8,16 +8,8 @@ public record RagfairServerPrices
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("staticPrices")]
-    public Dictionary<string, double>? StaticPrices
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, double>? StaticPrices { get; set; }
 
     [JsonPropertyName("dynamicPrices")]
-    public Dictionary<string, double>? DynamicPrices
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, double>? DynamicPrices { get; set; }
 }

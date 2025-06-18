@@ -9,9 +9,5 @@ public record RecordShootingRangePoints : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("points")]
-    public int? Points
-    {
-        get;
-        set;
-    }
+    public int? Points { get; set; }
 }

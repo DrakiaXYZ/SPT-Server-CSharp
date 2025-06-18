@@ -13,5 +13,5 @@ public enum LogBackgroundColor
     Magenta = 45,
     Cyan = 46,
     White = 47,
-    Default = 49
+    Default = 49,
 }

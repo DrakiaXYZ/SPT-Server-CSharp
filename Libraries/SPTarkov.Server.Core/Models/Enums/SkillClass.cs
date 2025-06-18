@@ -9,6 +9,6 @@ namespace SPTarkov.Server.Core.Models.Enums
         Combat,
         Special,
         Practical,
-        Mental
+        Mental,
     }
 }

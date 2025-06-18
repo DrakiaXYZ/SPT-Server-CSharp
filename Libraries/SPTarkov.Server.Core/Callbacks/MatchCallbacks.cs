@@ -54,12 +54,9 @@ public class MatchCallbacks(
     /// <returns></returns>
     public ValueTask<string> GroupCurrent(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(
-            new MatchGroupCurrentResponse
-            {
-                Squad = []
-            }
-        ));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(new MatchGroupCurrentResponse { Squad = [] })
+        );
     }
 
     /// <summary>
@@ -84,7 +81,11 @@ public class MatchCallbacks(
     ///     Handle client/match/group/invite/send
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> SendGroupInvite(string url, MatchGroupInviteSendRequest info, string sessionID)
+    public ValueTask<string> SendGroupInvite(
+        string url,
+        MatchGroupInviteSendRequest info,
+        string sessionID
+    )
     {
         return new ValueTask<string>(_httpResponseUtil.GetBody("2427943f23698ay9f2863735"));
     }
@@ -95,12 +96,7 @@ public class MatchCallbacks(
     /// <returns></returns>
     public ValueTask<string> AcceptGroupInvite(string url, RequestIdRequest info, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(
-            new List<GroupCharacter>
-            {
-                new()
-            }
-        ));
+        return new ValueTask<string>(_httpResponseUtil.GetBody(new List<GroupCharacter> { new() }));
     }
 
     /// <summary>
@@ -134,7 +130,11 @@ public class MatchCallbacks(
     /// <param name="info"></param>
     /// <param name="sessionID">Session/player id</param>
     /// <returns></returns>
-    public ValueTask<string> TransferGroup(string url, MatchGroupTransferRequest info, string sessionID)
+    public ValueTask<string> TransferGroup(
+        string url,
+        MatchGroupTransferRequest info,
+        string sessionID
+    )
     {
         return new ValueTask<string>(_httpResponseUtil.GetBody(true));
     }
@@ -161,7 +161,11 @@ public class MatchCallbacks(
     ///     Handle client/analytics/event-disconnect
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> EventDisconnect(string url, PutMetricsRequestData info, string sessionID)
+    public ValueTask<string> EventDisconnect(
+        string url,
+        PutMetricsRequestData info,
+        string sessionID
+    )
     {
         return new ValueTask<string>(_httpResponseUtil.NullResponse());
     }
@@ -179,9 +183,15 @@ public class MatchCallbacks(
     ///     Handle match/group/start_game
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> JoinMatch(string url, MatchGroupStartGameRequest info, string sessionID)
+    public ValueTask<string> JoinMatch(
+        string url,
+        MatchGroupStartGameRequest info,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_matchController.JoinMatch(info, sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_matchController.JoinMatch(info, sessionID))
+        );
     }
 
     /// <summary>
@@ -190,7 +200,9 @@ public class MatchCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetMetrics(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_databaseService.GetMatch().Metrics));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_databaseService.GetMatch().Metrics)
+        );
     }
 
     /// <summary>
@@ -198,9 +210,15 @@ public class MatchCallbacks(
     ///     Handle client/match/group/status
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GetGroupStatus(string url, MatchGroupStatusRequest info, string sessionID)
+    public ValueTask<string> GetGroupStatus(
+        string url,
+        MatchGroupStatusRequest info,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_matchController.GetGroupStatus(info)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_matchController.GetGroupStatus(info))
+        );
     }
 
     /// <summary>
@@ -226,7 +244,11 @@ public class MatchCallbacks(
     ///     Handle client/match/group/player/remove
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> RemovePlayerFromGroup(string url, MatchGroupPlayerRemoveRequest info, string sessionID)
+    public ValueTask<string> RemovePlayerFromGroup(
+        string url,
+        MatchGroupPlayerRemoveRequest info,
+        string sessionID
+    )
     {
         return new ValueTask<string>(_httpResponseUtil.GetBody(true));
     }
@@ -235,16 +257,26 @@ public class MatchCallbacks(
     ///     Handle client/match/local/start
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> StartLocalRaid(string url, StartLocalRaidRequestData info, string sessionID)
+    public ValueTask<string> StartLocalRaid(
+        string url,
+        StartLocalRaidRequestData info,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_matchController.StartLocalRaid(sessionID, info)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_matchController.StartLocalRaid(sessionID, info))
+        );
     }
 
     /// <summary>
     ///     Handle client/match/local/end
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> EndLocalRaid(string url, EndLocalRaidRequestData info, string sessionID)
+    public ValueTask<string> EndLocalRaid(
+        string url,
+        EndLocalRaidRequestData info,
+        string sessionID
+    )
     {
         _matchController.EndLocalRaid(sessionID, info);
         return new ValueTask<string>(_httpResponseUtil.NullResponse());
@@ -254,7 +286,11 @@ public class MatchCallbacks(
     ///     Handle client/raid/configuration
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GetRaidConfiguration(string url, GetRaidConfigurationRequestData info, string sessionID)
+    public ValueTask<string> GetRaidConfiguration(
+        string url,
+        GetRaidConfigurationRequestData info,
+        string sessionID
+    )
     {
         _matchController.ConfigureOfflineRaid(info, sessionID);
         return new ValueTask<string>(_httpResponseUtil.NullResponse());
@@ -267,7 +303,11 @@ public class MatchCallbacks(
     /// <param name="info"></param>
     /// <param name="sessionID">Session/player id</param>
     /// <returns></returns>
-    public ValueTask<string> GetConfigurationByProfile(string url, GetRaidConfigurationRequestData info, string sessionID)
+    public ValueTask<string> GetConfigurationByProfile(
+        string url,
+        GetRaidConfigurationRequestData info,
+        string sessionID
+    )
     {
         return new ValueTask<string>(_httpResponseUtil.NullResponse());
     }

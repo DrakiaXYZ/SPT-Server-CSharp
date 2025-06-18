@@ -9,9 +9,5 @@ public record MatchGroupTransferRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("aidToChange")]
-    public string? AidToChange
-    {
-        get;
-        set;
-    }
+    public string? AidToChange { get; set; }
 }

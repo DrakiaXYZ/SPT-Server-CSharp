@@ -13,8 +13,11 @@ public abstract record ICustomTrader : ITrader
 {
     public abstract string Name { get; }
     public abstract string Id { get; }
+
     public abstract TraderAssort? GetAssort();
+
     public abstract Dictionary<string, Dictionary<string, string>>? GetQuestAssort();
+
     public abstract TraderBase? GetBase();
 
     public virtual List<Suit>? GetSuits()

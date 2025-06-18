@@ -21,12 +21,13 @@ public class LocaleService(
     /// <returns> Dictionary of locales for desired language - en/fr/cn </returns>
     public Dictionary<string, string> GetLocaleDb(string? language = null)
     {
-        var languageToUse = string.IsNullOrEmpty(language)
-            ? GetDesiredGameLocale()
-            : language;
+        var languageToUse = string.IsNullOrEmpty(language) ? GetDesiredGameLocale() : language;
 
         // if it can't get locales for language provided, default to en
-        if (TryGetLocaleDb(languageToUse, out var localeToReturn) || TryGetLocaleDb("en", out localeToReturn))
+        if (
+            TryGetLocaleDb(languageToUse, out var localeToReturn)
+            || TryGetLocaleDb("en", out localeToReturn)
+        )
         {
             return localeToReturn;
         }
@@ -40,10 +41,17 @@ public class LocaleService(
     /// <param name="languageKey">The language key for which the locale database should be retrieved.</param>
     /// <param name="localeToReturn">The resulting locale database as a dictionary, or null if the operation fails.</param>
     /// <returns>True if the locale database was successfully retrieved, otherwise false.</returns>
-    protected bool TryGetLocaleDb(string languageKey, out Dictionary<string, string>? localeToReturn)
+    protected bool TryGetLocaleDb(
+        string languageKey,
+        out Dictionary<string, string>? localeToReturn
+    )
     {
         localeToReturn = null;
-        if (!_databaseServer.GetTables().Locales.Global.TryGetValue(languageKey, out var keyedLocales))
+        if (
+            !_databaseServer
+                .GetTables()
+                .Locales.Global.TryGetValue(languageKey, out var keyedLocales)
+        )
         {
             return false;
         }
@@ -72,7 +80,11 @@ public class LocaleService(
     /// <returns> Locale e.g en/ge/cz/cn </returns>
     public string GetDesiredServerLocale()
     {
-        return string.Equals(_localeConfig.ServerLocale, "system", StringComparison.OrdinalIgnoreCase)
+        return string.Equals(
+            _localeConfig.ServerLocale,
+            "system",
+            StringComparison.OrdinalIgnoreCase
+        )
             ? GetPlatformForServerLocale()
             : _localeConfig.ServerLocale.ToLower(); // Use custom locale value
     }
@@ -120,7 +132,7 @@ public class LocaleService(
         if (_localeConfig.ServerSupportedLocales.Contains(languageCode))
         {
             if (baseNameCode == "zh")
-                // Handle edge case of zh
+            // Handle edge case of zh
             {
                 return "zh-cn";
             }
@@ -129,12 +141,14 @@ public class LocaleService(
         }
 
         if (baseNameCode == "pt")
-            // Handle edge case of pt
+        // Handle edge case of pt
         {
             return "pt-pt";
         }
 
-        _logger.Warning($"Unsupported system language found: {baseNameCode}, langCode: {languageCode} falling back to english for server locale");
+        _logger.Warning(
+            $"Unsupported system language found: {baseNameCode}, langCode: {languageCode} falling back to english for server locale"
+        );
 
         return "en";
     }
@@ -178,12 +192,14 @@ public class LocaleService(
         }
 
         if (baseNameCode == "zh")
-            // Handle edge case of zh
+        // Handle edge case of zh
         {
             return "cn";
         }
 
-        _logger.Warning($"Unsupported system language found: {languageCode} baseLocale: {baseNameCode}, falling back to english for client locale");
+        _logger.Warning(
+            $"Unsupported system language found: {languageCode} baseLocale: {baseNameCode}, falling back to english for client locale"
+        );
         return "en";
     }
 
@@ -204,7 +220,9 @@ public class LocaleService(
     /// <summary>
     ///     Blank out the "test" mail message from prapor
     /// </summary>
-    protected Dictionary<string, string> RemovePraporTestMessage(Dictionary<string, string> dbLocales)
+    protected Dictionary<string, string> RemovePraporTestMessage(
+        Dictionary<string, string> dbLocales
+    )
     {
         dbLocales["61687e2c3e526901fa76baf9"] = "";
         return dbLocales;

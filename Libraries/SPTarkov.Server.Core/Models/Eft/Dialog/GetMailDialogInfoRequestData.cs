@@ -9,9 +9,5 @@ public record GetMailDialogInfoRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("dialogId")]
-    public string? DialogId
-    {
-        get;
-        set;
-    }
+    public string? DialogId { get; set; }
 }

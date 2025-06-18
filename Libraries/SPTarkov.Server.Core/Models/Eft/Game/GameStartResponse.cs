@@ -8,9 +8,5 @@ public record GameStartResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("utc_time")]
-    public double UtcTime
-    {
-        get;
-        set;
-    }
+    public double UtcTime { get; set; }
 }

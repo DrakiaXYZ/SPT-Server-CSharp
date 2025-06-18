@@ -8,9 +8,5 @@ public class LauncherV2PingResponse : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public required string Response
-    {
-        get;
-        set;
-    }
+    public required string Response { get; set; }
 }

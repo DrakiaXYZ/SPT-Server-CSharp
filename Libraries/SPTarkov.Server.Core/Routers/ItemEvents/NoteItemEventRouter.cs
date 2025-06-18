@@ -14,10 +14,7 @@ public class NoteItemEventRouter : ItemEventRouterDefinition
 {
     protected NoteCallbacks _noteCallbacks;
 
-    public NoteItemEventRouter
-    (
-        NoteCallbacks noteCallbacks
-    )
+    public NoteItemEventRouter(NoteCallbacks noteCallbacks)
     {
         _noteCallbacks = noteCallbacks;
     }
@@ -28,23 +25,36 @@ public class NoteItemEventRouter : ItemEventRouterDefinition
         {
             new(ItemEventActions.ADD_NOTE, false),
             new(ItemEventActions.EDIT_NOTE, false),
-            new(ItemEventActions.DELETE_NOTE, false)
+            new(ItemEventActions.DELETE_NOTE, false),
         };
     }
 
-    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
-        ItemEventRouterResponse output)
+    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(
+        string url,
+        PmcData pmcData,
+        BaseInteractionRequestData body,
+        string sessionID,
+        ItemEventRouterResponse output
+    )
     {
         switch (url)
         {
             case ItemEventActions.ADD_NOTE:
-                return new ValueTask<ItemEventRouterResponse>(_noteCallbacks.AddNote(pmcData, body as NoteActionRequest, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _noteCallbacks.AddNote(pmcData, body as NoteActionRequest, sessionID)
+                );
             case ItemEventActions.EDIT_NOTE:
-                return new ValueTask<ItemEventRouterResponse>(_noteCallbacks.EditNote(pmcData, body as NoteActionRequest, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _noteCallbacks.EditNote(pmcData, body as NoteActionRequest, sessionID)
+                );
             case ItemEventActions.DELETE_NOTE:
-                return new ValueTask<ItemEventRouterResponse>(_noteCallbacks.DeleteNote(pmcData, body as NoteActionRequest, sessionID));
+                return new ValueTask<ItemEventRouterResponse>(
+                    _noteCallbacks.DeleteNote(pmcData, body as NoteActionRequest, sessionID)
+                );
             default:
-                throw new Exception($"NoteItemEventRouter being used when it cant handle route {url}");
+                throw new Exception(
+                    $"NoteItemEventRouter being used when it cant handle route {url}"
+                );
         }
     }
 }

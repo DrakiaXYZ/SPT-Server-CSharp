@@ -14,7 +14,6 @@ using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 using Vitality = SPTarkov.Server.Core.Models.Eft.Profile.Vitality;
 
-
 namespace SPTarkov.Server.Core.Services;
 
 [Injectable]
@@ -42,7 +41,9 @@ public class CreateProfileService(
     public async ValueTask<string> CreateProfile(string sessionId, ProfileCreateRequestData request)
     {
         var account = _cloner.Clone(_saveServer.GetProfile(sessionId));
-        var profileTemplateClone = _cloner.Clone(_profileHelper.GetProfileTemplateForSide(account.ProfileInfo.Edition, request.Side));
+        var profileTemplateClone = _cloner.Clone(
+            _profileHelper.GetProfileTemplateForSide(account.ProfileInfo.Edition, request.Side)
+        );
 
         var pmcData = profileTemplateClone.Character;
 
@@ -55,7 +56,7 @@ public class CreateProfileService(
         pmcData.SessionId = sessionId;
         pmcData.Info.Nickname = request.Nickname;
         pmcData.Info.LowerNickname = request.Nickname.ToLower();
-        pmcData.Info.RegistrationDate = (int) _timeUtil.GetTimeStamp();
+        pmcData.Info.RegistrationDate = (int)_timeUtil.GetTimeStamp();
         pmcData.Info.Voice = _databaseService.GetCustomization()[request.VoiceId].Name;
         pmcData.Stats = _profileHelper.GetDefaultCounters();
         pmcData.Info.NeedWipeOptions = [];
@@ -85,16 +86,18 @@ public class CreateProfileService(
         {
             if (pmcData.Stats.Eft is not null)
             {
-                pmcData.Stats.Eft.TotalInGameTime = account.CharacterData.PmcData.Stats.Eft.TotalInGameTime;
+                pmcData.Stats.Eft.TotalInGameTime = account
+                    .CharacterData
+                    .PmcData
+                    .Stats
+                    .Eft
+                    .TotalInGameTime;
             }
         }
 
         UpdateInventoryEquipmentId(pmcData);
 
-        pmcData.UnlockedInfo ??= new UnlockedInfo
-        {
-            UnlockedProductionRecipe = []
-        };
+        pmcData.UnlockedInfo ??= new UnlockedInfo { UnlockedProductionRecipe = [] };
 
         // Add required items to pmc stash
         AddMissingInternalContainersToProfile(pmcData);
@@ -106,11 +109,7 @@ public class CreateProfileService(
         var profileDetails = new SptProfile
         {
             ProfileInfo = account.ProfileInfo,
-            CharacterData = new Characters
-            {
-                PmcData = pmcData,
-                ScavData = new PmcData()
-            },
+            CharacterData = new Characters { PmcData = pmcData, ScavData = new PmcData() },
             UserBuildData = profileTemplateClone.UserBuilds,
             DialogueRecords = profileTemplateClone.Dialogues,
             SptData = _profileHelper.GetDefaultSptDataObject(),
@@ -120,7 +119,7 @@ public class CreateProfileService(
             BtrDeliveryList = [],
             TraderPurchases = new Dictionary<string, Dictionary<string, TraderPurchaseData>?>(),
             FriendProfileIds = [],
-            CustomisationUnlocks = []
+            CustomisationUnlocks = [],
         };
 
         AddCustomisationUnlocksToProfile(profileDetails);
@@ -136,19 +135,24 @@ public class CreateProfileService(
 
             foreach (var (achievementId, _) in profileDetails.CharacterData.PmcData.Achievements)
             {
-                var rewards = achievementsDb.FirstOrDefault(achievementDb => achievementDb.Id == achievementId)?.Rewards;
+                var rewards = achievementsDb
+                    .FirstOrDefault(achievementDb => achievementDb.Id == achievementId)
+                    ?.Rewards;
 
                 if (rewards is null)
                 {
                     continue;
                 }
 
-                achievementRewardItemsToSend.AddRange(_rewardHelper.ApplyRewards(
-                    rewards,
-                    CustomisationSource.ACHIEVEMENT,
-                    profileDetails,
-                    profileDetails.CharacterData.PmcData,
-                    achievementId));
+                achievementRewardItemsToSend.AddRange(
+                    _rewardHelper.ApplyRewards(
+                        rewards,
+                        CustomisationSource.ACHIEVEMENT,
+                        profileDetails,
+                        profileDetails.CharacterData.PmcData,
+                        achievementId
+                    )
+                );
             }
 
             if (achievementRewardItemsToSend.Count > 0)
@@ -158,19 +162,20 @@ public class CreateProfileService(
                     "670547bb5fa0b1a7c30d5836 0",
                     achievementRewardItemsToSend,
                     [],
-                    31536000);
+                    31536000
+                );
             }
         }
 
         // Process handling if the account is forced to prestige, or if the account currently has any pending prestiges
-        if (request.SptForcePrestigeLevel is not null || account.SptData?.PendingPrestige is not null)
+        if (
+            request.SptForcePrestigeLevel is not null
+            || account.SptData?.PendingPrestige is not null
+        )
         {
             var pendingPrestige = account.SptData.PendingPrestige is not null
                 ? account.SptData.PendingPrestige
-                : new PendingPrestige
-                {
-                    PrestigeLevel = request.SptForcePrestigeLevel
-                };
+                : new PendingPrestige { PrestigeLevel = request.SptForcePrestigeLevel };
 
             _prestigeHelper.ProcessPendingPrestige(account, profileDetails, pendingPrestige);
         }
@@ -179,7 +184,10 @@ public class CreateProfileService(
 
         if (profileTemplateClone.Trader.SetQuestsAvailableForStart ?? false)
         {
-            _questHelper.AddAllQuestsToProfile(profileDetails.CharacterData.PmcData, [QuestStatusEnum.AvailableForStart]);
+            _questHelper.AddAllQuestsToProfile(
+                profileDetails.CharacterData.PmcData,
+                [QuestStatusEnum.AvailableForStart]
+            );
         }
 
         // Profile is flagged as wanting quests set to ready to hand in and collect rewards
@@ -190,7 +198,7 @@ public class CreateProfileService(
                 [
                     QuestStatusEnum.AvailableForStart,
                     QuestStatusEnum.Started,
-                    QuestStatusEnum.AvailableForFinish
+                    QuestStatusEnum.AvailableForFinish,
                 ]
             );
 
@@ -203,7 +211,9 @@ public class CreateProfileService(
 
         ResetAllTradersInProfile(sessionId);
 
-        _saveServer.GetProfile(sessionId).CharacterData.ScavData = _playerScavGenerator.Generate(sessionId);
+        _saveServer.GetProfile(sessionId).CharacterData.ScavData = _playerScavGenerator.Generate(
+            sessionId
+        );
 
         // Store minimal profile and reload it
         await _saveServer.SaveProfileAsync(sessionId);
@@ -229,7 +239,10 @@ public class CreateProfileService(
         else
         {
             _logger.Warning(
-                _localisationService.GetText("profile-unable_to_find_profile_by_id_cannot_delete", sessionID)
+                _localisationService.GetText(
+                    "profile-unable_to_find_profile_by_id_cannot_delete",
+                    sessionID
+                )
             );
         }
     }
@@ -277,13 +290,17 @@ public class CreateProfileService(
     /// <param name="pmcData"> Profile to check </param>
     protected void AddMissingInternalContainersToProfile(PmcData pmcData)
     {
-        if (!pmcData.Inventory.Items.Any(item => item.Id == pmcData.Inventory.HideoutCustomizationStashId))
+        if (
+            !pmcData.Inventory.Items.Any(item =>
+                item.Id == pmcData.Inventory.HideoutCustomizationStashId
+            )
+        )
         {
             pmcData.Inventory.Items.Add(
                 new Item
                 {
                     Id = pmcData.Inventory.HideoutCustomizationStashId,
-                    Template = ItemTpl.HIDEOUTAREACONTAINER_CUSTOMIZATION
+                    Template = ItemTpl.HIDEOUTAREACONTAINER_CUSTOMIZATION,
                 }
             );
         }
@@ -294,7 +311,7 @@ public class CreateProfileService(
                 new Item
                 {
                     Id = pmcData.Inventory.SortingTable,
-                    Template = ItemTpl.SORTINGTABLE_SORTING_TABLE
+                    Template = ItemTpl.SORTINGTABLE_SORTING_TABLE,
                 }
             );
         }
@@ -305,7 +322,7 @@ public class CreateProfileService(
                 new Item
                 {
                     Id = pmcData.Inventory.QuestStashItems,
-                    Template = ItemTpl.STASH_QUESTOFFLINE
+                    Template = ItemTpl.STASH_QUESTOFFLINE,
                 }
             );
         }
@@ -316,7 +333,7 @@ public class CreateProfileService(
                 new Item
                 {
                     Id = pmcData.Inventory.QuestRaidItems,
-                    Template = ItemTpl.STASH_QUESTRAID
+                    Template = ItemTpl.STASH_QUESTRAID,
                 }
             );
         }
@@ -332,7 +349,9 @@ public class CreateProfileService(
         var gameEdition = GetGameEdition(fullProfile);
         if (gameEdition is null)
         {
-            _logger.Error($"Unable to get Game edition of profile: {fullProfile.ProfileInfo.ProfileId}, skipping customisation unlocks");
+            _logger.Error(
+                $"Unable to get Game edition of profile: {fullProfile.ProfileInfo.ProfileId}, skipping customisation unlocks"
+            );
             return;
         }
 
@@ -345,7 +364,7 @@ public class CreateProfileService(
                     {
                         Id = "6746fd09bafff85008048838",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
 
@@ -354,7 +373,7 @@ public class CreateProfileService(
                     {
                         Id = "67471938bafff850080488b7",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
 
@@ -366,7 +385,7 @@ public class CreateProfileService(
                     {
                         Id = "6746fd09bafff85008048838",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
 
@@ -375,7 +394,7 @@ public class CreateProfileService(
                     {
                         Id = "67471938bafff850080488b7",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
 
@@ -384,7 +403,7 @@ public class CreateProfileService(
                     {
                         Id = "67471928d17d6431550563b5",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
 
@@ -393,7 +412,7 @@ public class CreateProfileService(
                     {
                         Id = "6747193f170146228c0d2226",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
 
@@ -403,7 +422,7 @@ public class CreateProfileService(
                     {
                         Id = "666841a02537107dc508b704",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.SUITE
+                        Type = CustomisationType.SUITE,
                     }
                 );
 
@@ -413,7 +432,7 @@ public class CreateProfileService(
                     {
                         Id = "675850ba33627edb710b0592",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.ENVIRONMENT
+                        Type = CustomisationType.ENVIRONMENT,
                     }
                 );
 
@@ -430,7 +449,7 @@ public class CreateProfileService(
                     {
                         Id = "674dbf593bee1152d407f005",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
             }
@@ -442,7 +461,7 @@ public class CreateProfileService(
                     {
                         Id = "675dcfea7ae1a8792107ca99",
                         Source = CustomisationSource.DEFAULT,
-                        Type = CustomisationType.DOG_TAG
+                        Type = CustomisationType.DOG_TAG,
                     }
                 );
             }
@@ -450,14 +469,14 @@ public class CreateProfileService(
 
         // Dev profile additions
         if (fullProfile.ProfileInfo.Edition.ToLower().Contains("developer"))
-            // CyberTark background
+        // CyberTark background
         {
             fullProfile.CustomisationUnlocks.Add(
                 new CustomisationStorage
                 {
                     Id = "67585108def253bd97084552",
                     Source = CustomisationSource.DEFAULT,
-                    Type = CustomisationType.ENVIRONMENT
+                    Type = CustomisationType.ENVIRONMENT,
                 }
             );
         }
@@ -502,7 +521,10 @@ public class CreateProfileService(
     {
         foreach (var quest in profileDetails.CharacterData.PmcData.Quests)
         {
-            var questFromDb = _questHelper.GetQuestFromDb(quest.QId, profileDetails.CharacterData.PmcData);
+            var questFromDb = _questHelper.GetQuestFromDb(
+                quest.QId,
+                profileDetails.CharacterData.PmcData
+            );
 
             // Get messageId of text to send to player as text message in game
             // Copy of code from QuestController.acceptQuest()
@@ -510,7 +532,8 @@ public class CreateProfileService(
                 questFromDb.StartedMessageText,
                 questFromDb.Description
             );
-            var itemRewards = _questRewardHelper.ApplyQuestReward(
+            var itemRewards = _questRewardHelper
+                .ApplyQuestReward(
                     profileDetails.CharacterData.PmcData,
                     quest.QId,
                     QuestStatusEnum.Started,
@@ -518,7 +541,6 @@ public class CreateProfileService(
                     response
                 )
                 .ToList();
-
 
             _mailSendService.SendLocalisedNpcMessageToPlayer(
                 sessionID,

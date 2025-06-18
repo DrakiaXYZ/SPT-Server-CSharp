@@ -57,7 +57,9 @@ public class ProfileController(
         var profile = _saveServer.GetProfile(sessionId);
         if (profile?.CharacterData == null)
         {
-            throw new Exception($"Unable to find character data for id: {sessionId}. Profile may be corrupt");
+            throw new Exception(
+                $"Unable to find character data for id: {sessionId}. Profile may be corrupt"
+            );
         }
 
         var pmc = profile.CharacterData.PmcData;
@@ -81,7 +83,7 @@ public class ProfileController(
                 MaxLevel = maxLvl,
                 Edition = profile.ProfileInfo?.Edition ?? "",
                 ProfileId = profile.ProfileInfo?.ProfileId ?? "",
-                SptData = _profileHelper.GetDefaultSptDataObject()
+                SptData = _profileHelper.GetDefaultSptDataObject(),
             };
         }
 
@@ -93,12 +95,13 @@ public class ProfileController(
             Side = pmc.Info.Side,
             CurrentLevel = pmc.Info.Level,
             CurrentExperience = pmc.Info.Experience ?? 0,
-            PreviousExperience = currentLevel == 0 ? 0 : _profileHelper.GetExperience(currentLevel.Value),
+            PreviousExperience =
+                currentLevel == 0 ? 0 : _profileHelper.GetExperience(currentLevel.Value),
             NextLevel = xpToNextLevel,
             MaxLevel = maxLvl,
             Edition = profile.ProfileInfo?.Edition ?? "",
             ProfileId = profile.ProfileInfo?.ProfileId ?? "",
-            SptData = profile.SptData
+            SptData = profile.SptData,
         };
     }
 
@@ -118,7 +121,10 @@ public class ProfileController(
     /// <param name="request">Create profile request</param>
     /// <param name="sessionId">Player id</param>
     /// <returns>Player id</returns>
-    public virtual async ValueTask<string> CreateProfile(ProfileCreateRequestData request, string sessionId)
+    public virtual async ValueTask<string> CreateProfile(
+        ProfileCreateRequestData request,
+        string sessionId
+    )
     {
         return await _createProfileService.CreateProfile(sessionId, request);
     }
@@ -140,7 +146,10 @@ public class ProfileController(
     /// <param name="request">Validate nickname request</param>
     /// <param name="sessionId">Session/Player id</param>
     /// <returns></returns>
-    public virtual NicknameValidationResult ValidateNickname(ValidateNicknameRequestData request, string sessionId)
+    public virtual NicknameValidationResult ValidateNickname(
+        ValidateNicknameRequestData request,
+        string sessionId
+    )
     {
         if (request.Nickname?.Length < 3)
         {
@@ -162,13 +171,13 @@ public class ProfileController(
     /// <param name="request">Change nickname request</param>
     /// <param name="sessionId">Player id</param>
     /// <returns></returns>
-    public virtual NicknameValidationResult ChangeNickname(ProfileChangeNicknameRequestData request, string sessionId)
+    public virtual NicknameValidationResult ChangeNickname(
+        ProfileChangeNicknameRequestData request,
+        string sessionId
+    )
     {
         var output = ValidateNickname(
-            new ValidateNicknameRequestData
-            {
-                Nickname = request.Nickname
-            },
+            new ValidateNicknameRequestData { Nickname = request.Nickname },
             sessionId
         );
 
@@ -200,7 +209,10 @@ public class ProfileController(
     /// <param name="request">Search profiles request</param>
     /// <param name="sessionID">Player id</param>
     /// <returns>Found profiles</returns>
-    public virtual List<SearchFriendResponse> SearchProfiles(SearchProfilesRequestData request, string sessionID)
+    public virtual List<SearchFriendResponse> SearchProfiles(
+        SearchProfilesRequestData request,
+        string sessionID
+    )
     {
         var result = new List<SearchFriendResponse>();
 
@@ -241,7 +253,7 @@ public class ProfileController(
                     Status = "Free",
                     Sid = "",
                     Ip = "",
-                    Port = 0
+                    Port = 0,
                 },
                 new ProfileStatusData
                 {
@@ -250,9 +262,9 @@ public class ProfileController(
                     Status = "Free",
                     Sid = "",
                     Ip = "",
-                    Port = 0
-                }
-            ]
+                    Port = 0,
+                },
+            ],
         };
 
         return response;
@@ -264,13 +276,21 @@ public class ProfileController(
     /// <param name="sessionId">Session/Player id</param>
     /// <param name="request">Get other profile request</param>
     /// <returns>GetOtherProfileResponse</returns>
-    public virtual GetOtherProfileResponse GetOtherProfile(string sessionId, GetOtherProfileRequest request)
+    public virtual GetOtherProfileResponse GetOtherProfile(
+        string sessionId,
+        GetOtherProfileRequest request
+    )
     {
         // Find the profile by the account ID, fall back to the current player if we can't find the account
         var profileToView = _profileHelper.GetFullProfileByAccountId(request.AccountId);
-        if (profileToView?.CharacterData?.PmcData is null || profileToView.CharacterData.ScavData is null)
+        if (
+            profileToView?.CharacterData?.PmcData is null
+            || profileToView.CharacterData.ScavData is null
+        )
         {
-            _logger.Warning($"Unable to get profile: {request.AccountId} to show, falling back to own profile");
+            _logger.Warning(
+                $"Unable to get profile: {request.AccountId} to show, falling back to own profile"
+            );
             profileToView = _profileHelper.GetFullProfile(sessionId);
         }
 
@@ -283,12 +303,17 @@ public class ProfileController(
         hideoutKeys.Add(profileToViewPmc.Inventory.HideoutCustomizationStashId);
 
         // Find hideout items e.g. posters
-        var hideoutRootItems = profileToViewPmc.Inventory.Items.Where(x => hideoutKeys.Contains(x.Id));
+        var hideoutRootItems = profileToViewPmc.Inventory.Items.Where(x =>
+            hideoutKeys.Contains(x.Id)
+        );
         var itemsToReturn = new List<Item>();
         foreach (var rootItems in hideoutRootItems)
         {
             // Check each root items for children and add
-            var itemWithChildren = _itemHelper.FindAndReturnChildrenAsItems(profileToViewPmc.Inventory.Items, rootItems.Id);
+            var itemWithChildren = _itemHelper.FindAndReturnChildrenAsItems(
+                profileToViewPmc.Inventory.Items,
+                rootItems.Id
+            );
             itemsToReturn.AddRange(itemWithChildren);
         }
 
@@ -301,10 +326,12 @@ public class ProfileController(
                 Nickname = profileToViewPmc.Info.Nickname,
                 Side = profileToViewPmc.Info.Side,
                 Experience = profileToViewPmc.Info.Experience,
-                MemberCategory = (int)(profileToViewPmc.Info.MemberCategory ?? MemberCategory.Default),
+                MemberCategory = (int)(
+                    profileToViewPmc.Info.MemberCategory ?? MemberCategory.Default
+                ),
                 BannedState = profileToViewPmc.Info.BannedState,
                 BannedUntil = profileToViewPmc.Info.BannedUntil,
-                RegistrationDate = profileToViewPmc.Info.RegistrationDate
+                RegistrationDate = profileToViewPmc.Info.RegistrationDate,
             },
             Customization = new OtherProfileCustomization
             {
@@ -312,13 +339,13 @@ public class ProfileController(
                 Body = profileToViewPmc.Customization.Body,
                 Feet = profileToViewPmc.Customization.Feet,
                 Hands = profileToViewPmc.Customization.Hands,
-                Dogtag = profileToViewPmc.Customization.DogTag
+                Dogtag = profileToViewPmc.Customization.DogTag,
             },
             Skills = profileToViewPmc.Skills,
             Equipment = new OtherProfileEquipment
             {
                 Id = profileToViewPmc.Inventory.Equipment,
-                Items = profileToViewPmc.Inventory.Items
+                Items = profileToViewPmc.Inventory.Items,
             },
             Achievements = profileToViewPmc.Achievements,
             FavoriteItems = _profileHelper.GetOtherProfileFavorites(profileToViewPmc),
@@ -327,21 +354,21 @@ public class ProfileController(
                 Eft = new OtherProfileSubStats
                 {
                     TotalInGameTime = profileToViewPmc.Stats.Eft.TotalInGameTime,
-                    OverAllCounters = profileToViewPmc.Stats.Eft.OverallCounters
-                }
+                    OverAllCounters = profileToViewPmc.Stats.Eft.OverallCounters,
+                },
             },
             ScavStats = new OtherProfileStats
             {
                 Eft = new OtherProfileSubStats
                 {
                     TotalInGameTime = profileToViewScav.Stats.Eft.TotalInGameTime,
-                    OverAllCounters = profileToViewScav.Stats.Eft.OverallCounters
-                }
+                    OverAllCounters = profileToViewScav.Stats.Eft.OverallCounters,
+                },
             },
             Hideout = profileToViewPmc.Hideout,
             CustomizationStash = profileToViewPmc.Inventory.HideoutCustomizationStashId,
             HideoutAreaStashes = profileToViewPmc.Inventory.HideoutAreaStashes,
-            Items = itemsToReturn
+            Items = itemsToReturn,
         };
 
         return profile;

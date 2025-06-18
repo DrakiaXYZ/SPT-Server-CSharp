@@ -8,23 +8,11 @@ public record MessageContentRagfair
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("offerId")]
-    public string? OfferId
-    {
-        get;
-        set;
-    }
+    public string? OfferId { get; set; }
 
     [JsonPropertyName("count")]
-    public double? Count
-    {
-        get;
-        set;
-    }
+    public double? Count { get; set; }
 
     [JsonPropertyName("handbookId")]
-    public string? HandbookId
-    {
-        get;
-        set;
-    }
+    public string? HandbookId { get; set; }
 }

@@ -26,7 +26,8 @@ public class ProfileSptCommand(
     /// spt profile skill metabolism 10
     /// </summary>
     protected static readonly Regex _commandRegex = new(
-        @"^spt profile (?<command>level|skill)((?<=.*skill) (?<skill>[\w]+))? (?<quantity>(?!0+)[0-9]+)$");
+        @"^spt profile (?<command>level|skill)((?<=.*skill) (?<skill>[\w]+))? (?<quantity>(?!0+)[0-9]+)$"
+    );
 
     protected static readonly Regex _examineRegex = new(@"^spt profile (?<command>examine)");
 
@@ -37,13 +38,16 @@ public class ProfileSptCommand(
 
     public string GetCommandHelp()
     {
-        return
-            "spt profile\n========\nSets the profile level or skill to the desired level through the message system.\n\n\tspt " +
-            "profile level [desired level]\n\t\tEx: spt profile level 20\n\n\tspt profile skill [skill name] [quantity]\n\t\tEx: " +
-            "spt profile skill metabolism 51";
+        return "spt profile\n========\nSets the profile level or skill to the desired level through the message system.\n\n\tspt "
+            + "profile level [desired level]\n\t\tEx: spt profile level 20\n\n\tspt profile skill [skill name] [quantity]\n\t\tEx: "
+            + "spt profile skill metabolism 51";
     }
 
-    public string PerformAction(UserDialogInfo commandHandler, string sessionId, SendMessageRequest request)
+    public string PerformAction(
+        UserDialogInfo commandHandler,
+        string sessionId,
+        SendMessageRequest request
+    )
     {
         var isCommand = _commandRegex.IsMatch(request.Text);
         var isExamine = _examineRegex.IsMatch(request.Text);
@@ -60,9 +64,13 @@ public class ProfileSptCommand(
 
         var result = _commandRegex.Match(request.Text);
 
-        var command = result.Groups["command"].Length > 0 ? result.Groups["command"].Captures[0].Value : null;
-        var skill = result.Groups["skill"].Length > 0 ?  result.Groups["skill"].Captures[0].Value : null;
-        var quantity = int.Parse(result.Groups["quantity"].Length > 0 ? result.Groups["quantity"].Captures[0].Value : "0");
+        var command =
+            result.Groups["command"].Length > 0 ? result.Groups["command"].Captures[0].Value : null;
+        var skill =
+            result.Groups["skill"].Length > 0 ? result.Groups["skill"].Captures[0].Value : null;
+        var quantity = int.Parse(
+            result.Groups["quantity"].Length > 0 ? result.Groups["quantity"].Captures[0].Value : "0"
+        );
 
         ProfileChangeEvent profileChangeEvent;
         switch (command)
@@ -81,40 +89,41 @@ public class ProfileSptCommand(
                 profileChangeEvent = HandleLevelCommand(quantity);
                 break;
             case "skill":
+            {
+                var enumSkill = Enum.GetValues<SkillTypes>()
+                    .Cast<SkillTypes?>()
+                    .FirstOrDefault(t =>
+                        string.Equals(t?.ToString(), skill, StringComparison.OrdinalIgnoreCase)
+                    );
+
+                if (enumSkill == null)
                 {
-                    var enumSkill = Enum.GetValues<SkillTypes>()
-                        .Cast<SkillTypes?>()
-                        .FirstOrDefault(t => string.Equals(t?.ToString(), skill, StringComparison.OrdinalIgnoreCase)
-                        );
-
-                    if (enumSkill == null)
-                    {
-                        _mailSendService.SendUserMessageToPlayer(
-                            sessionId,
-                            commandHandler,
-                            "Invalid use of profile command, the skill was not found. Use 'help' for more information."
-                        );
-                        return request.DialogId;
-                    }
-
-                    if (quantity is < 0 or > 51)
-                    {
-                        _mailSendService.SendUserMessageToPlayer(
-                            sessionId,
-                            commandHandler,
-                            "Invalid use of profile command, the skill level was outside bounds: 1 to 51. Use 'help' for more information."
-                        );
-                        return request.DialogId;
-                    }
-
-                    profileChangeEvent = HandleSkillCommand(enumSkill, quantity);
-                    break;
+                    _mailSendService.SendUserMessageToPlayer(
+                        sessionId,
+                        commandHandler,
+                        "Invalid use of profile command, the skill was not found. Use 'help' for more information."
+                    );
+                    return request.DialogId;
                 }
+
+                if (quantity is < 0 or > 51)
+                {
+                    _mailSendService.SendUserMessageToPlayer(
+                        sessionId,
+                        commandHandler,
+                        "Invalid use of profile command, the skill level was outside bounds: 1 to 51. Use 'help' for more information."
+                    );
+                    return request.DialogId;
+                }
+
+                profileChangeEvent = HandleSkillCommand(enumSkill, quantity);
+                break;
+            }
             case "examine":
-                {
-                    profileChangeEvent = HandleExamineCommand();
-                    break;
-                }
+            {
+                profileChangeEvent = HandleExamineCommand();
+                break;
+            }
             default:
                 _mailSendService.SendUserMessageToPlayer(
                     sessionId,
@@ -132,13 +141,10 @@ public class ProfileSptCommand(
                 {
                     Id = _hashUtil.Generate(),
                     Template = Money.ROUBLES,
-                    Upd = new Upd
-                    {
-                        StackObjectsCount = 1
-                    },
+                    Upd = new Upd { StackObjectsCount = 1 },
                     ParentId = _hashUtil.Generate(),
-                    SlotId = "main"
-                }
+                    SlotId = "main",
+                },
             ],
             999999,
             [profileChangeEvent]
@@ -154,7 +160,7 @@ public class ProfileSptCommand(
             Id = _hashUtil.Generate(),
             Type = "SkillPoints",
             Value = level * 100,
-            Entity = skill.ToString()
+            Entity = skill.ToString(),
         };
         return profileChangeEvent;
     }
@@ -167,7 +173,7 @@ public class ProfileSptCommand(
             Id = _hashUtil.Generate(),
             Type = "ProfileLevel",
             Value = exp,
-            Entity = null
+            Entity = null,
         };
         return profileChangeEvent;
     }
@@ -179,7 +185,7 @@ public class ProfileSptCommand(
             Id = _hashUtil.Generate(),
             Type = "ExamineAllItems",
             Value = null,
-            Entity = null
+            Entity = null,
         };
 
         return profileChangeEvent;

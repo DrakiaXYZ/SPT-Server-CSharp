@@ -6,30 +6,29 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Services;
 
 [Injectable(InjectionType.Singleton)]
-public class ProfileActivityService(
-    TimeUtil timeUtil
-)
+public class ProfileActivityService(TimeUtil timeUtil)
 {
     private readonly ConcurrentDictionary<string, ProfileActivityData> _activeProfiles = [];
 
     public void AddActiveProfile(string sessionId, long clientStartedTimestamp)
     {
         _activeProfiles.AddOrUpdate(
-        sessionId,
-        // On add value
-        key => new ProfileActivityData
-        {
-            ClientStartedTimestamp = clientStartedTimestamp,
-            LastActive = timeUtil.GetTimeStamp()
-        },
-        // On Update value, client was started before but crashed or user restarted
-        (key, existingValue) =>
-        {
-            existingValue.ClientStartedTimestamp = clientStartedTimestamp;
-            existingValue.LastActive = timeUtil.GetTimeStamp();
-            existingValue.RaidData = null;
-            return existingValue;
-        });
+            sessionId,
+            // On add value
+            key => new ProfileActivityData
+            {
+                ClientStartedTimestamp = clientStartedTimestamp,
+                LastActive = timeUtil.GetTimeStamp(),
+            },
+            // On Update value, client was started before but crashed or user restarted
+            (key, existingValue) =>
+            {
+                existingValue.ClientStartedTimestamp = clientStartedTimestamp;
+                existingValue.LastActive = timeUtil.GetTimeStamp();
+                existingValue.RaidData = null;
+                return existingValue;
+            }
+        );
     }
 
     // Yes this is terrible, the other alternative is re-doing half of bot-gen which is currently doing guess-work anyway
@@ -100,7 +99,7 @@ public class ProfileActivityService(
     /// <param name="sessionId"> Profile to update </param>
     public void SetActivityTimestamp(string sessionId)
     {
-        if(_activeProfiles.TryGetValue(sessionId, out var currentActiveProfile))
+        if (_activeProfiles.TryGetValue(sessionId, out var currentActiveProfile))
         {
             currentActiveProfile.LastActive = timeUtil.GetTimeStamp();
         }

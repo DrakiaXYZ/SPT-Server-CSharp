@@ -25,7 +25,7 @@ public class InRaidController(
     /// <param name="info">Register player request</param>
     public void AddPlayer(string sessionId, RegisterPlayerRequestData info)
     {
-       // _applicationContext.AddValue(ContextVariableType.REGISTER_PLAYER_REQUEST, info);
+        // _applicationContext.AddValue(ContextVariableType.REGISTER_PLAYER_REQUEST, info);
     }
 
     /// <summary>

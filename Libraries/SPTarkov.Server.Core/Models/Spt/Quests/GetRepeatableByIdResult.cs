@@ -9,16 +9,8 @@ public record GetRepeatableByIdResult
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("quest")]
-    public RepeatableQuest? Quest
-    {
-        get;
-        set;
-    }
+    public RepeatableQuest? Quest { get; set; }
 
     [JsonPropertyName("repeatableType")]
-    public PmcDataRepeatableQuest? RepeatableType
-    {
-        get;
-        set;
-    }
+    public PmcDataRepeatableQuest? RepeatableType { get; set; }
 }

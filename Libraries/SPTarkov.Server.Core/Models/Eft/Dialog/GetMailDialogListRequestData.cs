@@ -9,16 +9,8 @@ public record GetMailDialogListRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("limit")]
-    public int? Limit
-    {
-        get;
-        set;
-    }
+    public int? Limit { get; set; }
 
     [JsonPropertyName("offset")]
-    public int? Offset
-    {
-        get;
-        set;
-    }
+    public int? Offset { get; set; }
 }

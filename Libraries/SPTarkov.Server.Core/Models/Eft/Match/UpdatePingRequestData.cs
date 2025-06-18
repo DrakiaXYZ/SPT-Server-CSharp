@@ -9,9 +9,5 @@ public record UpdatePingRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("servers")]
-    public List<object>? servers
-    {
-        get;
-        set;
-    }
+    public List<object>? servers { get; set; }
 }

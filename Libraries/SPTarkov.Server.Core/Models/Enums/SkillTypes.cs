@@ -50,6 +50,7 @@ public enum SkillTypes
     SilentOps,
     Lockpicking,
     Search,
+
     // Also called Weapon Maintenance
     WeaponTreatment,
     Freetrading,
@@ -72,5 +73,5 @@ public enum SkillTypes
     BotSound,
     AimDrills,
     HideoutManagement,
-    Crafting = 66
+    Crafting = 66,
 }

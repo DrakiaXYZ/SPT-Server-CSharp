@@ -9,9 +9,5 @@ public record MatchGroupPlayerRemoveRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("aidToKick")]
-    public string? AidToKick
-    {
-        get;
-        set;
-    }
+    public string? AidToKick { get; set; }
 }

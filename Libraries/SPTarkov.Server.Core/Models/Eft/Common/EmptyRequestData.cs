@@ -7,5 +7,4 @@ public record EmptyRequestData : IRequestData
 {
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
-
 }

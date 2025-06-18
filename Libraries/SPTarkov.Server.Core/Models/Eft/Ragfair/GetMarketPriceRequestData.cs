@@ -9,9 +9,5 @@ public record GetMarketPriceRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("templateId")]
-    public string? TemplateId
-    {
-        get;
-        set;
-    }
+    public string? TemplateId { get; set; }
 }

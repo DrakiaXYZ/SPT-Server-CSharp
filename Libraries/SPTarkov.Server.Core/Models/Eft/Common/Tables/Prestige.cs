@@ -8,11 +8,7 @@ public record Prestige
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("elements")]
-    public List<PrestigeElement>? Elements
-    {
-        get;
-        set;
-    }
+    public List<PrestigeElement>? Elements { get; set; }
 }
 
 public record PrestigeElement
@@ -21,46 +17,22 @@ public record PrestigeElement
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("conditions")]
-    public List<QuestCondition>? Conditions
-    {
-        get;
-        set;
-    }
+    public List<QuestCondition>? Conditions { get; set; }
 
     [JsonPropertyName("rewards")]
-    public List<Reward>? Rewards
-    {
-        get;
-        set;
-    }
+    public List<Reward>? Rewards { get; set; }
 
     [JsonPropertyName("transferConfigs")]
-    public TransferConfigs? TransferConfigs
-    {
-        get;
-        set;
-    }
+    public TransferConfigs? TransferConfigs { get; set; }
 
     [JsonPropertyName("image")]
-    public string? Image
-    {
-        get;
-        set;
-    }
+    public string? Image { get; set; }
 
     [JsonPropertyName("bigImage")]
-    public string? BigImage
-    {
-        get;
-        set;
-    }
+    public string? BigImage { get; set; }
 }
 
 public record TransferConfigs
@@ -69,25 +41,13 @@ public record TransferConfigs
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("stashConfig")]
-    public StashPrestigeConfig? StashConfig
-    {
-        get;
-        set;
-    }
+    public StashPrestigeConfig? StashConfig { get; set; }
 
     [JsonPropertyName("skillConfig")]
-    public PrestigeSkillConfig? SkillConfig
-    {
-        get;
-        set;
-    }
+    public PrestigeSkillConfig? SkillConfig { get; set; }
 
     [JsonPropertyName("masteringConfig")]
-    public PrestigeMasteringConfig? MasteringConfig
-    {
-        get;
-        set;
-    }
+    public PrestigeMasteringConfig? MasteringConfig { get; set; }
 }
 
 public record StashPrestigeConfig
@@ -96,25 +56,13 @@ public record StashPrestigeConfig
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("xCellCount")]
-    public int? XCellCount
-    {
-        get;
-        set;
-    }
+    public int? XCellCount { get; set; }
 
     [JsonPropertyName("yCellCount")]
-    public int? YCellCount
-    {
-        get;
-        set;
-    }
+    public int? YCellCount { get; set; }
 
     [JsonPropertyName("filters")]
-    public StashPrestigeFilters? Filters
-    {
-        get;
-        set;
-    }
+    public StashPrestigeFilters? Filters { get; set; }
 }
 
 public record StashPrestigeFilters
@@ -123,18 +71,10 @@ public record StashPrestigeFilters
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("includedItems")]
-    public List<string>? IncludedItems
-    {
-        get;
-        set;
-    }
+    public List<string>? IncludedItems { get; set; }
 
     [JsonPropertyName("excludedItems")]
-    public List<string>? ExcludedItems
-    {
-        get;
-        set;
-    }
+    public List<string>? ExcludedItems { get; set; }
 }
 
 public record PrestigeSkillConfig
@@ -143,11 +83,7 @@ public record PrestigeSkillConfig
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("transferMultiplier")]
-    public double? TransferMultiplier
-    {
-        get;
-        set;
-    }
+    public double? TransferMultiplier { get; set; }
 }
 
 public record PrestigeMasteringConfig
@@ -156,9 +92,5 @@ public record PrestigeMasteringConfig
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("transferMultiplier")]
-    public double? TransferMultiplier
-    {
-        get;
-        set;
-    }
+    public double? TransferMultiplier { get; set; }
 }

@@ -8,16 +8,8 @@ public record GetRaidTimeResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("NewSurviveTimeSeconds")]
-    public double? NewSurviveTimeSeconds
-    {
-        get;
-        set;
-    }
+    public double? NewSurviveTimeSeconds { get; set; }
 
     [JsonPropertyName("OriginalSurvivalTimeSeconds")]
-    public double? OriginalSurvivalTimeSeconds
-    {
-        get;
-        set;
-    }
+    public double? OriginalSurvivalTimeSeconds { get; set; }
 }

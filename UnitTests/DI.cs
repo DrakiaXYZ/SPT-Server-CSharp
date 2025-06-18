@@ -21,20 +21,21 @@ public class DI
         }
 
         var services = new ServiceCollection();
-        var jsonUtil = new JsonUtil([ new SptJsonConverterRegistrator() ]);
+        var jsonUtil = new JsonUtil([new SptJsonConverterRegistrator()]);
         var mathUtil = new MathUtil();
 
         services.AddSingleton<JsonUtil>(jsonUtil);
         services.AddSingleton<MathUtil>(mathUtil);
-        services.AddSingleton<ICloner,JsonCloner>();
-        services.AddSingleton<ISptLogger<RandomUtil>,MockLogger<RandomUtil>>();
+        services.AddSingleton<ICloner, JsonCloner>();
+        services.AddSingleton<ISptLogger<RandomUtil>, MockLogger<RandomUtil>>();
         services.AddSingleton<RandomUtil>();
         services.AddSingleton<HashUtil>();
 
         _serviceProvider = services.BuildServiceProvider();
     }
 
-    public static T GetService<T>() where T : notnull
+    public static T GetService<T>()
+        where T : notnull
     {
         return _serviceProvider.GetRequiredService<T>();
     }

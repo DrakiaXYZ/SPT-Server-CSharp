@@ -39,9 +39,8 @@ public class WeatherHelper(
         var currentTimestampSeconds = timestamp;
 
         var tarkovTime = _timeUtil.GetDateTimeFromTimeStamp(
-            (long)
-            (russiaOffsetSeconds + currentTimestampSeconds * _weatherConfig.Acceleration) %
-            twentyFourHoursSeconds
+            (long)(russiaOffsetSeconds + currentTimestampSeconds * _weatherConfig.Acceleration)
+                % twentyFourHoursSeconds
         );
 
         return tarkovTime;

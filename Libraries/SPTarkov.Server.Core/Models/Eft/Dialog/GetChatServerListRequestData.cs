@@ -9,9 +9,5 @@ public record GetChatServerListRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("VersionId")]
-    public string? VersionId
-    {
-        get;
-        set;
-    }
+    public string? VersionId { get; set; }
 }

@@ -7,7 +7,8 @@ namespace SPTarkov.Server.Core.Services;
 [Injectable(InjectionType.Singleton)]
 public class RagfairRequiredItemsService(
     RagfairOfferService ragfairOfferService,
-    PaymentHelper paymentHelper)
+    PaymentHelper paymentHelper
+)
 {
     /// <summary>
     /// Key = tpl
@@ -39,7 +40,7 @@ public class RagfairRequiredItemsService(
         foreach (var requirement in offer.Requirements)
         {
             if (paymentHelper.IsMoneyTpl(requirement.Template))
-                // This would just be too noisy
+            // This would just be too noisy
             {
                 continue;
             }

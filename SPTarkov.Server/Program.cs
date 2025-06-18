@@ -20,7 +20,9 @@ public static class Program
         // Some users don't know how to create a shortcut...
         if (!IsRunFromInstallationFolder())
         {
-            Console.WriteLine("You have not created a shortcut properly. Please hold alt when dragging to create a shortcut.");
+            Console.WriteLine(
+                "You have not created a shortcut properly. Please hold alt when dragging to create a shortcut."
+            );
             await Task.Delay(-1);
             return;
         }
@@ -47,7 +49,9 @@ public static class Program
             // update the loadedMods list with our validated sorted mods
             loadedMods = sortedLoadedMods;
 
-            diHandler.AddInjectableTypesFromAssemblies(sortedLoadedMods.SelectMany(a => a.Assemblies));
+            diHandler.AddInjectableTypesFromAssemblies(
+                sortedLoadedMods.SelectMany(a => a.Assemblies)
+            );
         }
         diHandler.InjectAll();
 
@@ -65,9 +69,10 @@ public static class Program
                 {
                     // Convert to relative path
                     string relativeModPath = Path.GetRelativePath(
-                        Directory.GetCurrentDirectory(),
-                        mod.Directory
-                    ).Replace('\\', '/');
+                            Directory.GetCurrentDirectory(),
+                            mod.Directory
+                        )
+                        .Replace('\\', '/');
 
                     bundleLoader.AddBundles(relativeModPath);
                 }
@@ -85,7 +90,8 @@ public static class Program
                 await app.InitializeAsync();
 
                 // Run garbage collection now the server is ready to start
-                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GCSettings.LargeObjectHeapCompactionMode =
+                    GCLargeObjectHeapCompactionMode.CompactOnce;
                 GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, true, true);
 
                 await app.StartAsync();
@@ -128,8 +134,8 @@ public static class Program
         diHandler.AddInjectableTypesFromAssembly(typeof(App).Assembly);
         diHandler.InjectAll();
         // register the mod validator components
-        var provider = builder.Services
-            .AddScoped(typeof(ISptLogger<ModValidator>), typeof(SptLogger<ModValidator>))
+        var provider = builder
+            .Services.AddScoped(typeof(ISptLogger<ModValidator>), typeof(SptLogger<ModValidator>))
             .AddScoped(typeof(ISemVer), typeof(SemanticVersioningSemVer))
             .AddSingleton<ModValidator>()
             .AddSingleton<ModLoadOrder>()
@@ -165,10 +171,12 @@ public static class Program
 
     private static bool IsRunFromInstallationFolder()
     {
-        var dirFiles =  Directory.GetFiles(Directory.GetCurrentDirectory());
+        var dirFiles = Directory.GetFiles(Directory.GetCurrentDirectory());
 
         // This file is guaranteed to exist if ran from the correct location, even if the game does not exist here.
-        return dirFiles.Any(dirFile => dirFile.EndsWith("sptLogger.json") || dirFile.EndsWith("sptLogger.Development.json"));
+        return dirFiles.Any(dirFile =>
+            dirFile.EndsWith("sptLogger.json") || dirFile.EndsWith("sptLogger.Development.json")
+        );
     }
 
     [DllImport("kernel32.dll", SetLastError = true)]

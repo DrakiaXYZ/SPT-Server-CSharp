@@ -9,9 +9,5 @@ public record ListQuestsRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("completed")]
-    public bool? Completed
-    {
-        get;
-        set;
-    }
+    public bool? Completed { get; set; }
 }

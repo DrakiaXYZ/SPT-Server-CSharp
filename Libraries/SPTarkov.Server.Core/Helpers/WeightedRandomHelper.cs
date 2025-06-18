@@ -18,7 +18,8 @@ public class WeightedRandomHelper(
     /// </summary>
     /// <param name="values">Items and weights to use</param>
     /// <returns>Chosen item from array</returns>
-    public T GetWeightedValue<T>(Dictionary<T, double> values) where T : notnull
+    public T GetWeightedValue<T>(Dictionary<T, double> values)
+        where T : notnull
     {
         if (values.Count == 1)
         {
@@ -54,12 +55,19 @@ public class WeightedRandomHelper(
 
         if (weights.Count == 0)
         {
-            _logger.Error(localisationService.GetText("weightedrandomhelper-supplied_weights_empty"));
+            _logger.Error(
+                localisationService.GetText("weightedrandomhelper-supplied_weights_empty")
+            );
         }
 
         if (items.Count != weights.Count)
         {
-            _logger.Error(localisationService.GetText("weightedrandomhelper-supplied_data_doesnt_match", new { itemCount = items .Count, weightCount = weights.Count}));
+            _logger.Error(
+                localisationService.GetText(
+                    "weightedrandomhelper-supplied_data_doesnt_match",
+                    new { itemCount = items.Count, weightCount = weights.Count }
+                )
+            );
         }
 
         // Preparing the cumulative weights list.
@@ -81,11 +89,7 @@ public class WeightedRandomHelper(
         {
             // Weights are all the same, early exit
             var randomIndex = _randomUtil.GetInt(0, items.Count - 1);
-            return new WeightedRandomResult<T>
-            {
-                Item = items[randomIndex],
-                Index = randomIndex
-            };
+            return new WeightedRandomResult<T> { Item = items[randomIndex], Index = randomIndex };
         }
 
         // Getting the random number in a range of [0...sum(weights)]
@@ -96,11 +100,7 @@ public class WeightedRandomHelper(
         {
             if (cumulativeWeights[itemIndex] >= randomNumber)
             {
-                return new WeightedRandomResult<T>
-                {
-                    Item = items[itemIndex],
-                    Index = itemIndex
-                };
+                return new WeightedRandomResult<T> { Item = items[itemIndex], Index = itemIndex };
             }
         }
 

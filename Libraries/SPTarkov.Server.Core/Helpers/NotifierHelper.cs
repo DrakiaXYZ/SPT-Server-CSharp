@@ -6,9 +6,7 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Helpers;
 
 [Injectable(InjectionType.Singleton)]
-public class NotifierHelper(
-    HttpServerHelper httpServerHelper,
-    HashUtil hashUtil)
+public class NotifierHelper(HttpServerHelper httpServerHelper, HashUtil hashUtil)
 {
     protected static WsPing ping = new();
 
@@ -25,7 +23,8 @@ public class NotifierHelper(
      */
     public WsRagfairOfferSold CreateRagfairOfferSoldNotification(
         Message dialogueMessage,
-        MessageContentRagfair ragfairData)
+        MessageContentRagfair ragfairData
+    )
     {
         return new WsRagfairOfferSold
         {
@@ -33,7 +32,7 @@ public class NotifierHelper(
             EventIdentifier = dialogueMessage.Id,
             OfferId = ragfairData.OfferId,
             HandbookId = ragfairData.HandbookId,
-            Count = (int) ragfairData.Count
+            Count = (int)ragfairData.Count,
         };
     }
 
@@ -49,7 +48,7 @@ public class NotifierHelper(
             EventType = NotificationEventType.new_message,
             EventIdentifier = dialogueMessage.Id,
             DialogId = dialogueMessage.UserId,
-            Message = dialogueMessage
+            Message = dialogueMessage,
         };
     }
 
@@ -60,7 +59,7 @@ public class NotifierHelper(
             EventType = NotificationEventType.RagfairNewRating,
             EventIdentifier = hashUtil.Generate(),
             Rating = rating,
-            IsRatingGrowing = isGrowing
+            IsRatingGrowing = isGrowing,
         };
     }
 

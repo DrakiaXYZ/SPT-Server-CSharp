@@ -14,7 +14,9 @@ namespace SPTarkov.Server.Core.Models.External;
 /// <remarks>
 /// <b>DEPRECATED, see code example above for replacement!</b>
 /// </remarks>
-[Obsolete("This interface is obsolete and will be removed in 4.1.0, please use IOnLoad instead with the desired Injectable(TypePriority). See class documentation for examples.")]
+[Obsolete(
+    "This interface is obsolete and will be removed in 4.1.0, please use IOnLoad instead with the desired Injectable(TypePriority). See class documentation for examples."
+)]
 public interface IPreSptLoadModAsync
 {
     Task PreSptLoadAsync();

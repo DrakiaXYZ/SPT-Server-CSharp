@@ -45,10 +45,14 @@ public class App(
 
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
-            _logger.Debug($"OS: {Environment.OSVersion.Version} | {Environment.OSVersion.Platform}");
+            _logger.Debug(
+                $"OS: {Environment.OSVersion.Version} | {Environment.OSVersion.Platform}"
+            );
             _logger.Debug($"Ran as admin: {Environment.IsPrivilegedProcess}");
             _logger.Debug($"CPU cores: {Environment.ProcessorCount}");
-            _logger.Debug($"PATH: {_encodingUtil.ToBase64(Environment.ProcessPath ?? "null returned")}");
+            _logger.Debug(
+                $"PATH: {_encodingUtil.ToBase64(Environment.ProcessPath ?? "null returned")}"
+            );
             _logger.Debug($"Server: {ProgramStatics.SPT_VERSION() ?? _coreConfig.SptVersion}");
 
             // _logger.Debug($"RAM: {(os.totalmem() / 1024 / 1024 / 1024).toFixed(2)}GB");
@@ -75,15 +79,25 @@ public class App(
 
     public async Task StartAsync()
     {
-        if(!_httpServer.IsStarted())
+        if (!_httpServer.IsStarted())
         {
-            _logger.Success(_localisationService.GetText("started_webserver_success", _httpServer.ListeningUrl()));
-            _logger.Success(_localisationService.GetText("websocket-started", _httpServer.ListeningUrl().Replace("https://", "wss://")));
+            _logger.Success(
+                _localisationService.GetText(
+                    "started_webserver_success",
+                    _httpServer.ListeningUrl()
+                )
+            );
+            _logger.Success(
+                _localisationService.GetText(
+                    "websocket-started",
+                    _httpServer.ListeningUrl().Replace("https://", "wss://")
+                )
+            );
         }
 
         _logger.Success(GetRandomisedStartMessage());
 
-       await _httpServer.StartAsync();
+        await _httpServer.StartAsync();
     }
 
     protected string GetRandomisedStartMessage()
@@ -114,7 +128,8 @@ public class App(
                 var updateableName = updateable.GetType().FullName;
                 if (string.IsNullOrEmpty(updateableName))
                 {
-                    updateableName = $"{updateable.GetType().Namespace}.{updateable.GetType().Name}";
+                    updateableName =
+                        $"{updateable.GetType().Namespace}.{updateable.GetType().Name}";
                 }
 
                 var lastRunTimeTimestamp = _onUpdateLastRun.GetValueOrDefault(updateableName, 0);
@@ -122,7 +137,7 @@ public class App(
 
                 try
                 {
-                    if(await updateable.OnUpdate(secondsSinceLastRun))
+                    if (await updateable.OnUpdate(secondsSinceLastRun))
                     {
                         _onUpdateLastRun[updateableName] = _timeUtil.GetTimeStamp();
                     }
@@ -139,7 +154,12 @@ public class App(
 
     protected void LogUpdateException(Exception err, IOnUpdate updateable)
     {
-        _logger.Error(_localisationService.GetText("scheduled_event_failed_to_run", updateable.GetType().FullName));
+        _logger.Error(
+            _localisationService.GetText(
+                "scheduled_event_failed_to_run",
+                updateable.GetType().FullName
+            )
+        );
         _logger.Error(err.ToString());
     }
 }

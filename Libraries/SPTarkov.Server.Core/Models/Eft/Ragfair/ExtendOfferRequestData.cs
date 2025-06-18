@@ -9,16 +9,8 @@ public record ExtendOfferRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("offerId")]
-    public string? OfferId
-    {
-        get;
-        set;
-    }
+    public string? OfferId { get; set; }
 
     [JsonPropertyName("renewalTime")]
-    public long? RenewalTime
-    {
-        get;
-        set;
-    }
+    public long? RenewalTime { get; set; }
 }

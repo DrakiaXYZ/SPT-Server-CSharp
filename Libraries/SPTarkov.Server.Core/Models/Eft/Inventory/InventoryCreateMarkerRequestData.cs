@@ -9,16 +9,8 @@ public record InventoryCreateMarkerRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
-    public string? Item
-    {
-        get;
-        set;
-    }
+    public string? Item { get; set; }
 
     [JsonPropertyName("mapMarker")]
-    public MapMarker? MapMarker
-    {
-        get;
-        set;
-    }
+    public MapMarker? MapMarker { get; set; }
 }

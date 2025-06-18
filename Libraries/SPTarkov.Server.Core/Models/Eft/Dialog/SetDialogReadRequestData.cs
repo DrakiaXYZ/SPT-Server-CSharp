@@ -9,9 +9,5 @@ public record SetDialogReadRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("dialogs")]
-    public List<string>? Dialogs
-    {
-        get;
-        set;
-    }
+    public List<string>? Dialogs { get; set; }
 }

@@ -9,9 +9,5 @@ public class LauncherV2ProfilesResponse : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public required List<MiniProfile> Response
-    {
-        get;
-        set;
-    }
+    public required List<MiniProfile> Response { get; set; }
 }

@@ -16,7 +16,6 @@ public class DependencyInjectionHandler
 
     private bool _oneTimeUseFlag;
 
-
     public DependencyInjectionHandler(IServiceCollection serviceCollection)
     {
         _serviceCollection = serviceCollection;
@@ -43,8 +42,9 @@ public class DependencyInjectionHandler
     public void AddInjectableTypesFromTypeList(IEnumerable<Type> types)
     {
         var typesToInject = types.Where(type =>
-            Attribute.IsDefined(type, typeof(Injectable)) &&
-            !_injectedTypeNames.ContainsKey($"{type.Namespace}.{type.Name}"));
+            Attribute.IsDefined(type, typeof(Injectable))
+            && !_injectedTypeNames.ContainsKey($"{type.Namespace}.{type.Name}")
+        );
         if (typesToInject.Any())
         {
             foreach (var type in typesToInject)
@@ -58,16 +58,24 @@ public class DependencyInjectionHandler
     {
         if (_oneTimeUseFlag)
         {
-            throw new Exception("Invalid usage of DependencyInjectionHandler, this is a one time use service!");
+            throw new Exception(
+                "Invalid usage of DependencyInjectionHandler, this is a one time use service!"
+            );
         }
         _oneTimeUseFlag = true;
-        var typeRefValues = _injectedTypeNames.Values
-            .Select(t => new TypeRefContainer(((Injectable[]) Attribute.GetCustomAttributes(t, typeof(Injectable)))[0], t, t));
+        var typeRefValues = _injectedTypeNames.Values.Select(t => new TypeRefContainer(
+            ((Injectable[])Attribute.GetCustomAttributes(t, typeof(Injectable)))[0],
+            t,
+            t
+        ));
         // All the components that have a type override, we need to find them and remove them before injecting everything
-        var componentsToRemove = typeRefValues.Where(tr => tr.InjectableAttribute.TypeOverride != null).Select(tr =>
-            string.IsNullOrEmpty(tr.InjectableAttribute.TypeOverride!.FullName)
-                ? $"{tr.InjectableAttribute.TypeOverride.Namespace}.{tr.InjectableAttribute.TypeOverride.Name}"
-                : tr.InjectableAttribute.TypeOverride.FullName!)
+        var componentsToRemove = typeRefValues
+            .Where(tr => tr.InjectableAttribute.TypeOverride != null)
+            .Select(tr =>
+                string.IsNullOrEmpty(tr.InjectableAttribute.TypeOverride!.FullName)
+                    ? $"{tr.InjectableAttribute.TypeOverride.Namespace}.{tr.InjectableAttribute.TypeOverride.Name}"
+                    : tr.InjectableAttribute.TypeOverride.FullName!
+            )
             .ToHashSet();
         // All the components without the removed overrides
         var cleanedComponents = typeRefValues.Where(tr =>
@@ -78,17 +86,27 @@ public class DependencyInjectionHandler
             return !componentsToRemove.Contains(name);
         });
         // All the components sorted and ready to be inserted into the DI container
-        var sortedInjectableTypes = cleanedComponents.OrderBy(tRef => tRef.InjectableAttribute.TypePriority);
+        var sortedInjectableTypes = cleanedComponents.OrderBy(tRef =>
+            tRef.InjectableAttribute.TypePriority
+        );
 
         foreach (var typeRefToInject in sortedInjectableTypes)
         {
             var nodes = new Queue<TypeRefContainer>();
             nodes.Enqueue(typeRefToInject);
-            foreach (var implementedInterface in typeRefToInject.Type.GetInterfaces()
-                         .Where(t => !t.Namespace.StartsWith("System")))
+            foreach (
+                var implementedInterface in typeRefToInject
+                    .Type.GetInterfaces()
+                    .Where(t => !t.Namespace.StartsWith("System"))
+            )
             {
-                nodes.Enqueue(new TypeRefContainer(typeRefToInject.InjectableAttribute, typeRefToInject.Type,
-                    implementedInterface));
+                nodes.Enqueue(
+                    new TypeRefContainer(
+                        typeRefToInject.InjectableAttribute,
+                        typeRefToInject.Type,
+                        implementedInterface
+                    )
+                );
             }
 
             while (nodes.Any())
@@ -96,8 +114,13 @@ public class DependencyInjectionHandler
                 var node = nodes.Dequeue();
                 if (node.Type.BaseType != null && node.Type.BaseType != typeof(object))
                 {
-                    nodes.Enqueue(new TypeRefContainer(node.InjectableAttribute, typeRefToInject.Type,
-                        node.Type.BaseType));
+                    nodes.Enqueue(
+                        new TypeRefContainer(
+                            node.InjectableAttribute,
+                            typeRefToInject.Type,
+                            node.Type.BaseType
+                        )
+                    );
                 }
 
                 if (node.Type.IsGenericType)
@@ -106,9 +129,11 @@ public class DependencyInjectionHandler
                 }
                 else
                 {
-                    RegisterComponent(node.InjectableAttribute.InjectionType,
+                    RegisterComponent(
+                        node.InjectableAttribute.InjectionType,
                         node.Type,
-                        node.ParentType);
+                        node.ParentType
+                    );
                 }
             }
         }
@@ -118,7 +143,10 @@ public class DependencyInjectionHandler
     {
         try
         {
-            _allLoadedTypes ??= AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).ToList();
+            _allLoadedTypes ??= AppDomain
+                .CurrentDomain.GetAssemblies()
+                .SelectMany(t => t.GetTypes())
+                .ToList();
         }
         catch (ReflectionTypeLoadException ex)
         {
@@ -130,10 +158,12 @@ public class DependencyInjectionHandler
         var typeName = $"{typeRef.Type.Namespace}.{typeRef.Type.Name}";
         try
         {
-            var matchedConstructors = _allConstructors.Where(c => c.GetParameters()
-                .Any(p => p.ParameterType.IsGenericType &&
-                          p.ParameterType.GetGenericTypeDefinition().FullName == typeName
-                )
+            var matchedConstructors = _allConstructors.Where(c =>
+                c.GetParameters()
+                    .Any(p =>
+                        p.ParameterType.IsGenericType
+                        && p.ParameterType.GetGenericTypeDefinition().FullName == typeName
+                    )
             );
 
             var constructorInfos = matchedConstructors.ToList();
@@ -145,7 +175,11 @@ public class DependencyInjectionHandler
             foreach (var matchedConstructor in constructorInfos)
             {
                 var constructorParams = matchedConstructor.GetParameters();
-                foreach (var parameterInfo in constructorParams.Where(x => IsMatchingGenericType(x, typeName)))
+                foreach (
+                    var parameterInfo in constructorParams.Where(x =>
+                        IsMatchingGenericType(x, typeName)
+                    )
+                )
                 {
                     var parameters = parameterInfo.ParameterType.GetGenericArguments();
                     var typedGeneric = typeRef.ParentType.MakeGenericType(parameters);
@@ -166,8 +200,8 @@ public class DependencyInjectionHandler
 
     private static bool IsMatchingGenericType(ParameterInfo paramInfo, string typeName)
     {
-        return paramInfo.ParameterType.IsGenericType &&
-               paramInfo.ParameterType.GetGenericTypeDefinition().FullName == typeName;
+        return paramInfo.ParameterType.IsGenericType
+            && paramInfo.ParameterType.GetGenericTypeDefinition().FullName == typeName;
     }
 
     private void RegisterComponent(
@@ -188,7 +222,10 @@ public class DependencyInjectionHandler
                 _serviceCollection.AddScoped(registrableInterface, implementationType);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(injectionType), $"Unknown injection type on {implementationType.Namespace}.{implementationType.Name}");
+                throw new ArgumentOutOfRangeException(
+                    nameof(injectionType),
+                    $"Unknown injection type on {implementationType.Namespace}.{implementationType.Name}"
+                );
         }
     }
 
@@ -197,20 +234,23 @@ public class DependencyInjectionHandler
         var serviceKey = $"{implementationType.Namespace}.{implementationType.Name}";
         if (registrableInterface != implementationType)
         {
-            _serviceCollection.AddSingleton(registrableInterface, (serviceProvider) =>
-            {
-                object service;
-                lock (_injectedValuesLock)
+            _serviceCollection.AddSingleton(
+                registrableInterface,
+                (serviceProvider) =>
                 {
-                    if (!_injectedValues.TryGetValue(serviceKey, out service))
+                    object service;
+                    lock (_injectedValuesLock)
                     {
-                        service = serviceProvider.GetService(implementationType);
-                        _injectedValues.Add(serviceKey, service);
+                        if (!_injectedValues.TryGetValue(serviceKey, out service))
+                        {
+                            service = serviceProvider.GetService(implementationType);
+                            _injectedValues.Add(serviceKey, service);
+                        }
                     }
-                }
 
-                return service;
-            });
+                    return service;
+                }
+            );
         }
         else
         {

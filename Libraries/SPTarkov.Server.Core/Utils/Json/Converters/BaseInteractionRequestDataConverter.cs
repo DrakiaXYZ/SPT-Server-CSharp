@@ -18,8 +18,14 @@ namespace SPTarkov.Server.Core.Utils.Json.Converters;
 
 public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteractionRequestData>
 {
-    private static Dictionary<string, Func<string, BaseInteractionRequestData?>> _modHandlers = new();
-    public override BaseInteractionRequestData? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    private static Dictionary<string, Func<string, BaseInteractionRequestData?>> _modHandlers =
+        new();
+
+    public override BaseInteractionRequestData? Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
     {
         using var jsonDocument = JsonDocument.ParseValue(ref reader);
 
@@ -39,7 +45,11 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
     /// <param name="jsonDocumentRoot">Root json element of client request</param>
     /// <param name="jsonText">Raw JSON request text</param>
     /// <returns>BaseInteractionRequestData</returns>
-    private static BaseInteractionRequestData? ConvertToCorrectType(string action, JsonElement jsonDocumentRoot, string jsonText)
+    private static BaseInteractionRequestData? ConvertToCorrectType(
+        string action,
+        JsonElement jsonDocumentRoot,
+        string jsonText
+    )
     {
         switch (action)
         {
@@ -64,11 +74,15 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
             case HideoutEventActions.HIDEOUT_TOGGLE_AREA:
                 return JsonSerializer.Deserialize<HideoutToggleAreaRequestData>(jsonText);
             case HideoutEventActions.HIDEOUT_SINGLE_PRODUCTION_START:
-                return JsonSerializer.Deserialize<HideoutSingleProductionStartRequestData>(jsonText);
+                return JsonSerializer.Deserialize<HideoutSingleProductionStartRequestData>(
+                    jsonText
+                );
             case HideoutEventActions.HIDEOUT_SCAV_CASE_PRODUCTION_START:
                 return JsonSerializer.Deserialize<HideoutScavCaseStartRequestData>(jsonText);
             case HideoutEventActions.HIDEOUT_CONTINUOUS_PRODUCTION_START:
-                return JsonSerializer.Deserialize<HideoutContinuousProductionStartRequestData>(jsonText);
+                return JsonSerializer.Deserialize<HideoutContinuousProductionStartRequestData>(
+                    jsonText
+                );
             case HideoutEventActions.HIDEOUT_TAKE_PRODUCTION:
                 return JsonSerializer.Deserialize<HideoutTakeProductionRequestData>(jsonText);
             case HideoutEventActions.HIDEOUT_RECORD_SHOOTING_RANGE_POINTS:
@@ -77,13 +91,17 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
             case HideoutEventActions.HIDEOUT_CANCEL_PRODUCTION_COMMAND:
                 return JsonSerializer.Deserialize<HideoutImproveAreaRequestData>(jsonText);
             case HideoutEventActions.HIDEOUT_CIRCLE_OF_CULTIST_PRODUCTION_START:
-                return JsonSerializer.Deserialize<HideoutCircleOfCultistProductionStartRequestData>(jsonText);
+                return JsonSerializer.Deserialize<HideoutCircleOfCultistProductionStartRequestData>(
+                    jsonText
+                );
             case HideoutEventActions.HIDEOUT_DELETE_PRODUCTION_COMMAND:
                 return JsonSerializer.Deserialize<HideoutDeleteProductionRequestData>(jsonText);
             case HideoutEventActions.HIDEOUT_CUSTOMIZATION_APPLY_COMMAND:
                 return JsonSerializer.Deserialize<HideoutCustomizationApplyRequestData>(jsonText);
             case HideoutEventActions.HIDEOUT_CUSTOMIZATION_SET_MANNEQUIN_POSE:
-                return JsonSerializer.Deserialize<HideoutCustomizationSetMannequinPoseRequest>(jsonText);
+                return JsonSerializer.Deserialize<HideoutCustomizationSetMannequinPoseRequest>(
+                    jsonText
+                );
             case ItemEventActions.INSURE:
                 return JsonSerializer.Deserialize<InsureRequestData>(jsonText);
             case ItemEventActions.ADD_TO_WISHLIST:
@@ -93,19 +111,19 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
             case ItemEventActions.CHANGE_WISHLIST_ITEM_CATEGORY:
                 return JsonSerializer.Deserialize<ChangeWishlistItemCategoryRequest>(jsonText);
             case ItemEventActions.TRADING_CONFIRM:
+            {
+                switch (jsonDocumentRoot.GetProperty("type").GetString())
                 {
-                    switch (jsonDocumentRoot.GetProperty("type").GetString())
-                    {
-                        case ItemEventActions.BUY_FROM_TRADER:
-                            return JsonSerializer.Deserialize<ProcessBuyTradeRequestData>(jsonText);
-                        case ItemEventActions.SELL_TO_TRADER:
-                            return JsonSerializer.Deserialize<ProcessSellTradeRequestData>(jsonText);
-                        default:
-                            throw new Exception(
-                                $"Unhandled action type: {action}, make sure BaseInteractionRequestDataConverter has deserialization for this action."
-                            );
-                    }
+                    case ItemEventActions.BUY_FROM_TRADER:
+                        return JsonSerializer.Deserialize<ProcessBuyTradeRequestData>(jsonText);
+                    case ItemEventActions.SELL_TO_TRADER:
+                        return JsonSerializer.Deserialize<ProcessSellTradeRequestData>(jsonText);
+                    default:
+                        throw new Exception(
+                            $"Unhandled action type: {action}, make sure BaseInteractionRequestDataConverter has deserialization for this action."
+                        );
                 }
+            }
             case ItemEventActions.RAGFAIR_BUY_OFFER:
                 return JsonSerializer.Deserialize<ProcessRagfairTradeRequestData>(jsonText);
             case ItemEventActions.SELL_ALL_FROM_SAVAGE:
@@ -188,15 +206,24 @@ public class BaseInteractionRequestDataConverter : JsonConverter<BaseInteraction
         }
     }
 
-    public static void RegisterModDataHandler(string action, Func<string, BaseInteractionRequestData?> handler)
+    public static void RegisterModDataHandler(
+        string action,
+        Func<string, BaseInteractionRequestData?> handler
+    )
     {
         if (!_modHandlers.TryAdd(action, handler))
         {
-            throw new Exception($"Unable to register action {action} to BaseInteractionRequestDataConverter as it already exists.");
+            throw new Exception(
+                $"Unable to register action {action} to BaseInteractionRequestDataConverter as it already exists."
+            );
         }
     }
 
-    public override void Write(Utf8JsonWriter writer, BaseInteractionRequestData value, JsonSerializerOptions options)
+    public override void Write(
+        Utf8JsonWriter writer,
+        BaseInteractionRequestData value,
+        JsonSerializerOptions options
+    )
     {
         JsonSerializer.Serialize(writer, value, options);
     }

@@ -9,18 +9,10 @@ public record QuestTypePool
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("types")]
-    public List<string>? Types
-    {
-        get;
-        set;
-    }
+    public List<string>? Types { get; set; }
 
     [JsonPropertyName("pool")]
-    public QuestPool? Pool
-    {
-        get;
-        set;
-    }
+    public QuestPool? Pool { get; set; }
 }
 
 public record QuestPool
@@ -29,25 +21,13 @@ public record QuestPool
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Exploration")]
-    public ExplorationPool? Exploration
-    {
-        get;
-        set;
-    }
+    public ExplorationPool? Exploration { get; set; }
 
     [JsonPropertyName("Elimination")]
-    public EliminationPool? Elimination
-    {
-        get;
-        set;
-    }
+    public EliminationPool? Elimination { get; set; }
 
     [JsonPropertyName("Pickup")]
-    public ExplorationPool? Pickup
-    {
-        get;
-        set;
-    }
+    public ExplorationPool? Pickup { get; set; }
 }
 
 public record ExplorationPool
@@ -56,11 +36,7 @@ public record ExplorationPool
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("locations")]
-    public Dictionary<ELocationName, List<string>>? Locations
-    {
-        get;
-        set;
-    } // TODO: check the type, originally - Partial<Record<ELocationName, string[]>>
+    public Dictionary<ELocationName, List<string>>? Locations { get; set; } // TODO: check the type, originally - Partial<Record<ELocationName, string[]>>
 }
 
 public record EliminationPool
@@ -69,11 +45,7 @@ public record EliminationPool
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("targets")]
-    public Dictionary<string, TargetLocation>? Targets
-    {
-        get;
-        set;
-    }
+    public Dictionary<string, TargetLocation>? Targets { get; set; }
 }
 
 public record TargetLocation
@@ -82,9 +54,5 @@ public record TargetLocation
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("locations")]
-    public List<string>? Locations
-    {
-        get;
-        set;
-    }
+    public List<string>? Locations { get; set; }
 }

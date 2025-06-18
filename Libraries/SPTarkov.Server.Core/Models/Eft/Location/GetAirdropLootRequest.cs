@@ -9,9 +9,5 @@ public record GetAirdropLootRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("containerId")]
-    public string? ContainerId
-    {
-        get;
-        set;
-    }
+    public string? ContainerId { get; set; }
 }

@@ -21,7 +21,9 @@ public class PrestigeCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetPrestige(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_prestigeController.GetPrestige(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_prestigeController.GetPrestige(sessionID))
+        );
     }
 
     /// <summary>
@@ -31,7 +33,11 @@ public class PrestigeCallbacks(
     /// <param name="info"></param>
     /// <param name="sessionID">Session/player id</param>
     /// <returns></returns>
-    public async ValueTask<string> ObtainPrestige(string url, ObtainPrestigeRequestList info, string sessionID)
+    public async ValueTask<string> ObtainPrestige(
+        string url,
+        ObtainPrestigeRequestList info,
+        string sessionID
+    )
     {
         await _prestigeController.ObtainPrestige(sessionID, info);
 

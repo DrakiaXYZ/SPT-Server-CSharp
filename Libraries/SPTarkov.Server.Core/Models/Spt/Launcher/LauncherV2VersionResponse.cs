@@ -8,9 +8,5 @@ public record LauncherV2VersionResponse : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public required LauncherV2CompatibleVersion Response
-    {
-        get;
-        set;
-    }
+    public required LauncherV2CompatibleVersion Response { get; set; }
 }

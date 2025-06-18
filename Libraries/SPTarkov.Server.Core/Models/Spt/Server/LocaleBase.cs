@@ -11,23 +11,11 @@ public record LocaleBase
     [JsonPropertyName("global")]
     /// DO NOT USE THIS PROPERTY DIRECTLY, USE LOCALESERVICE INSTEAD
     /// THIS IS LAZY LOADED AND YOUR CHANGES WILL NOT BE SAVED
-    public required Dictionary<string, LazyLoad<Dictionary<string, string>>> Global
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, LazyLoad<Dictionary<string, string>>> Global { get; set; }
 
     [JsonPropertyName("menu")]
-    public required Dictionary<string, Dictionary<string, object>> Menu
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, Dictionary<string, object>> Menu { get; set; }
 
     [JsonPropertyName("languages")]
-    public required Dictionary<string, string> Languages
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, string> Languages { get; set; }
 }

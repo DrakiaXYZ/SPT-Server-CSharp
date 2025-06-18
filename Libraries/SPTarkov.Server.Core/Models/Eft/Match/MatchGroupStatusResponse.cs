@@ -8,16 +8,8 @@ public record MatchGroupStatusResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("players")]
-    public List<GroupCharacter>? Players
-    {
-        get;
-        set;
-    }
+    public List<GroupCharacter>? Players { get; set; }
 
     [JsonPropertyName("maxPveCountExceeded")]
-    public bool? MaxPveCountExceeded
-    {
-        get;
-        set;
-    }
+    public bool? MaxPveCountExceeded { get; set; }
 }

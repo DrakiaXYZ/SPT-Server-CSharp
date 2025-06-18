@@ -17,7 +17,9 @@ public class AchievementCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetAchievements(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_achievementController.GetAchievements(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_achievementController.GetAchievements(sessionID))
+        );
     }
 
     /// <summary>
@@ -26,6 +28,8 @@ public class AchievementCallbacks(
     /// <returns></returns>
     public ValueTask<string> Statistic(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_achievementController.GetAchievementStatics(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_achievementController.GetAchievementStatics(sessionID))
+        );
     }
 }

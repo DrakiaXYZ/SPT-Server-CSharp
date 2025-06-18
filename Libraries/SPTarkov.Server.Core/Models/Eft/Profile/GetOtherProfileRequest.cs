@@ -9,9 +9,5 @@ public record GetOtherProfileRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("accountId")]
-    public string? AccountId
-    {
-        get;
-        set;
-    }
+    public string? AccountId { get; set; }
 }

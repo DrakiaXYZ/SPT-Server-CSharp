@@ -18,15 +18,23 @@ public class LocationCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetLocationData(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_locationController.GenerateAll(sessionID)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_locationController.GenerateAll(sessionID))
+        );
     }
 
     /// <summary>
     ///     Handle client/airdrop/loot
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GetAirdropLoot(string url, GetAirdropLootRequest info, string sessionID)
+    public ValueTask<string> GetAirdropLoot(
+        string url,
+        GetAirdropLootRequest info,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_locationController.GetAirDropLoot(info)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_locationController.GetAirDropLoot(info))
+        );
     }
 }

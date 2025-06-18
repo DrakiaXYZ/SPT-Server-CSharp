@@ -8,9 +8,5 @@ public class ModOrder
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("order")]
-    public List<string> Order
-    {
-        get;
-        set;
-    }
+    public List<string> Order { get; set; }
 }

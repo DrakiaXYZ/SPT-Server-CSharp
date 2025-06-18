@@ -9,9 +9,5 @@ public record GameEmptyCrcRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("crc")]
-    public int? Crc
-    {
-        get;
-        set;
-    }
+    public int? Crc { get; set; }
 }

@@ -9,9 +9,5 @@ public record ProfileChangeVoiceRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("voice")]
-    public string? Voice
-    {
-        get;
-        set;
-    }
+    public string? Voice { get; set; }
 }

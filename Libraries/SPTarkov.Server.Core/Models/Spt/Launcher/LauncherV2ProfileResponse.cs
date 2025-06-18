@@ -9,9 +9,5 @@ public class LauncherV2ProfileResponse : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public SptProfile Response
-    {
-        get;
-        set;
-    }
+    public SptProfile Response { get; set; }
 }

@@ -7,5 +7,5 @@ public enum RepairStrategyType
 {
     MeleeWeapon,
     Firearms,
-    Armor
+    Armor,
 }

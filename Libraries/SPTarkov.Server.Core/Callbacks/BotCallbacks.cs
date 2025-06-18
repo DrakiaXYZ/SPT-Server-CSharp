@@ -7,10 +7,7 @@ using SPTarkov.Server.Core.Utils;
 namespace SPTarkov.Server.Core.Callbacks;
 
 [Injectable]
-public class BotCallbacks(
-    BotController _botController,
-    HttpResponseUtil _httpResponseUtil
-)
+public class BotCallbacks(BotController _botController, HttpResponseUtil _httpResponseUtil)
 {
     /// <summary>
     ///     Handle singleplayer/settings/bot/limit
@@ -21,7 +18,9 @@ public class BotCallbacks(
     {
         var splitUrl = url.Split('/');
         var type = splitUrl[^1];
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_botController.GetBotPresetGenerationLimit(type)));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_botController.GetBotPresetGenerationLimit(type))
+        );
     }
 
     /// <summary>
@@ -35,10 +34,14 @@ public class BotCallbacks(
         var difficulty = splitUrl[^1];
         if (difficulty == "core")
         {
-            return new ValueTask<string>(_httpResponseUtil.NoBody(_botController.GetBotCoreDifficulty()));
+            return new ValueTask<string>(
+                _httpResponseUtil.NoBody(_botController.GetBotCoreDifficulty())
+            );
         }
 
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_botController.GetBotDifficulty(sessionID, type, difficulty)));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_botController.GetBotDifficulty(sessionID, type, difficulty))
+        );
     }
 
     /// <summary>
@@ -47,16 +50,24 @@ public class BotCallbacks(
     /// <returns></returns>
     public ValueTask<string> GetAllBotDifficulties(string url, EmptyRequestData _, string sessionID)
     {
-        return new ValueTask<string>(_httpResponseUtil.NoBody(_botController.GetAllBotDifficulties()));
+        return new ValueTask<string>(
+            _httpResponseUtil.NoBody(_botController.GetAllBotDifficulties())
+        );
     }
 
     /// <summary>
     ///     Handle client/game/bot/generate
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> GenerateBots(string url, GenerateBotsRequestData info, string sessionID)
+    public ValueTask<string> GenerateBots(
+        string url,
+        GenerateBotsRequestData info,
+        string sessionID
+    )
     {
-        return new ValueTask<string>(_httpResponseUtil.GetBody(_botController.Generate(sessionID, info)));
+        return new ValueTask<string>(
+            _httpResponseUtil.GetBody(_botController.Generate(sessionID, info))
+        );
     }
 
     /// <summary>

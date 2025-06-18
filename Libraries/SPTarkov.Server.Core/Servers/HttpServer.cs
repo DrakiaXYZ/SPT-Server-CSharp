@@ -42,15 +42,19 @@ public class HttpServer(
 
         _builder.WebHost.ConfigureKestrel(options =>
         {
-            options.Listen(IPAddress.Parse(_httpConfig.Ip), _httpConfig.Port, listenOptions =>
-            {
-                listenOptions.UseHttps(opts =>
+            options.Listen(
+                IPAddress.Parse(_httpConfig.Ip),
+                _httpConfig.Port,
+                listenOptions =>
                 {
-                    opts.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
-                    opts.ServerCertificate = _certificateHelper.LoadOrGenerateCertificatePfx();
-                    opts.ClientCertificateMode = ClientCertificateMode.NoCertificate;
-                });
-            });
+                    listenOptions.UseHttps(opts =>
+                    {
+                        opts.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
+                        opts.ServerCertificate = _certificateHelper.LoadOrGenerateCertificatePfx();
+                        opts.ClientCertificateMode = ClientCertificateMode.NoCertificate;
+                    });
+                }
+            );
         });
 
         _webApplication = _builder.Build();
@@ -61,13 +65,16 @@ public class HttpServer(
         }
 
         // Enable web socket
-        _webApplication.UseWebSockets(new WebSocketOptions
-        {
-            // Every minute a heartbeat is sent to keep the connection alive.
-            KeepAliveInterval = TimeSpan.FromSeconds(60)
-        });
+        _webApplication.UseWebSockets(
+            new WebSocketOptions
+            {
+                // Every minute a heartbeat is sent to keep the connection alive.
+                KeepAliveInterval = TimeSpan.FromSeconds(60),
+            }
+        );
 
-        _webApplication.Use(async (HttpContext req, RequestDelegate _) =>
+        _webApplication.Use(
+            async (HttpContext req, RequestDelegate _) =>
             {
                 await HandleFallback(req);
             }
@@ -81,7 +88,6 @@ public class HttpServer(
             _started = true;
             await _webApplication.RunAsync();
         }
-
     }
 
     private async Task HandleFallback(HttpContext context)
@@ -109,7 +115,9 @@ public class HttpServer(
 
         try
         {
-            var listener = _httpListeners.FirstOrDefault(l => l.CanHandle(sessionId, context.Request));
+            var listener = _httpListeners.FirstOrDefault(l =>
+                l.CanHandle(sessionId, context.Request)
+            );
 
             if (listener != null)
             {
@@ -139,17 +147,16 @@ public class HttpServer(
     {
         if (isLocalRequest)
         {
-            _logger.Info(_localisationService.GetText("client_request", context.Request.Path.Value));
+            _logger.Info(
+                _localisationService.GetText("client_request", context.Request.Path.Value)
+            );
         }
         else
         {
             _logger.Info(
                 _localisationService.GetText(
-                    "client_request_ip", new
-                    {
-                        ip = clientIp,
-                        url = context.Request.Path.Value
-                    }
+                    "client_request_ip",
+                    new { ip = clientIp, url = context.Request.Path.Value }
                 )
             );
         }
@@ -180,9 +187,9 @@ public class HttpServer(
             return false;
         }
 
-        return remoteAddress.StartsWith("127.0.0") ||
-               remoteAddress.StartsWith("192.168.") ||
-               remoteAddress.StartsWith("localhost");
+        return remoteAddress.StartsWith("127.0.0")
+            || remoteAddress.StartsWith("192.168.")
+            || remoteAddress.StartsWith("localhost");
     }
 
     protected Dictionary<string, string> GetCookies(HttpRequest req)

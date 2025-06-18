@@ -8,9 +8,5 @@ public class LauncherV2LoginResponse : IRequestData
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
-    public required bool Response
-    {
-        get;
-        set;
-    }
+    public required bool Response { get; set; }
 }

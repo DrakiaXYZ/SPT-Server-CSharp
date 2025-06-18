@@ -9,16 +9,8 @@ public record LoginRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("username")]
-    public string? Username
-    {
-        get;
-        set;
-    }
+    public string? Username { get; set; }
 
     [JsonPropertyName("password")]
-    public string? Password
-    {
-        get;
-        set;
-    }
+    public string? Password { get; set; }
 }

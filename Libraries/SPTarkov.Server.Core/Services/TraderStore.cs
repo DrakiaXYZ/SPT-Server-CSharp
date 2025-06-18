@@ -14,8 +14,8 @@ public class TraderStore(
     DatabaseService databaseService,
     IEnumerable<ITrader> injectedTraders,
     LocalisationService localisationService,
-    ISptLogger<TraderStore> logger)
-    : IOnLoad
+    ISptLogger<TraderStore> logger
+) : IOnLoad
 {
     private readonly Dictionary<string, ITrader> _traders = new();
 
@@ -46,7 +46,12 @@ public class TraderStore(
                 }
                 catch (Exception e)
                 {
-                    logger.Error(localisationService.GetText("trader-unable_to_add_custom_trader", new { traderId = trader.Name, error = e.StackTrace }));
+                    logger.Error(
+                        localisationService.GetText(
+                            "trader-unable_to_add_custom_trader",
+                            new { traderId = trader.Name, error = e.StackTrace }
+                        )
+                    );
                 }
             }
             else
@@ -55,7 +60,9 @@ public class TraderStore(
             }
         }
 
-        logger.Info($"Importing traders complete {(customTraders == 0 ? "" : $"[{customTraders} traders loaded]")}");
+        logger.Info(
+            $"Importing traders complete {(customTraders == 0 ? "" : $"[{customTraders} traders loaded]")}"
+        );
         return Task.CompletedTask;
     }
 

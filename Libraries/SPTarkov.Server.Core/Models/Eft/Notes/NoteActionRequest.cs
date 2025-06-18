@@ -6,18 +6,10 @@ namespace SPTarkov.Server.Core.Models.Eft.Notes;
 public record NoteActionRequest : BaseInteractionRequestData
 {
     [JsonPropertyName("index")]
-    public int? Index
-    {
-        get;
-        set;
-    }
+    public int? Index { get; set; }
 
     [JsonPropertyName("note")]
-    public Note? Note
-    {
-        get;
-        set;
-    }
+    public Note? Note { get; set; }
 }
 
 public record Note
@@ -26,16 +18,8 @@ public record Note
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Time")]
-    public double? Time
-    {
-        get;
-        set;
-    }
+    public double? Time { get; set; }
 
     [JsonPropertyName("Text")]
-    public string? Text
-    {
-        get;
-        set;
-    }
+    public string? Text { get; set; }
 }

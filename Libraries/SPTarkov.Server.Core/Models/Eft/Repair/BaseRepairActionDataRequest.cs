@@ -8,9 +8,5 @@ public record BaseRepairActionDataRequest
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Action")]
-    public string? Action
-    {
-        get;
-        set;
-    }
+    public string? Action { get; set; }
 }

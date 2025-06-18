@@ -21,7 +21,7 @@ public class DatabaseImporter(
     ImageRouter _imageRouter,
     ImporterUtil _importerUtil,
     JsonUtil _jsonUtil
-    ) : IOnLoad
+) : IOnLoad
 {
     private const string _sptDataPath = "./SPT_Data/";
     protected ISptLogger<DatabaseImporter> _logger = logger;
@@ -90,21 +90,26 @@ public class DatabaseImporter(
 
                 await using var ms = new MemoryStream(jsonBytes);
 
-                var FileHashes = await _jsonUtil.DeserializeFromMemoryStreamAsync<List<FileHash>>(ms) ?? [];
+                var FileHashes =
+                    await _jsonUtil.DeserializeFromMemoryStreamAsync<List<FileHash>>(ms) ?? [];
 
-                foreach(var hash in FileHashes)
+                foreach (var hash in FileHashes)
                 {
                     databaseHashes.Add(hash.Path, hash.Hash);
                 }
             }
             else
             {
-                _logger.Error(_localisationService.GetText("validation_error_exception", checksFilePath));
+                _logger.Error(
+                    _localisationService.GetText("validation_error_exception", checksFilePath)
+                );
             }
         }
         catch (Exception)
         {
-            _logger.Error(_localisationService.GetText("validation_error_exception", checksFilePath));
+            _logger.Error(
+                _localisationService.GetText("validation_error_exception", checksFilePath)
+            );
         }
     }
 
@@ -169,12 +174,16 @@ public class DatabaseImporter(
                 {
                     if (databaseHashes[relativePath] != hashString)
                     {
-                        _logger.Warning(_localisationService.GetText("validation_error_file", fileName));
+                        _logger.Warning(
+                            _localisationService.GetText("validation_error_file", fileName)
+                        );
                     }
                 }
                 else
                 {
-                    _logger.Warning(_localisationService.GetText("validation_error_file", fileName));
+                    _logger.Warning(
+                        _localisationService.GetText("validation_error_file", fileName)
+                    );
                 }
             }
         }
@@ -186,4 +195,3 @@ public class FileHash
     public string Path { get; set; } = string.Empty;
     public string Hash { get; set; } = string.Empty;
 }
-

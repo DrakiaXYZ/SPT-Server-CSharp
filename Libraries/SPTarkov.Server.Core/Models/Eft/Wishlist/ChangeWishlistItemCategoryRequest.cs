@@ -9,16 +9,8 @@ public record ChangeWishlistItemCategoryRequest : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
-    public string? Item
-    {
-        get;
-        set;
-    }
+    public string? Item { get; set; }
 
     [JsonPropertyName("category")]
-    public int? Category
-    {
-        get;
-        set;
-    }
+    public int? Category { get; set; }
 }

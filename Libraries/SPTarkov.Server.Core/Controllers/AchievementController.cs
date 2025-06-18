@@ -23,10 +23,7 @@ public class AchievementController(
     /// <returns></returns>
     public virtual GetAchievementsResponse GetAchievements(string sessionID)
     {
-        return new GetAchievementsResponse
-        {
-            Elements = databaseService.GetAchievements()
-        };
+        return new GetAchievementsResponse { Elements = databaseService.GetAchievements() };
     }
 
     /// <summary>
@@ -37,12 +34,21 @@ public class AchievementController(
     public virtual CompletedAchievementsResponse GetAchievementStatics(string sessionId)
     {
         var stats = new Dictionary<string, int>();
-        var profiles = profileHelper.GetProfiles()
-            .Where(kvp => !coreConfig.Features.AchievementProfileIdBlacklist.Contains(kvp.Value.ProfileInfo.ProfileId))
+        var profiles = profileHelper
+            .GetProfiles()
+            .Where(kvp =>
+                !coreConfig.Features.AchievementProfileIdBlacklist.Contains(
+                    kvp.Value.ProfileInfo.ProfileId
+                )
+            )
             .ToDictionary();
 
         var achievements = databaseService.GetAchievements();
-        foreach (var achievementId in achievements.Select(achievement => achievement.Id).Where(achievementId => !string.IsNullOrEmpty(achievementId)))
+        foreach (
+            var achievementId in achievements
+                .Select(achievement => achievement.Id)
+                .Where(achievementId => !string.IsNullOrEmpty(achievementId))
+        )
         {
             var profilesHaveAchievement = 0;
             foreach (var (profileId, profile) in profiles)
@@ -63,15 +69,13 @@ public class AchievementController(
             var percentage = 0;
             if (profiles.Count > 0)
             {
-                percentage = (int)Math.Round((double)profilesHaveAchievement / profiles.Count * 100);
+                percentage = (int)
+                    Math.Round((double)profilesHaveAchievement / profiles.Count * 100);
             }
 
             stats.Add(achievementId, percentage);
         }
 
-        return new CompletedAchievementsResponse
-        {
-            Elements = stats
-        };
+        return new CompletedAchievementsResponse { Elements = stats };
     }
 }

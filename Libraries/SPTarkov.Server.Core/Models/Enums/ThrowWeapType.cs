@@ -11,5 +11,5 @@ public enum ThrowWeapType
     smoke_grenade,
     gas_grenade,
     incendiary_grenade,
-    sonar
+    sonar,
 }

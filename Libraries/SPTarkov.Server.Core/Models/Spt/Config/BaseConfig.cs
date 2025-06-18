@@ -5,11 +5,7 @@ namespace SPTarkov.Server.Core.Models.Spt.Config;
 public abstract record BaseConfig
 {
     [JsonPropertyName("kind")]
-    public abstract string Kind
-    {
-        get;
-        set;
-    }
+    public abstract string Kind { get; set; }
 }
 
 public record RunIntervalValues
@@ -18,16 +14,8 @@ public record RunIntervalValues
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("inRaid")]
-    public int InRaid
-    {
-        get;
-        set;
-    }
+    public int InRaid { get; set; }
 
     [JsonPropertyName("outOfRaid")]
-    public int OutOfRaid
-    {
-        get;
-        set;
-    }
+    public int OutOfRaid { get; set; }
 }

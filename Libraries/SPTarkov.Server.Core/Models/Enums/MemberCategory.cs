@@ -16,5 +16,5 @@ public enum MemberCategory
     UnitTest = 128,
     Sherpa = 256,
     Emissary = 512,
-    Unheard = 1024
+    Unheard = 1024,
 }

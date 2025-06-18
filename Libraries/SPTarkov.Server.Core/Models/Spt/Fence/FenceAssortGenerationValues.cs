@@ -8,18 +8,10 @@ public record FenceAssortGenerationValues
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("normal")]
-    public GenerationAssortValues? Normal
-    {
-        get;
-        set;
-    }
+    public GenerationAssortValues? Normal { get; set; }
 
     [JsonPropertyName("discount")]
-    public GenerationAssortValues? Discount
-    {
-        get;
-        set;
-    }
+    public GenerationAssortValues? Discount { get; set; }
 }
 
 public record GenerationAssortValues
@@ -28,23 +20,11 @@ public record GenerationAssortValues
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
-    public int? Item
-    {
-        get;
-        set;
-    }
+    public int? Item { get; set; }
 
     [JsonPropertyName("weaponPreset")]
-    public int? WeaponPreset
-    {
-        get;
-        set;
-    }
+    public int? WeaponPreset { get; set; }
 
     [JsonPropertyName("equipmentPreset")]
-    public int? EquipmentPreset
-    {
-        get;
-        set;
-    }
+    public int? EquipmentPreset { get; set; }
 }

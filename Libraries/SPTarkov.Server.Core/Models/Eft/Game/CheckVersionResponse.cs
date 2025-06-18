@@ -8,16 +8,8 @@ public record CheckVersionResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("isvalid")]
-    public bool? IsValid
-    {
-        get;
-        set;
-    }
+    public bool? IsValid { get; set; }
 
     [JsonPropertyName("latestVersion")]
-    public string? LatestVersion
-    {
-        get;
-        set;
-    }
+    public string? LatestVersion { get; set; }
 }

@@ -8,9 +8,5 @@ public record CreateProfileResponse
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("uid")]
-    public string? UserId
-    {
-        get;
-        set;
-    }
+    public string? UserId { get; set; }
 }

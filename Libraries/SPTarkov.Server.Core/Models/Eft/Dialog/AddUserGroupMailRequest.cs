@@ -9,16 +9,8 @@ public record AddUserGroupMailRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("dialogId")]
-    public string? DialogId
-    {
-        get;
-        set;
-    }
+    public string? DialogId { get; set; }
 
     [JsonPropertyName("uid")]
-    public string? Uid
-    {
-        get;
-        set;
-    }
+    public string? Uid { get; set; }
 }

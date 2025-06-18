@@ -195,7 +195,7 @@ public class PostDbLoadService(
 
     private void RemovePraporTestMessage()
     {
-        foreach((var locale, var lazyLoad) in _databaseService.GetLocales().Global)
+        foreach ((var locale, var lazyLoad) in _databaseService.GetLocales().Global)
         {
             lazyLoad.AddTransformer(lazyloadedData =>
             {
@@ -279,38 +279,47 @@ public class PostDbLoadService(
                 continue;
             }
 
-            _databaseService.GetLocation(mapId).LooseLoot.AddTransformer(looselootData =>
-            {
-                if (looselootData is null)
+            _databaseService
+                .GetLocation(mapId)
+                .LooseLoot.AddTransformer(looselootData =>
                 {
-                    _logger.Warning(
-                        _localisationService.GetText("location-map_has_no_loose_loot_data", mapId)
-                    );
-
-                    return looselootData;
-                }
-
-                foreach (var positionToAdd in positionsToAdd)
-                {
-                    // Exists already, add new items to existing positions pool
-                    var existingLootPosition = looselootData.Spawnpoints.FirstOrDefault(x =>
-                        x.Template.Id == positionToAdd.Template.Id
-                    );
-
-                    if (existingLootPosition is not null)
+                    if (looselootData is null)
                     {
-                        existingLootPosition.Template.Items.AddRange(positionToAdd.Template.Items);
-                        existingLootPosition.ItemDistribution.AddRange(positionToAdd.ItemDistribution);
+                        _logger.Warning(
+                            _localisationService.GetText(
+                                "location-map_has_no_loose_loot_data",
+                                mapId
+                            )
+                        );
 
-                        continue;
+                        return looselootData;
                     }
 
-                    // New position, add entire object
-                    looselootData.Spawnpoints.Add(positionToAdd);
-                }
+                    foreach (var positionToAdd in positionsToAdd)
+                    {
+                        // Exists already, add new items to existing positions pool
+                        var existingLootPosition = looselootData.Spawnpoints.FirstOrDefault(x =>
+                            x.Template.Id == positionToAdd.Template.Id
+                        );
 
-                return looselootData;
-            });
+                        if (existingLootPosition is not null)
+                        {
+                            existingLootPosition.Template.Items.AddRange(
+                                positionToAdd.Template.Items
+                            );
+                            existingLootPosition.ItemDistribution.AddRange(
+                                positionToAdd.ItemDistribution
+                            );
+
+                            continue;
+                        }
+
+                        // New position, add entire object
+                        looselootData.Spawnpoints.Add(positionToAdd);
+                    }
+
+                    return looselootData;
+                });
         }
     }
 
@@ -415,39 +424,44 @@ public class PostDbLoadService(
 
         foreach (var (mapId, mapAdjustments) in _lootConfig.LooseLootSpawnPointAdjustments)
         {
-            _databaseService.GetLocation(mapId).LooseLoot.AddTransformer(looselootData =>
-            {
-                if (looselootData is null)
+            _databaseService
+                .GetLocation(mapId)
+                .LooseLoot.AddTransformer(looselootData =>
                 {
-                    _logger.Warning(
-                        _localisationService.GetText("location-map_has_no_loose_loot_data", mapId)
-                    );
-
-                    return looselootData;
-                }
-
-                foreach (var (lootKey, newChanceValue) in mapAdjustments)
-                {
-                    var lootPostionToAdjust = looselootData.Spawnpoints.FirstOrDefault(spawnPoint =>
-                        spawnPoint.Template.Id == lootKey
-                    );
-                    if (lootPostionToAdjust is null)
+                    if (looselootData is null)
                     {
                         _logger.Warning(
                             _localisationService.GetText(
-                                "location-unable_to_adjust_loot_position_on_map",
-                                new { lootKey, mapId }
+                                "location-map_has_no_loose_loot_data",
+                                mapId
                             )
                         );
 
-                        continue;
+                        return looselootData;
                     }
 
-                    lootPostionToAdjust.Probability = newChanceValue;
-                }
+                    foreach (var (lootKey, newChanceValue) in mapAdjustments)
+                    {
+                        var lootPostionToAdjust = looselootData.Spawnpoints.FirstOrDefault(
+                            spawnPoint => spawnPoint.Template.Id == lootKey
+                        );
+                        if (lootPostionToAdjust is null)
+                        {
+                            _logger.Warning(
+                                _localisationService.GetText(
+                                    "location-unable_to_adjust_loot_position_on_map",
+                                    new { lootKey, mapId }
+                                )
+                            );
 
-                return looselootData;
-            });
+                            continue;
+                        }
+
+                        lootPostionToAdjust.Probability = newChanceValue;
+                    }
+
+                    return looselootData;
+                });
         }
     }
 
@@ -541,11 +555,11 @@ public class PostDbLoadService(
         }
 
         foreach (var area in _databaseService.GetHideout().Areas)
-            foreach (var (_, stage) in area.Stages)
-            // Only adjust crafts ABOVE the override
-            {
-                stage.ConstructionTime = Math.Min(stage.ConstructionTime.Value, overrideSeconds);
-            }
+        foreach (var (_, stage) in area.Stages)
+        // Only adjust crafts ABOVE the override
+        {
+            stage.ConstructionTime = Math.Min(stage.ConstructionTime.Value, overrideSeconds);
+        }
     }
 
     protected void UnlockHideoutLootCrateCrafts()

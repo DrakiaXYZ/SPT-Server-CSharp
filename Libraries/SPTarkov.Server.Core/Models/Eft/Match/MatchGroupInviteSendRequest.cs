@@ -9,16 +9,8 @@ public record MatchGroupInviteSendRequest : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("to")]
-    public string? To
-    {
-        get;
-        set;
-    }
+    public string? To { get; set; }
 
     [JsonPropertyName("inLobby")]
-    public bool? InLobby
-    {
-        get;
-        set;
-    }
+    public bool? InLobby { get; set; }
 }

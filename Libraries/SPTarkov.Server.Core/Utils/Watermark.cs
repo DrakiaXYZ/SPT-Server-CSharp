@@ -23,7 +23,7 @@ public class WatermarkLocale
             "",
             localisationService.GetText("watermark-free_of_charge"),
             localisationService.GetText("watermark-paid_scammed"),
-            localisationService.GetText("watermark-commercial_use_prohibited")
+            localisationService.GetText("watermark-commercial_use_prohibited"),
         ];
         warning =
         [
@@ -34,7 +34,7 @@ public class WatermarkLocale
             $"{localisationService.GetText("watermark-report_issues_to")}:",
             localisationService.GetText("watermark-issue_tracker_url"),
             "",
-            localisationService.GetText("watermark-use_at_own_risk")
+            localisationService.GetText("watermark-use_at_own_risk"),
         ];
         modding =
         [
@@ -42,7 +42,7 @@ public class WatermarkLocale
             localisationService.GetText("watermark-modding_disabled"),
             "",
             localisationService.GetText("watermark-not_an_issue"),
-            localisationService.GetText("watermark-do_not_report")
+            localisationService.GetText("watermark-do_not_report"),
         ];
     }
 
@@ -98,8 +98,7 @@ public class Watermark : IOnLoad
         versionLabel = $"{sptConfig.ProjectName} {versionTag} {sptConfig.CompatibleTarkovVersion}";
 
         text = [versionLabel];
-        text = [..text, ..description];
-
+        text = [.. text, .. description];
 
         if (ProgramStatics.DEBUG())
         {
@@ -110,7 +109,6 @@ public class Watermark : IOnLoad
         {
             text.AddRange(modding);
         }
-
 
         if (sptConfig.CustomWatermarkLocaleKeys?.Count > 0)
         {
@@ -134,7 +132,8 @@ public class Watermark : IOnLoad
     public string GetVersionTag(bool withEftVersion = false)
     {
         var sptVersion = ProgramStatics.SPT_VERSION() ?? sptConfig.SptVersion;
-        var versionTag = /*ProgramStatics.DEBUG*/ $"{sptVersion} - {_localisationService.GetText("bleeding_edge_build")}";
+        var versionTag = /*ProgramStatics.DEBUG*/
+            $"{sptVersion} - {_localisationService.GetText("bleeding_edge_build")}";
 
         if (withEftVersion)
         {
@@ -153,7 +152,9 @@ public class Watermark : IOnLoad
     public string GetInGameVersionLabel()
     {
         var sptVersion = ProgramStatics.SPT_VERSION();
-        var versionTag = ProgramStatics.DEBUG() ? $"{sptVersion} - BLEEDINGEDGE {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}" : $"{sptVersion} - {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}";
+        var versionTag = ProgramStatics.DEBUG()
+            ? $"{sptVersion} - BLEEDINGEDGE {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}"
+            : $"{sptVersion} - {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}";
 
         return $"{sptConfig.ProjectName} {versionTag}";
     }

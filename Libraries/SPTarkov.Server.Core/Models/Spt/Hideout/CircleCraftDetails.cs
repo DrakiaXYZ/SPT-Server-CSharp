@@ -10,30 +10,14 @@ public record CircleCraftDetails
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("time")]
-    public required long Time
-    {
-        get;
-        set;
-    }
+    public required long Time { get; set; }
 
     [JsonPropertyName("rewardType")]
-    public required CircleRewardType RewardType
-    {
-        get;
-        set;
-    }
+    public required CircleRewardType RewardType { get; set; }
 
     [JsonPropertyName("rewardAmountRoubles")]
-    public required int RewardAmountRoubles
-    {
-        get;
-        set;
-    }
+    public required int RewardAmountRoubles { get; set; }
 
     [JsonPropertyName("rewardDetails")]
-    public required CraftTimeThreshold RewardDetails
-    {
-        get;
-        set;
-    }
+    public required CraftTimeThreshold RewardDetails { get; set; }
 }

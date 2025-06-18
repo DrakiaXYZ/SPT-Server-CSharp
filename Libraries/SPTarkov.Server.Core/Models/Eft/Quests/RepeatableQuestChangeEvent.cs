@@ -9,9 +9,5 @@ public record RepeatableQuestChangeRequest : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("qid")]
-    public string? QuestId
-    {
-        get;
-        set;
-    }
+    public string? QuestId { get; set; }
 }

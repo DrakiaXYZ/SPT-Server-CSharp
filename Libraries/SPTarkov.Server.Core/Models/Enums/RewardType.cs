@@ -28,5 +28,5 @@ public enum RewardType
     Customization = 116,
     BattlePassExperience,
     BattlePassCurrency,
-    ArenaArmoryItem = 100
+    ArenaArmoryItem = 100,
 }

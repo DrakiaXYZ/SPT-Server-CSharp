@@ -9,9 +9,5 @@ public record InventorySortRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("changedItems")]
-    public List<Item>? ChangedItems
-    {
-        get;
-        set;
-    }
+    public List<Item>? ChangedItems { get; set; }
 }

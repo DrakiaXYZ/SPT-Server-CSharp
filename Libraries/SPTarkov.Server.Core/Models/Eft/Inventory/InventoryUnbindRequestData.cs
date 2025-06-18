@@ -8,16 +8,8 @@ public record InventoryUnbindRequestData : InventoryBaseActionRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
-    public string? Item
-    {
-        get;
-        set;
-    }
+    public string? Item { get; set; }
 
     [JsonPropertyName("index")]
-    public int? Index
-    {
-        get;
-        set;
-    }
+    public int? Index { get; set; }
 }

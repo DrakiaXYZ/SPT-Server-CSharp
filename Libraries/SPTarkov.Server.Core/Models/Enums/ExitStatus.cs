@@ -10,5 +10,5 @@ public enum ExitStatus
     LEFT,
     RUNNER,
     MISSINGINACTION,
-    TRANSIT
+    TRANSIT,
 }

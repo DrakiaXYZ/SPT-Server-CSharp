@@ -30,5 +30,5 @@ public enum HideoutAreas
     WeaponStand,
     WeaponStandSecondary,
     EquipmentPresetsStand,
-    CircleOfCultists
+    CircleOfCultists,
 }

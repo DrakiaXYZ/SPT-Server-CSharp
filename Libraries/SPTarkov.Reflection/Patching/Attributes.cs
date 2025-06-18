@@ -1,27 +1,17 @@
 ﻿namespace SPTarkov.Reflection.Patching
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class PatchPrefixAttribute : Attribute
-    {
-    }
+    public class PatchPrefixAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class PatchPostfixAttribute : Attribute
-    {
-    }
+    public class PatchPostfixAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class PatchTranspilerAttribute : Attribute
-    {
-    }
+    public class PatchTranspilerAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class PatchFinalizerAttribute : Attribute
-    {
-    }
+    public class PatchFinalizerAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class PatchIlManipulatorAttribute : Attribute
-    {
-    }
+    public class PatchIlManipulatorAttribute : Attribute { }
 }

@@ -6,73 +6,37 @@ namespace SPTarkov.Server.Core.Models.Spt.Config;
 public record RepairConfig : BaseConfig
 {
     [JsonPropertyName("kind")]
-    public override string Kind
-    {
-        get;
-        set;
-    } = "spt-repair";
+    public override string Kind { get; set; } = "spt-repair";
 
     [JsonPropertyName("priceMultiplier")]
-    public double PriceMultiplier
-    {
-        get;
-        set;
-    }
+    public double PriceMultiplier { get; set; }
 
     [JsonPropertyName("applyRandomizeDurabilityLoss")]
-    public bool ApplyRandomizeDurabilityLoss
-    {
-        get;
-        set;
-    }
+    public bool ApplyRandomizeDurabilityLoss { get; set; }
 
     [JsonPropertyName("weaponSkillRepairGain")]
-    public double WeaponSkillRepairGain
-    {
-        get;
-        set;
-    }
+    public double WeaponSkillRepairGain { get; set; }
 
     [JsonPropertyName("armorKitSkillPointGainPerRepairPointMultiplier")]
-    public double ArmorKitSkillPointGainPerRepairPointMultiplier
-    {
-        get;
-        set;
-    }
+    public double ArmorKitSkillPointGainPerRepairPointMultiplier { get; set; }
 
     /// <summary>
     ///     INT gain multiplier per repaired item type
     /// </summary>
     [JsonPropertyName("repairKitIntellectGainMultiplier")]
-    public required IntellectGainValues RepairKitIntellectGainMultiplier
-    {
-        get;
-        set;
-    }
+    public required IntellectGainValues RepairKitIntellectGainMultiplier { get; set; }
 
     /// <summary>
     ///     How much INT can be given to player per repair action
     /// </summary>
     [JsonPropertyName("maxIntellectGainPerRepair")]
-    public required MaxIntellectGainValues MaxIntellectGainPerRepair
-    {
-        get;
-        set;
-    }
+    public required MaxIntellectGainValues MaxIntellectGainPerRepair { get; set; }
 
     [JsonPropertyName("weaponTreatment")]
-    public required WeaponTreatmentRepairValues WeaponTreatment
-    {
-        get;
-        set;
-    }
+    public required WeaponTreatmentRepairValues WeaponTreatment { get; set; }
 
     [JsonPropertyName("repairKit")]
-    public required RepairKit RepairKit
-    {
-        get;
-        set;
-    }
+    public required RepairKit RepairKit { get; set; }
 }
 
 public record IntellectGainValues
@@ -81,18 +45,10 @@ public record IntellectGainValues
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("weapon")]
-    public double Weapon
-    {
-        get;
-        set;
-    }
+    public double Weapon { get; set; }
 
     [JsonPropertyName("armor")]
-    public double Armor
-    {
-        get;
-        set;
-    }
+    public double Armor { get; set; }
 }
 
 public record MaxIntellectGainValues
@@ -101,18 +57,10 @@ public record MaxIntellectGainValues
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("kit")]
-    public double Kit
-    {
-        get;
-        set;
-    }
+    public double Kit { get; set; }
 
     [JsonPropertyName("trader")]
-    public double Trader
-    {
-        get;
-        set;
-    }
+    public double Trader { get; set; }
 }
 
 public record WeaponTreatmentRepairValues
@@ -124,45 +72,25 @@ public record WeaponTreatmentRepairValues
     ///     The chance to gain more weapon maintenance skill
     /// </summary>
     [JsonPropertyName("critSuccessChance")]
-    public double CritSuccessChance
-    {
-        get;
-        set;
-    }
+    public double CritSuccessChance { get; set; }
 
     [JsonPropertyName("critSuccessAmount")]
-    public double CritSuccessAmount
-    {
-        get;
-        set;
-    }
+    public double CritSuccessAmount { get; set; }
 
     /// <summary>
     ///     The chance to gain less weapon maintenance skill
     /// </summary>
     [JsonPropertyName("critFailureChance")]
-    public double CritFailureChance
-    {
-        get;
-        set;
-    }
+    public double CritFailureChance { get; set; }
 
     [JsonPropertyName("critFailureAmount")]
-    public double CritFailureAmount
-    {
-        get;
-        set;
-    }
+    public double CritFailureAmount { get; set; }
 
     /// <summary>
     ///     The multiplier used for calculating weapon maintenance XP
     /// </summary>
     [JsonPropertyName("pointGainMultiplier")]
-    public double PointGainMultiplier
-    {
-        get;
-        set;
-    }
+    public double PointGainMultiplier { get; set; }
 }
 
 public record RepairKit
@@ -171,32 +99,16 @@ public record RepairKit
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("armor")]
-    public required BonusSettings Armor
-    {
-        get;
-        set;
-    }
+    public required BonusSettings Armor { get; set; }
 
     [JsonPropertyName("weapon")]
-    public required BonusSettings Weapon
-    {
-        get;
-        set;
-    }
+    public required BonusSettings Weapon { get; set; }
 
     [JsonPropertyName("vest")]
-    public required BonusSettings Vest
-    {
-        get;
-        set;
-    }
+    public required BonusSettings Vest { get; set; }
 
     [JsonPropertyName("headwear")]
-    public required BonusSettings Headwear
-    {
-        get;
-        set;
-    }
+    public required BonusSettings Headwear { get; set; }
 }
 
 public record BonusSettings
@@ -205,32 +117,16 @@ public record BonusSettings
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("rarityWeight")]
-    public required Dictionary<string, double> RarityWeight
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, double> RarityWeight { get; set; }
 
     [JsonPropertyName("bonusTypeWeight")]
-    public required Dictionary<string, double> BonusTypeWeight
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, double> BonusTypeWeight { get; set; }
 
     [JsonPropertyName("Common")]
-    public required Dictionary<string, BonusValues> Common
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, BonusValues> Common { get; set; }
 
     [JsonPropertyName("Rare")]
-    public required Dictionary<string, BonusValues> Rare
-    {
-        get;
-        set;
-    }
+    public required Dictionary<string, BonusValues> Rare { get; set; }
 }
 
 public record BonusValues
@@ -239,19 +135,11 @@ public record BonusValues
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("valuesMinMax")]
-    public required MinMax<double> ValuesMinMax
-    {
-        get;
-        set;
-    }
+    public required MinMax<double> ValuesMinMax { get; set; }
 
     /// <summary>
     ///     What dura is buff active between (min max of current max)
     /// </summary>
     [JsonPropertyName("activeDurabilityPercentMinMax")]
-    public required MinMax<int> ActiveDurabilityPercentMinMax
-    {
-        get;
-        set;
-    }
+    public required MinMax<int> ActiveDurabilityPercentMinMax { get; set; }
 }

@@ -21,7 +21,6 @@ public class VirtualizerPatch : IPatcher
                     continue;
                 }
 
-
                 if (typeDefinitionMethod.IsFinal && typeDefinitionMethod.IsVirtual)
                 {
                     typeDefinitionMethod.IsFinal = false;
@@ -59,27 +58,25 @@ public class VirtualizerPatch : IPatcher
         }
 
 #if DEBUG
-        var writerParams = new WriterParameters()
-        {
-            WriteSymbols = true
-        };
+        var writerParams = new WriterParameters() { WriteSymbols = true };
         assembly.Write(writerParams);
 #else
         assembly.Write();
 #endif
-
     }
 
     static bool MethodIsSerializationCallback(MethodDefinition method)
     {
         return ContainsAttribute(method.CustomAttributes, "OnSerializingAttribute")
-               || ContainsAttribute(method.CustomAttributes, "OnSerializedAttribute")
-               || ContainsAttribute(method.CustomAttributes, "OnDeserializingAttribute")
-               || ContainsAttribute(method.CustomAttributes, "OnDeserializedAttribute");
+            || ContainsAttribute(method.CustomAttributes, "OnSerializedAttribute")
+            || ContainsAttribute(method.CustomAttributes, "OnDeserializingAttribute")
+            || ContainsAttribute(method.CustomAttributes, "OnDeserializedAttribute");
     }
 
-    public static bool ContainsAttribute(IEnumerable<CustomAttribute> attributes, string attributeName) =>
-        attributes.Any(attribute => attribute.Constructor.DeclaringType.Name == attributeName);
+    public static bool ContainsAttribute(
+        IEnumerable<CustomAttribute> attributes,
+        string attributeName
+    ) => attributes.Any(attribute => attribute.Constructor.DeclaringType.Name == attributeName);
 
     public string Name
     {

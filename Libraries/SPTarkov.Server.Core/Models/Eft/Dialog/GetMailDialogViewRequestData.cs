@@ -10,30 +10,14 @@ public record GetMailDialogViewRequestData : IRequestData
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("type")]
-    public MessageType? Type
-    {
-        get;
-        set;
-    }
+    public MessageType? Type { get; set; }
 
     [JsonPropertyName("dialogId")]
-    public string? DialogId
-    {
-        get;
-        set;
-    }
+    public string? DialogId { get; set; }
 
     [JsonPropertyName("limit")]
-    public int? Limit
-    {
-        get;
-        set;
-    }
+    public int? Limit { get; set; }
 
     [JsonPropertyName("time")]
-    public decimal? Time
-    {
-        get;
-        set;
-    } // decimal
+    public decimal? Time { get; set; } // decimal
 }

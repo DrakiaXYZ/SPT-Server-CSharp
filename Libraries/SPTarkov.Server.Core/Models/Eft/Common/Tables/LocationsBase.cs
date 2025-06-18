@@ -8,18 +8,10 @@ public record LocationsBase
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("locations")]
-    public Locations? Locations
-    {
-        get;
-        set;
-    }
+    public Locations? Locations { get; set; }
 
     [JsonPropertyName("paths")]
-    public List<Path>? Paths
-    {
-        get;
-        set;
-    }
+    public List<Path>? Paths { get; set; }
 }
 
 public record Locations
@@ -36,22 +28,10 @@ public record Path
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Source")]
-    public string? Source
-    {
-        get;
-        set;
-    }
+    public string? Source { get; set; }
 
     [JsonPropertyName("Destination")]
-    public string? Destination
-    {
-        get;
-        set;
-    }
+    public string? Destination { get; set; }
 
-    public bool? Event
-    {
-        get;
-        set;
-    }
+    public bool? Event { get; set; }
 }

@@ -10,60 +10,28 @@ public record GroupCharacter
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("_id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("aid")]
-    public int? Aid
-    {
-        get;
-        set;
-    }
+    public int? Aid { get; set; }
 
     [JsonPropertyName("Info")]
-    public CharacterInfo? Info
-    {
-        get;
-        set;
-    }
+    public CharacterInfo? Info { get; set; }
 
     [JsonPropertyName("PlayerVisualRepresentation")]
-    public PlayerVisualRepresentation? VisualRepresentation
-    {
-        get;
-        set;
-    }
+    public PlayerVisualRepresentation? VisualRepresentation { get; set; }
 
     [JsonPropertyName("isLeader")]
-    public bool? IsLeader
-    {
-        get;
-        set;
-    }
+    public bool? IsLeader { get; set; }
 
     [JsonPropertyName("isReady")]
-    public bool? IsReady
-    {
-        get;
-        set;
-    }
+    public bool? IsReady { get; set; }
 
     [JsonPropertyName("region")]
-    public string? Region
-    {
-        get;
-        set;
-    }
+    public string? Region { get; set; }
 
     [JsonPropertyName("lookingGroup")]
-    public bool? LookingGroup
-    {
-        get;
-        set;
-    }
+    public bool? LookingGroup { get; set; }
 }
 
 public record CharacterInfo
@@ -72,60 +40,28 @@ public record CharacterInfo
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Nickname")]
-    public string? Nickname
-    {
-        get;
-        set;
-    }
+    public string? Nickname { get; set; }
 
     [JsonPropertyName("Side")]
-    public string? Side
-    {
-        get;
-        set;
-    }
+    public string? Side { get; set; }
 
     [JsonPropertyName("Level")]
-    public int? Level
-    {
-        get;
-        set;
-    }
+    public int? Level { get; set; }
 
     [JsonPropertyName("MemberCategory")]
-    public MemberCategory? MemberCategory
-    {
-        get;
-        set;
-    }
+    public MemberCategory? MemberCategory { get; set; }
 
     [JsonPropertyName("GameVersion")]
-    public string? GameVersion
-    {
-        get;
-        set;
-    }
+    public string? GameVersion { get; set; }
 
     [JsonPropertyName("SavageLockTime")]
-    public double? SavageLockTime
-    {
-        get;
-        set;
-    }
+    public double? SavageLockTime { get; set; }
 
     [JsonPropertyName("SavageNickname")]
-    public string? SavageNickname
-    {
-        get;
-        set;
-    }
+    public string? SavageNickname { get; set; }
 
     [JsonPropertyName("hasCoopExtension")]
-    public bool? HasCoopExtension
-    {
-        get;
-        set;
-    }
+    public bool? HasCoopExtension { get; set; }
 }
 
 public record PlayerVisualRepresentation
@@ -134,25 +70,13 @@ public record PlayerVisualRepresentation
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Info")]
-    public VisualInfo? Info
-    {
-        get;
-        set;
-    }
+    public VisualInfo? Info { get; set; }
 
     [JsonPropertyName("Customization")]
-    public Customization? Customization
-    {
-        get;
-        set;
-    }
+    public Customization? Customization { get; set; }
 
     [JsonPropertyName("Equipment")]
-    public Equipment? Equipment
-    {
-        get;
-        set;
-    }
+    public Equipment? Equipment { get; set; }
 }
 
 public record VisualInfo
@@ -161,39 +85,19 @@ public record VisualInfo
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Side")]
-    public string? Side
-    {
-        get;
-        set;
-    }
+    public string? Side { get; set; }
 
     [JsonPropertyName("Level")]
-    public int? Level
-    {
-        get;
-        set;
-    }
+    public int? Level { get; set; }
 
     [JsonPropertyName("Nickname")]
-    public string? Nickname
-    {
-        get;
-        set;
-    }
+    public string? Nickname { get; set; }
 
     [JsonPropertyName("MemberCategory")]
-    public MemberCategory? MemberCategory
-    {
-        get;
-        set;
-    }
+    public MemberCategory? MemberCategory { get; set; }
 
     [JsonPropertyName("GameVersion")]
-    public string? GameVersion
-    {
-        get;
-        set;
-    }
+    public string? GameVersion { get; set; }
 }
 
 public record Customization
@@ -202,32 +106,16 @@ public record Customization
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Head")]
-    public string? Head
-    {
-        get;
-        set;
-    }
+    public string? Head { get; set; }
 
     [JsonPropertyName("Body")]
-    public string? Body
-    {
-        get;
-        set;
-    }
+    public string? Body { get; set; }
 
     [JsonPropertyName("Feet")]
-    public string? Feet
-    {
-        get;
-        set;
-    }
+    public string? Feet { get; set; }
 
     [JsonPropertyName("Hands")]
-    public string? Hands
-    {
-        get;
-        set;
-    }
+    public string? Hands { get; set; }
 }
 
 public record Equipment
@@ -236,16 +124,8 @@ public record Equipment
     public Dictionary<string, object> ExtensionData { get; set; }
 
     [JsonPropertyName("Id")]
-    public string? Id
-    {
-        get;
-        set;
-    }
+    public string? Id { get; set; }
 
     [JsonPropertyName("Items")]
-    public List<Item>? Items
-    {
-        get;
-        set;
-    }
+    public List<Item>? Items { get; set; }
 }
