@@ -3,9 +3,7 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 
 namespace SPTarkov.Server.Core.Services;
 
@@ -13,9 +11,7 @@ namespace SPTarkov.Server.Core.Services;
 public class BotEquipmentModPoolService
 {
     private readonly Lock _lockObject = new();
-    protected bool _armorPoolGenerated;
-    protected BotConfig _botConfig;
-    protected ConfigServer _configServer;
+    
     protected DatabaseService _databaseService;
     protected ConcurrentDictionary<string, ConcurrentDictionary<string, HashSet<string>>> _gearModPool;
     protected ItemHelper _itemHelper;
@@ -24,21 +20,19 @@ public class BotEquipmentModPoolService
     protected ConcurrentDictionary<string, ConcurrentDictionary<string, HashSet<string>>> _weaponModPool;
 
     protected bool _weaponPoolGenerated;
+    protected bool _armorPoolGenerated;
 
     public BotEquipmentModPoolService(
         ISptLogger<BotEquipmentModPoolService> logger,
         ItemHelper itemHelper,
         DatabaseService databaseService,
-        LocalisationService localisationService,
-        ConfigServer configServer
+        LocalisationService localisationService
     )
     {
         _logger = logger;
         _itemHelper = itemHelper;
         _databaseService = databaseService;
         _localisationService = localisationService;
-        _configServer = configServer;
-        _botConfig = _configServer.GetConfig<BotConfig>();
 
         _weaponModPool = new ConcurrentDictionary<string, ConcurrentDictionary<string, HashSet<string>>>();
         _gearModPool = new ConcurrentDictionary<string, ConcurrentDictionary<string, HashSet<string>>>();
