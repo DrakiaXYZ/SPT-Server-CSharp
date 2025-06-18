@@ -1,5 +1,6 @@
 using System.Runtime;
 using System.Runtime.InteropServices;
+using System.Text;
 using SPTarkov.Common.Semver;
 using SPTarkov.Common.Semver.Implementations;
 using SPTarkov.DI;
@@ -17,6 +18,8 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
+        Console.OutputEncoding = Encoding.UTF8;
+
         // Some users don't know how to create a shortcut...
         if (!IsRunFromInstallationFolder())
         {
