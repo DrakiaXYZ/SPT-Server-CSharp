@@ -5,6 +5,7 @@ using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
 using SPTarkov.Server.Core.Models.Eft.Quests;
+using SPTarkov.Server.Core.Models.Eft.Trade;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -17,7 +18,7 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Helpers;
 
-[Injectable]
+[Injectable(InjectionType.Singleton)]
 public class QuestHelper(
     ISptLogger<QuestHelper> _logger,
     TimeUtil _timeUtil,
@@ -38,6 +39,10 @@ public class QuestHelper(
 {
     protected readonly HashSet<QuestStatusEnum> _startedOrAvailToFinish = [QuestStatusEnum.Started, QuestStatusEnum.AvailableForFinish];
     protected readonly QuestConfig _questConfig = _configServer.GetConfig<QuestConfig>();
+
+    // We need to keep track of quests with `SellItemToTrader` finish conditions to avoid expensive lookups during trading.
+    // NOTE: DO NOT ACCESS ME DIRECTLY! use GetSellToTraderQuests()
+    protected readonly Dictionary<string, List<QuestCondition>> _sellToTraderQuestConditionCache = [];
 
     /// <summary>
     ///     Get status of a quest in player profile by its id
@@ -260,10 +265,10 @@ public class QuestHelper(
     }
 
     /**
-     * 
-     * @param pmcData 
-     * @param newState 
-     * @param acceptedQuest 
+     *
+     * @param pmcData
+     * @param newState
+     * @param acceptedQuest
      */
 
     /// <summary>
@@ -664,6 +669,134 @@ public class QuestHelper(
         return updatedQuest;
     }
 
+
+    /// <summary>
+    /// Get all quests with finish condition `SellItemToTrader`.
+    /// The first time this method is called it will cache the conditions by quest id in `_sellToTraderQuestConditionCache` and return that thereafter.
+    /// </summary>
+    /// <returns>List of quests with `SellItemToTrader` finish conditions</returns>
+    protected Dictionary<string, List<QuestCondition>> GetSellToTraderQuests()
+    {
+        // Cache is hydrated, return it.
+        if (_sellToTraderQuestConditionCache.Count != 0)
+        {
+            return _sellToTraderQuestConditionCache;
+        }
+
+        // Hydrate the cache.
+        foreach (var quest in GetQuestsFromDb())
+        {
+            foreach (var cond in quest.Conditions.AvailableForFinish)
+            {
+                if (cond.ConditionType != "SellItemToTrader")
+                {
+                    continue;
+                }
+
+                if (!_sellToTraderQuestConditionCache.TryGetValue(quest.Id, out var questConditions))
+                {
+                    questConditions ??= [];
+                    questConditions.Add(cond);
+
+                    _sellToTraderQuestConditionCache.Add(quest.Id, questConditions);
+                    continue;
+                }
+
+                questConditions.Add(cond);
+            }
+        }
+
+        if (_logger.IsLogEnabled(LogLevel.Debug))
+        {
+            _logger.Debug($"_sellToTraderQuestConditionCache hydrated with {_sellToTraderQuestConditionCache.Count} quests");
+        }
+
+        return _sellToTraderQuestConditionCache;
+    }
+
+    /// <summary>
+    /// Get all active condition counters for `SellItemToTrader` conditions
+    /// </summary>
+    /// <param name="pmcData">Profile to check</param>
+    /// <returns>List of active TaskConditionCounters</returns>
+    protected List<TaskConditionCounter>? GetActiveSellToTraderConditionCounters(PmcData pmcData)
+    {
+        return pmcData.TaskConditionCounters?.Values.Where(condition => GetSellToTraderQuests().ContainsKey(condition.SourceId)
+                                                                        && condition.Type == "SellItemToTrader").ToList();
+    }
+
+    /// <summary>
+    /// Look over all active conditions and increment them as needed
+    /// </summary>
+    /// <param name="profileWithItemsToSell">profile selling the items</param>
+    /// <param name="profileToReceiveMoney">profile to recieve the money</param>
+    /// <param name="sellRequest">request with items to sell</param>
+    public void IncrementSoldToTraderCounters(
+        PmcData profileWithItemsToSell,
+        PmcData profileToReceiveMoney,
+        ProcessSellTradeRequestData sellRequest
+        )
+    {
+        var activeConditionCounters = GetActiveSellToTraderConditionCounters(profileToReceiveMoney);
+
+        // No active conditions, exit
+        if (activeConditionCounters is null || activeConditionCounters.Count == 0)
+        {
+            return;
+        }
+
+        var sellToTraderQuests = GetSellToTraderQuests();
+        foreach (var counter in activeConditionCounters)
+        {
+            // Condition is in profile, but quest doesn't exist in database
+            if (!sellToTraderQuests.TryGetValue(counter.SourceId, out var conditions))
+            {
+                _logger.Error(_localisationService.GetText("unable_to_find_quest_in_db_no_type", counter.SourceId));
+                continue;
+            }
+
+            foreach (var condition in conditions)
+            {
+                IncrementSoldToTraderCounter(profileWithItemsToSell, counter, condition, sellRequest);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Increment an individual condition counter
+    /// </summary>
+    /// <param name="profileWithItemsToSell">Profile selling the items</param>
+    /// <param name="taskCounter">condition counter to increment</param>
+    /// <param name="questCondition">quest condtion to check for valid items on</param>
+    /// <param name="sellRequest">sell request of items sold</param>
+    protected void IncrementSoldToTraderCounter(
+        PmcData profileWithItemsToSell,
+        TaskConditionCounter taskCounter,
+        QuestCondition questCondition,
+        ProcessSellTradeRequestData sellRequest
+        )
+    {
+        var itemsTplsThatIncrement = questCondition.Target;
+        foreach (var itemSoldToTrader in sellRequest.Items)
+        {
+            // Get sold items' details from profile
+            var itemDetails = profileWithItemsToSell.Inventory?.Items?.FirstOrDefault(inventoryItem => inventoryItem.Id == itemSoldToTrader.Id
+            );
+            if (itemDetails is null)
+            {
+                _logger.Error(_localisationService.GetText("trader-unable_to_find_inventory_item_for_selltotrader_counter", taskCounter.SourceId));
+
+                continue;
+            }
+
+            // Is sold item on the increment list
+            if (itemsTplsThatIncrement.List.Contains(itemDetails.Template))
+            {
+                taskCounter.Value += itemSoldToTrader.Count;
+            }
+        }
+    }
+
     /// <summary>
     /// Fail a quest in a player profile
     /// </summary>
@@ -1007,7 +1140,7 @@ public class QuestHelper(
         var completedQuestId = request.QuestId;
 
         // Keep a copy of player quest statuses from their profile (Must be gathered prior to applyQuestReward() & failQuests())
-        var clientQuestsClone = _cloner.Clone(GetClientQuests(sessionID)); 
+        var clientQuestsClone = _cloner.Clone(GetClientQuests(sessionID));
 
         const QuestStatusEnum newQuestState = QuestStatusEnum.Success;
         UpdateQuestState(pmcData, newQuestState, completedQuestId);
