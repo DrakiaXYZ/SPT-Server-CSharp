@@ -146,7 +146,7 @@ public class LocaleService(
             return "pt-pt";
         }
 
-        _logger.Warning(
+        _logger.Debug(
             $"Unsupported system language found: {baseNameCode}, langCode: {languageCode} falling back to english for server locale"
         );
 
@@ -179,11 +179,16 @@ public class LocaleService(
             return languageCode;
         }
 
-        //
-        // const regionCode = platformLocale.region?.toLocaleLowerCase();
-        // if (regionCode && locales.global[regionCode]) {
-        //     return regionCode;
-        // }
+        // language code wasn't found, if it's over 2 characters
+        // we can try taking first 2 characters and see if we have a locale that matches
+        if (languageCode.Length > 2)
+        {
+            // Take first 2 characters and see if that exists
+            if (locales.Global.ContainsKey(languageCode[..1]))
+            {
+                return languageCode;
+            }
+        }
 
         // BSG map DE to GE some reason
         if (baseNameCode == "de")
@@ -197,7 +202,7 @@ public class LocaleService(
             return "cn";
         }
 
-        _logger.Warning(
+        _logger.Debug(
             $"Unsupported system language found: {languageCode} baseLocale: {baseNameCode}, falling back to english for client locale"
         );
         return "en";
