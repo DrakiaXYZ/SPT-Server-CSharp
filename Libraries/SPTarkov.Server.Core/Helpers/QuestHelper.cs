@@ -751,7 +751,7 @@ public class QuestHelper(
             // Condition is in profile, but quest doesn't exist in database
             if (!SellToTraderQuestConditionCache.TryGetValue(counter.SourceId, out var conditions))
             {
-                _logger.Error(_localisationService.GetText("unable_to_find_quest_in_db_no_type", counter.SourceId));
+                _logger.Error(_localisationService.GetText("quest_unable_to_find_quest_in_db_no_type", counter.SourceId));
                 continue;
             }
 
