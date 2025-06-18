@@ -1,5 +1,4 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Models.Eft.Common;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -68,7 +67,7 @@ public class ConfigServer
         }
 
         // Get all filepaths
-        const string filepath = "./Assets/configs/";
+        const string filepath = "./SPT_Data/configs/";
         var files = _fileUtil.GetFiles(filepath);
 
         // Add file content to result

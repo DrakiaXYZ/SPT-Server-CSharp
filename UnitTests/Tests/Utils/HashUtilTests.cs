@@ -1,13 +1,19 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using SPTarkov.Server.Core.Utils;
-using SPTarkov.Server.Core.Utils.Cloners;
-using UnitTests.Mock;
 
 namespace UnitTests.Tests.Utils;
 
 [TestClass]
 public class HashUtilTests
 {
-    protected HashUtil _hashUtil = new(new RandomUtil(new MockLogger<RandomUtil>(), new JsonCloner(new JsonUtil())));
+    private HashUtil _hashUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _hashUtil = DI.GetService<HashUtil>();
+    }
 
     [TestMethod]
     public void GenerateTest()
@@ -56,11 +62,37 @@ public class HashUtilTests
     [DataRow("123456789", "25F9E794323B453885F5181F1B624D0B", "Not valid output, expected '25F9E794323B453885F5181F1B624D0B'")]
     public void GenerateValidMd5Test(string input, string expectedOutput, string failMessage)
     {
-        var result = _hashUtil.GenerateMd5ForData(input);
+        var result = _hashUtil.GenerateHashForData(HashingAlgorithm.MD5,input);
         Assert.AreEqual(
             expectedOutput,
             result,
             failMessage
+        );
+    }
+
+    [TestMethod]
+    public void MultiThreadedMongoIDGenerationTest()
+    {
+        var concurrentBag = new ConcurrentBag<string>();
+        var random = new Random();
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        Parallel.For(0, 1000, i =>
+        {
+            Thread.Sleep(random.Next(0, 10));
+            var mongoId = _hashUtil.Generate();
+            concurrentBag.Add(mongoId);
+        });
+
+        stopwatch.Stop();
+        Console.WriteLine($"Elapsed time: {stopwatch.ElapsedMilliseconds} ms");
+        var uniqueCount = concurrentBag.Distinct().Count();
+        var totalCount = concurrentBag.Count;
+        Assert.AreEqual(
+            totalCount,
+            uniqueCount,
+            $"Expected all generated MongoId's to be unique, but found {totalCount - uniqueCount} duplicates."
         );
     }
 }

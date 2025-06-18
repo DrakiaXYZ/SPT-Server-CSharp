@@ -1,6 +1,5 @@
 using System.Collections.Frozen;
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Match;
@@ -21,7 +20,7 @@ public class BotInventoryGenerator(
     HashUtil _hashUtil,
     RandomUtil _randomUtil,
     DatabaseService _databaseService,
-    ApplicationContext _applicationContext,
+    ProfileActivityService _profileActivityService,
     BotWeaponGenerator _botWeaponGenerator,
     BotLootGenerator _botLootGenerator,
     BotGeneratorHelper _botGeneratorHelper,
@@ -75,9 +74,7 @@ public class BotInventoryGenerator(
         var botInventory = GenerateInventoryBase();
 
         // Get generated raid details bot will be spawned in
-        var raidConfig = _applicationContext
-            .GetLatestValue(ContextVariableType.RAID_CONFIGURATION)
-            ?.GetValue<GetRaidConfigurationRequestData>();
+        var raidConfig = _profileActivityService.GetProfileActivityRaidData(sessionId)?.RaidConfiguration;
 
         GenerateAndAddEquipmentToBot(
             sessionId,
@@ -181,7 +178,7 @@ public class BotInventoryGenerator(
     /// <param name="chosenGameVersion">Game version for bot, only really applies for PMCs</param>
     /// <param name="raidConfig">RadiConfig</param>
     public void GenerateAndAddEquipmentToBot(string sessionId, BotTypeInventory templateInventory, Chances wornItemChances, string botRole,
-        BotBaseInventory botInventory, int botLevel, string chosenGameVersion, bool isPmc, GetRaidConfigurationRequestData raidConfig)
+        BotBaseInventory botInventory, int botLevel, string chosenGameVersion, bool isPmc, GetRaidConfigurationRequestData? raidConfig)
     {
         _botConfig.Equipment.TryGetValue(_botGeneratorHelper.GetBotEquipmentRole(botRole), out var botEquipConfig);
         var randomistionDetails = _botHelper.GetBotRandomizationDetails(botLevel, botEquipConfig);
@@ -190,11 +187,11 @@ public class BotInventoryGenerator(
         if (
             randomistionDetails?.NighttimeChanges is not null &&
             raidConfig is not null &&
-            _weatherHelper.IsNightTime(raidConfig.TimeVariant)
+            _weatherHelper.IsNightTime(raidConfig.TimeVariant, raidConfig.Location)
         )
         {
             foreach (var equipmentSlotKvP in randomistionDetails.NighttimeChanges.EquipmentModsModifiers)
-                // Never let mod chance go outside of 0 - 100
+                // Never let mod chance go outside 0 - 100
             {
                 randomistionDetails.EquipmentMods[equipmentSlotKvP.Key] = Math.Min(
                     Math.Max(randomistionDetails.EquipmentMods[equipmentSlotKvP.Key] + equipmentSlotKvP.Value, 0),

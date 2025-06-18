@@ -1,5 +1,4 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -9,7 +8,6 @@ using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Quests;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Spt.Location;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
@@ -21,7 +19,7 @@ namespace SPTarkov.Server.Core.Services;
 [Injectable(InjectionType.Singleton)]
 public class LocationLifecycleService
 {
-    protected ApplicationContext _applicationContext;
+    protected ProfileActivityService _profileActivityService;
     protected BotGenerationCacheService _botGenerationCacheService;
     protected BotLootCacheService _botLootCacheService;
     protected BotNameService _botNameService;
@@ -55,6 +53,7 @@ public class LocationLifecycleService
     protected TimeUtil _timeUtil;
     protected TraderConfig _traderConfig;
     protected TraderHelper _traderHelper;
+    protected BtrDeliveryService _btrDeliveryService;
 
     public LocationLifecycleService(
         ISptLogger<LocationLifecycleService> logger,
@@ -64,7 +63,7 @@ public class LocationLifecycleService
         DatabaseService databaseService,
         ProfileHelper profileHelper,
         HashUtil hashUtil,
-        ApplicationContext applicationContext,
+        ProfileActivityService profileActivityService,
         BotGenerationCacheService botGenerationCacheService,
         BotNameService botNameService,
         ICloner cloner,
@@ -84,7 +83,8 @@ public class LocationLifecycleService
         PmcWaveGenerator pmcWaveGenerator,
         QuestHelper questHelper,
         InsuranceService insuranceService,
-        MatchBotDetailsCacheService matchBotDetailsCacheService
+        MatchBotDetailsCacheService matchBotDetailsCacheService,
+        BtrDeliveryService btrDeliveryService
     )
     {
         _logger = logger;
@@ -94,7 +94,7 @@ public class LocationLifecycleService
         _databaseService = databaseService;
         _profileHelper = profileHelper;
         _hashUtil = hashUtil;
-        _applicationContext = applicationContext;
+        _profileActivityService = profileActivityService;
         _botGenerationCacheService = botGenerationCacheService;
         _botNameService = botNameService;
         _cloner = cloner;
@@ -115,6 +115,7 @@ public class LocationLifecycleService
         _questHelper = questHelper;
         _insuranceService = insuranceService;
         _matchBotDetailsCacheService = matchBotDetailsCacheService;
+        _btrDeliveryService = btrDeliveryService;
 
         _locationConfig = _configServer.GetConfig<LocationConfig>();
         _inRaidConfig = _configServer.GetConfig<InRaidConfig>();
@@ -150,7 +151,7 @@ public class LocationLifecycleService
             {
                 InsuredItems = playerProfile.CharacterData.PmcData.InsuredItems
             },
-            LocationLoot = GenerateLocationAndLoot(request.Location, !request.ShouldSkipLootGeneration ?? true),
+            LocationLoot = GenerateLocationAndLoot(sessionId, request.Location, !request.ShouldSkipLootGeneration ?? true),
             TransitionType = TransitionType.NONE,
             Transition = new Transition
             {
@@ -169,9 +170,7 @@ public class LocationLifecycleService
         }
 
         // Get data stored at end of previous raid (if any)
-        var transitionData = _applicationContext
-            .GetLatestValue(ContextVariableType.TRANSIT_INFO)
-            ?.GetValue<LocationTransit>();
+        var transitionData = _profileActivityService.GetProfileActivityRaidData(sessionId)?.LocationTransit;
 
         if (transitionData is not null)
         {
@@ -184,7 +183,7 @@ public class LocationLifecycleService
             result.Transition.VisitedLocations.Add(transitionData.SptLastVisitedLocation);
 
             // Complete, clean up as no longer needed
-            _applicationContext.ClearValues(ContextVariableType.TRANSIT_INFO);
+            _profileActivityService.GetProfileActivityRaidData(sessionId).LocationTransit = null;
         }
 
         // Apply changes from pmcConfig to bot hostility values
@@ -209,7 +208,7 @@ public class LocationLifecycleService
     /// <param name="locationData"> Maps location base data </param>
     protected void AdjustExtracts(string playerSide, string location, LocationBase locationData)
     {
-        var playerIsScav = playerSide.ToLower() == "savage";
+        var playerIsScav = string.Equals(playerSide, "savage", StringComparison.OrdinalIgnoreCase);
         if (!playerIsScav)
         {
             return;
@@ -225,7 +224,7 @@ public class LocationLifecycleService
         }
 
         // Find only scav extracts and overwrite existing exits with them
-        var scavExtracts = mapExtracts.Where(extract => extract.Side.ToLower() == "scav").ToList();
+        var scavExtracts = mapExtracts.Where(extract => string.Equals(extract.Side, "scav", StringComparison.OrdinalIgnoreCase)).ToList();
         if (scavExtracts.Count > 0)
             // Scav extracts found, use them
         {
@@ -338,7 +337,7 @@ public class LocationLifecycleService
     /// </summary>
     /// Generate a maps base location (cloned) and loot
     /// <summary>
-    public virtual LocationBase GenerateLocationAndLoot(string name, bool generateLoot = true)
+    public virtual LocationBase GenerateLocationAndLoot(string sessionId, string name, bool generateLoot = true)
     {
         var location = _databaseService.GetLocation(name);
         var locationBaseClone = _cloner.Clone(location.Base);
@@ -347,7 +346,7 @@ public class LocationLifecycleService
         locationBaseClone.UnixDateTime = _timeUtil.GetTimeStamp();
 
         // Don't generate loot for hideout
-        if (name.ToLower() == "hideout")
+        if (string.Equals(name, "hideout", StringComparison.OrdinalIgnoreCase))
         {
             return locationBaseClone;
         }
@@ -363,9 +362,7 @@ public class LocationLifecycleService
 
         // Adjust raid based on whether this is a scav run
         LocationConfig? locationConfigClone = null;
-        var raidAdjustments = _applicationContext
-            .GetLatestValue(ContextVariableType.RAID_ADJUSTMENTS)
-            ?.GetValue<RaidChanges>();
+        var raidAdjustments = _profileActivityService.GetProfileActivityRaidData(sessionId).RaidAdjustments;
         if (raidAdjustments is not null)
         {
             locationConfigClone = _cloner.Clone(_locationConfig); // Clone values so they can be used to reset originals later
@@ -405,7 +402,7 @@ public class LocationLifecycleService
             _locationConfig.StaticLootMultiplier = locationConfigClone.StaticLootMultiplier;
             _locationConfig.LooseLootMultiplier = locationConfigClone.LooseLootMultiplier;
 
-            _applicationContext.ClearValues(ContextVariableType.RAID_ADJUSTMENTS);
+            _profileActivityService.GetProfileActivityRaidData(sessionId).RaidAdjustments = null;
         }
 
         return locationBaseClone;
@@ -423,10 +420,6 @@ public class LocationLifecycleService
         var pmcProfile = fullProfile.CharacterData.PmcData;
         var scavProfile = fullProfile.CharacterData.ScavData;
 
-        // TODO:
-        // Quest status?
-        // stats/eft/aggressor - weird values (EFT.IProfileDataContainer.Nickname)
-
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
             _logger.Debug($"Raid: {request.ServerId} outcome: {request.Results.Result}");
@@ -441,13 +434,12 @@ public class LocationLifecycleService
 
         var locationName = serverDetails[0].ToLower();
         var isPmc = serverDetails[1].ToLower().Contains("pmc");
-        var mapBase = _databaseService.GetLocation(locationName).Base;
         var isDead = IsPlayerDead(request.Results);
         var isTransfer = IsMapToMapTransfer(request.Results);
         var isSurvived = IsPlayerSurvived(request.Results);
 
         // Handle items transferred via BTR or transit to player mailbox
-        HandleItemTransferEvent(sessionId, request);
+        _btrDeliveryService.HandleItemTransferEvent(sessionId, request);
 
         // Player is moving between maps
         if (isTransfer && request.LocationTransit is not null)
@@ -457,12 +449,19 @@ public class LocationLifecycleService
             // TODO - Persist each players last visited location history over multiple transits, e.g using InMemoryCacheService, need to take care to not let data get stored forever
             // Store transfer data for later use in `startLocalRaid()` when next raid starts
             request.LocationTransit.SptExitName = request.Results.ExitName;
-            _applicationContext.AddValue(ContextVariableType.TRANSIT_INFO, request.LocationTransit);
+            _profileActivityService.GetProfileActivityRaidData(sessionId).LocationTransit = request.LocationTransit;
         }
 
         if (!isPmc)
         {
-            HandlePostRaidPlayerScav(sessionId, pmcProfile, scavProfile, isDead, isTransfer, request);
+            HandlePostRaidPlayerScav(
+                sessionId,
+                pmcProfile,
+                scavProfile,
+                isDead,
+                isTransfer,
+                isSurvived,
+                request);
 
             return;
         }
@@ -496,27 +495,30 @@ public class LocationLifecycleService
         }
     }
 
-    private void SendCoopTakenFenceMessage(string sessionId)
+    /// <summary>
+    /// After taking a COOP extract, send player a gift via mail
+    /// </summary>
+    /// <param name="sessionId">Player/Session id</param>
+    protected void SendCoopTakenFenceMessage(string sessionId)
     {
-        // Generate reward for taking coop extract
+        // Generate randomised reward for taking coop extract
         var loot = _lootGenerator.CreateRandomLoot(_traderConfig.Fence.CoopExtractGift);
-        var mailableLoot = new List<Item>();
 
         var parentId = _hashUtil.Generate();
         foreach (var itemAndChildren in loot)
         {
             // Set all root items parent to new id
-            itemAndChildren[0].ParentId = parentId;
+            itemAndChildren.FirstOrDefault().ParentId = parentId;
         }
 
         // Flatten
-        mailableLoot.AddRange(loot.SelectMany(x => x));
+        List<Item> mailableLoot = [..loot.SelectMany(x => x)];
 
         // Send message from fence giving player reward generated above
         _mailSendService.SendLocalisedNpcMessageToPlayer(
             sessionId,
             Traders.FENCE,
-            MessageType.MESSAGE_WITH_ITEMS,
+            MessageType.MessageWithItems,
             _randomUtil.GetArrayValue(_traderConfig.Fence.CoopExtractGift.MessageLocaleIds),
             mailableLoot,
             _timeUtil.GetHoursAsSeconds(_traderConfig.Fence.CoopExtractGift.GiftExpiryHours)
@@ -531,7 +533,7 @@ public class LocationLifecycleService
     protected bool ExtractWasViaCar(string extractName)
     {
         // exit name is undefined on death
-        if (extractName is null)
+        if (string.IsNullOrEmpty(extractName))
         {
             return false;
         }
@@ -649,44 +651,66 @@ public class LocationLifecycleService
         return _inRaidConfig.CoopExtracts.Contains(extractName.Trim());
     }
 
+    /// <summary>
+    /// Perform post-raid profile changes
+    /// </summary>
+    /// <param name="sessionId">Player id</param>
+    /// <param name="pmcProfile">Players PMC profile</param>
+    /// <param name="scavProfile">Players scav profile</param>
+    /// <param name="isDead">Did player die</param>
+    /// <param name="isTransfer">Did player transfer to new map</param>
+    /// <param name="isSurvived">DId player get 'survived' exit status</param>
+    /// <param name="request">End raid request</param>
     protected void HandlePostRaidPlayerScav(
         string sessionId,
         PmcData pmcProfile,
         PmcData scavProfile,
         bool isDead,
         bool isTransfer,
+        bool isSurvived,
         EndLocalRaidRequestData request)
     {
         var postRaidProfile = request.Results.Profile;
 
-        if (isTransfer)
-            // We want scav inventory to persist into next raid when pscav is moving between maps
+        if (isTransfer || request.Results.Result == ExitStatus.RUNNER)
         {
-            _inRaidHelper.SetInventory(sessionId, scavProfile, postRaidProfile, true, isTransfer);
+            // Transfer over hp and effects - not necessary for runthroughs, but it causes no issues
+            scavProfile.Health = postRaidProfile.Health;
+
+            // Adjust limb hp and effects while transiting
+            UpdateLimbValuesAfterTransit(scavProfile.Health);
+
+            // We want scav inventory to persist into next raid when pscav is moving between maps
+            // Also adjust FiR status when exit was runthrough
+            _inRaidHelper.SetInventory(sessionId, scavProfile, postRaidProfile, isSurvived, isTransfer);
         }
 
-        scavProfile.Info.Level = request.Results.Profile.Info.Level;
-        scavProfile.Skills = request.Results.Profile.Skills;
-        scavProfile.Stats = request.Results.Profile.Stats;
-        scavProfile.Encyclopedia = request.Results.Profile.Encyclopedia;
-        scavProfile.TaskConditionCounters = request.Results.Profile.TaskConditionCounters;
-        scavProfile.SurvivorClass = request.Results.Profile.SurvivorClass;
+        scavProfile.Info.Level = postRaidProfile.Info.Level;
+        scavProfile.Skills = postRaidProfile.Skills;
+        scavProfile.Stats = postRaidProfile.Stats;
+        scavProfile.Encyclopedia = postRaidProfile.Encyclopedia;
+        scavProfile.TaskConditionCounters = postRaidProfile.TaskConditionCounters;
+        scavProfile.SurvivorClass = postRaidProfile.SurvivorClass;
 
-        // Scavs dont have achievements, but copy anyway
-        scavProfile.Achievements = request.Results.Profile.Achievements;
+        // Scavs don't have achievements, but copy anyway
+        scavProfile.Achievements = postRaidProfile.Achievements;
 
-        scavProfile.Info.Experience = request.Results.Profile.Info.Experience;
+        scavProfile.Info.Experience = postRaidProfile.Info.Experience;
 
         // Must occur after experience is set and stats copied over
         scavProfile.Stats.Eft.TotalSessionExperience = 0;
 
-        ApplyTraderStandingAdjustments(scavProfile.TradersInfo, request.Results.Profile.TradersInfo);
+        ApplyTraderStandingAdjustments(scavProfile.TradersInfo, postRaidProfile.TradersInfo);
 
         // Clamp fence standing within -7 to 15 range
         var fenceMax = _traderConfig.Fence.PlayerRepMax; // 15
         var fenceMin = _traderConfig.Fence.PlayerRepMin; //-7
-        var currentFenceStanding = request.Results.Profile.TradersInfo[Traders.FENCE].Standing;
-        scavProfile.TradersInfo[Traders.FENCE].Standing = Math.Min(Math.Max((double) currentFenceStanding, fenceMin), fenceMax);
+        if (!postRaidProfile.TradersInfo.TryGetValue(Traders.FENCE, out var postRaidFenceData))
+        {
+            _logger.Error($"post raid fence data not found for: {sessionId}");
+        }
+
+        scavProfile.TradersInfo[Traders.FENCE].Standing = Math.Min(Math.Max(postRaidFenceData.Standing.Value, fenceMin), fenceMax);
 
         // Successful extract as scav, give some rep
         if (IsPlayerSurvived(request.Results) && scavProfile.TradersInfo[Traders.FENCE].Standing < fenceMax)
@@ -716,7 +740,7 @@ public class LocationLifecycleService
         pmcProfile.Info.LastTimePlayedAsSavage = _timeUtil.GetTimeStamp();
 
         // Force a profile save
-        _saveServer.SaveProfile(sessionId);
+        _saveServer.SaveProfileAsync(sessionId);
     }
 
     /// <summary>
@@ -759,6 +783,50 @@ public class LocationLifecycleService
             // Update Status and StatusTimer properties
             pmcQuest.Status = scavQuest.Status;
             pmcQuest.StatusTimers = scavQuest.StatusTimers;
+        }
+    }
+
+    /// <summary>
+    /// Slightly fix broken limbs and remove effects
+    /// </summary>
+    /// <param name="profileHealth">Profile health data to adjust</param>
+    protected void UpdateLimbValuesAfterTransit(BotBaseHealth? profileHealth)
+    {
+        var transitSettings = _locationConfig.TransitSettings;
+        if (transitSettings == null)
+        {
+            _logger.Warning("Unable to find: _locationConfig.TransitSettings");
+
+            return;
+        }
+
+        // Check each body part
+        foreach (var (_, hpValues) in profileHealth.BodyParts)
+        {
+            if (transitSettings.AdjustLimbHealthPoints.GetValueOrDefault()
+                && hpValues.Health.Minimum <= 0)
+            {
+                    // Limb has been destroyed, reset
+                    hpValues.Health.Current = _randomUtil.GetPercentOfValue(
+                        transitSettings.LimbHealPercent.GetValueOrDefault(30),
+                        hpValues.Health.Maximum.Value);
+            }
+
+            if (!(hpValues.Effects?.Count > 0))
+            {
+                // No effects on limb, skip
+                continue;
+            }
+
+            // Limb has effects, check for blacklisted values and remove
+            var keysToRemove = hpValues.Effects.Keys
+                .Where(key => transitSettings.EffectsToRemove.Contains(key))
+                .ToHashSet();
+
+            foreach (var key in keysToRemove)
+            {
+                hpValues.Effects.Remove(key);
+            }
         }
     }
 
@@ -850,6 +918,12 @@ public class LocationLifecycleService
         // Handle temp, hydration, limb hp/effects
         _healthHelper.UpdateProfileHealthPostRaid(pmcProfile, postRaidProfile.Health, sessionId, isDead);
 
+        if (isTransfer)
+        {
+            // Adjust limb hp and effects while transiting
+            UpdateLimbValuesAfterTransit(pmcProfile.Health);
+        }
+
         // This must occur _BEFORE_ `deleteInventory`, as that method clears insured items
         HandleInsuredItemLostEvent(sessionId, pmcProfile, request, locationName);
 
@@ -908,7 +982,7 @@ public class LocationLifecycleService
     {
         // Exclude completed quests
         var activeQuestIdsInProfile = profileQuests
-            .Where(quest => quest.Status is QuestStatusEnum.AvailableForStart or QuestStatusEnum.Success)
+            .Where(quest => quest.Status is not QuestStatusEnum.AvailableForStart and not QuestStatusEnum.Success)
             .Select(status => status.QId);
 
         // Get db details of quests we found above
@@ -1066,81 +1140,6 @@ public class LocationLifecycleService
         }
     }
 
-    /// <summary>
-    ///     Check if player used BTR or transit item sending service and send items to player via mail if found
-    /// </summary>
-    /// <param name="sessionId"> Session ID </param>
-    /// <param name="request"> End raid request from client </param>
-    protected void HandleItemTransferEvent(string sessionId, EndLocalRaidRequestData request)
-    {
-        var transferTypes = new List<string>
-        {
-            "btr",
-            "transit"
-        };
-
-        foreach (var trasferType in transferTypes)
-        {
-            var rootId = $"{Traders.BTR}_{trasferType}";
-            List<Item>? itemsToSend = null;
-
-            // if rootId doesnt exist in TransferItems, skip
-            if (!request?.TransferItems?.TryGetValue(rootId, out itemsToSend) ?? false)
-            {
-                continue;
-            }
-
-            // Filter out the btr container item from transferred items before delivering
-            itemsToSend = itemsToSend?.Where(item => item.Id != Traders.BTR).ToList();
-            if (itemsToSend?.Count == 0)
-            {
-                continue;
-            }
-
-            TransferItemDelivery(sessionId, Traders.BTR, itemsToSend);
-        }
-    }
-
-    protected void TransferItemDelivery(string sessionId, string traderId, List<Item> items)
-    {
-        var serverProfile = _saveServer.GetProfile(sessionId);
-        var pmcData = serverProfile.CharacterData.PmcData;
-
-        var dialogueTemplates = _databaseService.GetTrader(traderId).Dialogue;
-        if (dialogueTemplates is null)
-        {
-            _logger.Error(_localisationService.GetText("inraid-unable_to_deliver_item_no_trader_found", traderId));
-
-            return;
-        }
-
-        if (!dialogueTemplates.TryGetValue("itemsDelivered", out var itemsDelivered))
-        {
-            _logger.Error("dialogueTemplates doesn't contain itemsDelivered");
-            return;
-        }
-
-        var messageId = _randomUtil.GetArrayValue(itemsDelivered);
-        var messageStoreTime = _timeUtil.GetHoursAsSeconds(_traderConfig.Fence.BtrDeliveryExpireHours);
-
-        // Remove any items that were returned by the item delivery, but also insured, from the player's insurance list
-        // This is to stop items being duplicated by being returned from both item delivery and insurance
-        var deliveredItemIds = items.Select(item => item.Id);
-        pmcData.InsuredItems = pmcData.InsuredItems.Where(insuredItem => !deliveredItemIds.Contains(insuredItem.ItemId)
-            )
-            .ToList();
-
-        // Send the items to the player
-        _mailSendService.SendLocalisedNpcMessageToPlayer(
-            sessionId,
-            traderId,
-            MessageType.BTR_ITEMS_DELIVERY,
-            messageId,
-            items,
-            messageStoreTime
-        );
-    }
-
     protected void HandleInsuredItemLostEvent(
         string sessionId,
         PmcData preRaidPmcProfile,
@@ -1208,7 +1207,7 @@ public class LocationLifecycleService
     ///     Reset the skill points earned in a raid to 0, ready for next raid
     /// </summary>
     /// <param name="commonSkills"> Profile common skills to update </param>
-    protected void ResetSkillPointsEarnedDuringRaid(List<BaseSkill> commonSkills)
+    protected void ResetSkillPointsEarnedDuringRaid(List<CommonSkill> commonSkills)
     {
         foreach (var skill in commonSkills)
         {

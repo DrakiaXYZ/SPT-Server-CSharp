@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -167,7 +167,7 @@ public class ProfileFixerService(
         // Iterate over clothing
         var customizationDb = _databaseService.GetTemplates().Customization;
         var customizationDbArray = customizationDb.Values;
-        var playerIsUsec = pmcProfile.Info.Side.ToLower() == "usec";
+        var playerIsUsec = string.Equals(pmcProfile.Info.Side, "usec", StringComparison.OrdinalIgnoreCase);
 
         // Check Head
         if (customizationDb[pmcProfile.Customization.Head] is null)
@@ -418,7 +418,7 @@ public class ProfileFixerService(
     {
         var globals = _databaseService.GetGlobals();
 
-        var generator = pmcProfile.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.GENERATOR);
+        var generator = pmcProfile.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.Generator);
         if (generator is not null)
         {
             var genSlots = generator.Slots.Count;
@@ -431,11 +431,11 @@ public class ProfileFixerService(
                     _logger.Debug("Updating generator area slots to a size of 6 + hideout management skill");
                 }
 
-                AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.GENERATOR, (int) (6 + extraGenSlots ?? 0), pmcProfile);
+                AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.Generator, (int) (6 + extraGenSlots ?? 0), pmcProfile);
             }
         }
 
-        var waterCollSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.WATER_COLLECTOR)
+        var waterCollSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.WaterCollector)
             .Slots
             .Count;
         var extraWaterCollSlots = globals.Configuration.SkillsSettings.HideoutManagement.EliteSlots.WaterCollector.Slots;
@@ -447,10 +447,10 @@ public class ProfileFixerService(
                 _logger.Debug("Updating water collector area slots to a size of 1 + hideout management skill");
             }
 
-            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.WATER_COLLECTOR, (int) (1 + extraWaterCollSlots ?? 0), pmcProfile);
+            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.WaterCollector, (int) (1 + extraWaterCollSlots ?? 0), pmcProfile);
         }
 
-        var filterSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.AIR_FILTERING).Slots.Count;
+        var filterSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.AirFilteringUnit).Slots.Count;
         var extraFilterSlots = globals.Configuration.SkillsSettings.HideoutManagement.EliteSlots.AirFilteringUnit.Slots;
 
         if (filterSlots < 3 + extraFilterSlots)
@@ -460,10 +460,10 @@ public class ProfileFixerService(
                 _logger.Debug("Updating air filter area slots to a size of 3 + hideout management skill");
             }
 
-            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.AIR_FILTERING, (int) (3 + extraFilterSlots ?? 0), pmcProfile);
+            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.AirFilteringUnit, (int) (3 + extraFilterSlots ?? 0), pmcProfile);
         }
 
-        var btcFarmSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.BITCOIN_FARM).Slots.Count;
+        var btcFarmSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.BitcoinFarm).Slots.Count;
         var extraBtcSlots = globals.Configuration.SkillsSettings.HideoutManagement.EliteSlots.BitcoinFarm.Slots;
 
         // BTC Farm doesnt have extra slots for hideout management, but we still check for modded stuff!!
@@ -474,10 +474,10 @@ public class ProfileFixerService(
                 _logger.Debug("Updating bitcoin farm area slots to a size of 50 + hideout management skill");
             }
 
-            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.BITCOIN_FARM, (int) (50 + extraBtcSlots ?? 0), pmcProfile);
+            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.BitcoinFarm, (int) (50 + extraBtcSlots ?? 0), pmcProfile);
         }
 
-        var cultistAreaSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.CIRCLE_OF_CULTISTS)
+        var cultistAreaSlots = pmcProfile.Hideout.Areas.FirstOrDefault(x => x.Type == HideoutAreas.CircleOfCultists)
             .Slots
             .Count;
         if (cultistAreaSlots < 1)
@@ -487,7 +487,7 @@ public class ProfileFixerService(
                 _logger.Debug("Updating cultist area slots to a size of 1");
             }
 
-            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.CIRCLE_OF_CULTISTS, 1, pmcProfile);
+            AddEmptyObjectsToHideoutAreaSlots(HideoutAreas.CircleOfCultists, 1, pmcProfile);
         }
     }
 
@@ -664,9 +664,9 @@ public class ProfileFixerService(
                 continue;
             }
 
-            foreach (var activeQuest in repeatable.ActiveQuests)
+            foreach (var activeQuest in repeatable.ActiveQuests.ToArray())
             {
-                if (!_traderHelper.TraderEnumHasValue(activeQuest.TraderId))
+                if (!_traderHelper.TraderExists(activeQuest.TraderId))
                 {
                     _logger.Error(_localisationService.GetText("fixer-trader_found", activeQuest.TraderId));
                     if (_coreConfig.Fixes.RemoveModItemsFromProfile)
@@ -701,7 +701,7 @@ public class ProfileFixerService(
         }
 
         foreach (var TraderPurchaseKvP in fullProfile.TraderPurchases
-                     .Where(TraderPurchase => !_traderHelper.TraderEnumHasValue(TraderPurchase.Key)))
+                     .Where(TraderPurchase => !_traderHelper.TraderExists(TraderPurchase.Key)))
         {
             _logger.Error(_localisationService.GetText("fixer-trader_found", TraderPurchaseKvP.Key));
             if (_coreConfig.Fixes.RemoveModItemsFromProfile)
@@ -893,7 +893,7 @@ public class ProfileFixerService(
         foreach (var traderKvP in fullProfile.CharacterData?.PmcData?.TradersInfo)
         {
             var traderId = traderKvP.Key;
-            if (!_traderHelper.TraderEnumHasValue(traderId))
+            if (!_traderHelper.TraderExists(traderId))
             {
                 _logger.Error(_localisationService.GetText("fixer-trader_found", traderId));
                 if (_coreConfig.Fixes.RemoveInvalidTradersFromProfile)
@@ -907,7 +907,7 @@ public class ProfileFixerService(
         foreach (var traderKvP in fullProfile.CharacterData.ScavData?.TradersInfo)
         {
             var traderId = traderKvP.Key;
-            if (!_traderHelper.TraderEnumHasValue(traderId))
+            if (!_traderHelper.TraderExists(traderId))
             {
                 _logger.Error(_localisationService.GetText("fixer-trader_found", traderId));
                 if (_coreConfig.Fixes.RemoveInvalidTradersFromProfile)

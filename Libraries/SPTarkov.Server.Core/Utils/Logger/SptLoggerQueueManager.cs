@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.Server.Core.Utils.Logger;
 
@@ -6,12 +6,12 @@ namespace SPTarkov.Server.Core.Utils.Logger;
 public class SptLoggerQueueManager(IEnumerable<ILogHandler> logHandlers)
 {
     private readonly Dictionary<string, List<BaseSptLoggerReference>> _resolvedMessageLoggerTypes = new();
-    private readonly object _resolvedMessageLoggerTypesLock = new();
+    private readonly Lock _resolvedMessageLoggerTypesLock = new();
     private Thread? _loggerTask;
-    private readonly object LoggerTaskLock = new();
+    private readonly Lock LoggerTaskLock = new();
     private readonly CancellationTokenSource _loggerCancellationTokens = new();
     private readonly Queue<SptLogMessage> _messageQueue = new();
-    private readonly object _messageQueueLock = new();
+    private readonly Lock _messageQueueLock = new();
     private Dictionary<LoggerType, ILogHandler>? _logHandlers;
     private SptLoggerConfiguration _config;
 

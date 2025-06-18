@@ -1,107 +1,39 @@
 using System.Diagnostics;
-using SPTarkov.Common.Annotations;
+using System.Security.Cryptography;
+using System.Text;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Server;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
-using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Utils;
 
-[Injectable(InjectionType.Singleton, InjectableTypeOverride = typeof(IOnLoad), TypePriority = OnLoadOrder.Database)]
-public class DatabaseImporter : IOnLoad
+[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.Database)]
+public class DatabaseImporter(
+    ISptLogger<DatabaseImporter> logger,
+    FileUtil _fileUtil,
+    LocalisationService _localisationService,
+    DatabaseServer _databaseServer,
+    ImageRouter _imageRouter,
+    ImporterUtil _importerUtil,
+    JsonUtil _jsonUtil
+    ) : IOnLoad
 {
-    private const string _sptDataPath = "./Assets/";
-    private readonly HttpConfig httpConfig;
-    private readonly ValidationResult valid = ValidationResult.UNDEFINED;
-    protected ConfigServer _configServer;
-
-    protected DatabaseServer _databaseServer;
-    protected EncodingUtil _encodingUtil;
-    protected FileUtil _fileUtil;
-    protected HashUtil _hashUtil;
-
-    protected ImageRouter _imageRouter;
-    protected ImporterUtil _importerUtil;
-    protected LocalisationService _localisationService;
-
-    protected ISptLogger<DatabaseImporter> _logger;
-    private string filepath;
-    private object hashedFile;
-
-    public DatabaseImporter(
-        ISptLogger<DatabaseImporter> logger,
-        // TODO: are we gonna use this? @inject("JsonUtil") protected jsonUtil: JsonUtil,
-        FileUtil fileUtil,
-        LocalisationService localisationService,
-        DatabaseServer databaseServer,
-        ImageRouter imageRouter,
-        EncodingUtil encodingUtil,
-        HashUtil hashUtil,
-        ImporterUtil importerUtil,
-        ConfigServer configServer
-    )
-    {
-        _logger = logger;
-        _localisationService = localisationService;
-        _databaseServer = databaseServer;
-        _encodingUtil = encodingUtil;
-        _hashUtil = hashUtil;
-        _importerUtil = importerUtil;
-        _configServer = configServer;
-        _fileUtil = fileUtil;
-        _imageRouter = imageRouter;
-        httpConfig = _configServer.GetConfig<HttpConfig>();
-    }
+    private const string _sptDataPath = "./SPT_Data/";
+    protected ISptLogger<DatabaseImporter> _logger = logger;
+    protected Dictionary<string, string> databaseHashes = [];
 
     public async Task OnLoad()
     {
-        filepath = GetSptDataPath();
+        await LoadHashes();
+        await HydrateDatabase(_sptDataPath);
 
-        /*
-        if (ProgramStatics.COMPILED) {
-            try {
-                // Reading the dynamic SHA1 file
-                const file = "checks.dat";
-                const fileWithPath = `${this.filepath}${file}`;
-                if (this.vfs.exists(fileWithPath)) {
-                    this.hashedFile = this.jsonUtil.deserialize(
-                        this.encodingUtil.fromBase64(this.vfs.readFile(fileWithPath)),
-                        file,
-                    );
-                } else {
-                    this.valid = ValidationResult.NOT_FOUND;
-                    this.logger.debug(this.localisationService.getText("validation_not_found"));
-                }
-            } catch (e) {
-                this.valid = ValidationResult.FAILED;
-                this.logger.warning(this.localisationService.getText("validation_error_decode"));
-            }
-        }
-        */
-
-        await HydrateDatabase(filepath);
-
-        var imageFilePath = $"{filepath}images/";
+        var imageFilePath = $"{_sptDataPath}images/";
         CreateRouteMapping(imageFilePath, "files");
-    }
-
-    public string GetRoute()
-    {
-        return "spt-database";
-    }
-
-    /**
-     * Get path to spt data
-     * @returns path to data
-     */
-    public string GetSptDataPath()
-    {
-        return _sptDataPath;
     }
 
     private void CreateRouteMapping(string directory, string newBasePath)
@@ -135,6 +67,47 @@ public class DatabaseImporter : IOnLoad
         return result;
     }
 
+    protected async Task LoadHashes()
+    {
+        // The checks hash file is only made in Release mode
+        if (ProgramStatics.DEBUG())
+        {
+            return;
+        }
+
+        var checksFilePath = System.IO.Path.Combine(_sptDataPath, "checks.dat");
+
+        try
+        {
+            if (File.Exists(checksFilePath))
+            {
+                await using FileStream fs = File.OpenRead(checksFilePath);
+
+                using var reader = new StreamReader(fs, Encoding.ASCII);
+                string base64Content = await reader.ReadToEndAsync();
+
+                byte[] jsonBytes = Convert.FromBase64String(base64Content);
+
+                await using var ms = new MemoryStream(jsonBytes);
+
+                var FileHashes = await _jsonUtil.DeserializeFromMemoryStreamAsync<List<FileHash>>(ms) ?? [];
+
+                foreach(var hash in FileHashes)
+                {
+                    databaseHashes.Add(hash.Path, hash.Hash);
+                }
+            }
+            else
+            {
+                _logger.Error(_localisationService.GetText("validation_error_exception", checksFilePath));
+            }
+        }
+        catch (Exception)
+        {
+            _logger.Error(_localisationService.GetText("validation_error_exception", checksFilePath));
+        }
+    }
+
     /**
      * Read all json files in database folder and map into a json object
      * @param filepath path to database folder
@@ -147,7 +120,7 @@ public class DatabaseImporter : IOnLoad
 
         var dataToImport = await _importerUtil.LoadRecursiveAsync<DatabaseTables>(
             $"{filePath}database/",
-            OnReadValidate
+            VerifyDatabase
         );
 
         // TODO: Fix loading of traders, so their full path is not included as the key
@@ -166,107 +139,51 @@ public class DatabaseImporter : IOnLoad
 
         dataToImport.Traders = tempTraders;
 
-        var validation = valid == ValidationResult.FAILED || valid == ValidationResult.NOT_FOUND ? "." : "";
-        _logger.Info($"{_localisationService.GetText("importing_database_finish")}{validation}");
+        _logger.Info(_localisationService.GetText("importing_database_finish"));
         _logger.Debug($"Database import took {timer.ElapsedMilliseconds}ms");
         _databaseServer.SetTables(dataToImport);
     }
 
-    protected void OnReadValidate(string fileWithPath)
+    protected async Task VerifyDatabase(string fileName)
     {
-        // Validate files
-        //if (ProgramStatics.COMPILED && hashedFile && !ValidateFile(fileWithPath, data)) {
-        //    this.valid = ValidationResult.FAILED;
-        //}
-    }
-
-    protected bool ValidateFile(string filePathAndName, object fileData)
-    {
-        /*
-        try {
-            const finalPath = filePathAndName.replace(this.filepath, "").replace(".json", "");
-            let tempObject: any;
-            for (const prop of finalPath.split("/")) {
-                if (!tempObject) {
-                    tempObject = this.hashedFile[prop];
-                } else {
-                    tempObject = tempObject[prop];
-                }
-            }
-
-            if (tempObject !== this.hashUtil.generateSha1ForData(fileData)) {
-                this.logger.debug(this.localisationService.getText("validation_error_file", filePathAndName));
-                return false;
-            }
-        } catch (e) {
-            this.logger.warning(this.localisationService.getText("validation_error_exception", filePathAndName));
-            this.logger.warning(e);
-            return false;
-        }
-        return true;
-        */
-        return true;
-    }
-
-    /**
-     * absolute dogshit, do not use
-     * Find and map files with image router inside a designated path
-     * @param filepath Path to find files in
-     */
-    [Obsolete]
-    public void LoadImages(string filepath, string[] directories, List<string> routes)
-    {
-        for (var i = 0; i < directories.Length; i++)
+        // The checks hash file is only made in Release mode
+        if (ProgramStatics.DEBUG())
         {
-            // Get all files in directory
-            var filesInDirectory = _fileUtil.GetFiles(directories[i]);
-            foreach (var file in filesInDirectory)
+            return;
+        }
+
+        var relativePath = fileName.StartsWith(_sptDataPath, StringComparison.OrdinalIgnoreCase)
+            ? fileName.Substring(_sptDataPath.Length)
+            : fileName;
+
+        using (var md5 = MD5.Create())
+        {
+            await using (var stream = File.OpenRead(fileName))
             {
-                var imagePath = file;
-                // Register each file in image router
-                var filename = _fileUtil.StripExtension(file);
-                var routeKey = $"{routes[i]}{filename}";
-                //var imagePath = $"{filepath}{directories[i]}/{file}";
+                var hashBytes = await md5.ComputeHashAsync(stream);
+                var hashString = Convert.ToHexString(hashBytes);
 
-                var pathOverride = GetImagePathOverride(imagePath);
-                if (!string.IsNullOrEmpty(pathOverride))
+                bool hashKeyExists = databaseHashes.ContainsKey(relativePath);
+
+                if (hashKeyExists)
                 {
-                    if (_logger.IsLogEnabled(LogLevel.Debug))
+                    if (databaseHashes[relativePath] != hashString)
                     {
-                        _logger.Debug($"overrode route: {routeKey} endpoint: {imagePath} with {pathOverride}");
+                        _logger.Warning(_localisationService.GetText("validation_error_file", fileName));
                     }
-
-                    imagePath = pathOverride;
                 }
-
-                _imageRouter.AddRoute(routeKey, imagePath);
+                else
+                {
+                    _logger.Warning(_localisationService.GetText("validation_error_file", fileName));
+                }
             }
         }
-
-        // Map icon file separately
-        _imageRouter.AddRoute("/favicon.ico", $"{filepath}icon.ico");
-    }
-
-    /**
-     * Check for a path override in the http json config file
-     * @param imagePath Key
-     * @returns override for key
-     */
-    protected string? GetImagePathOverride(string imagePath)
-    {
-        if (httpConfig.ServerImagePathOverride.TryGetValue(imagePath, out var value))
-        {
-            return value;
-        }
-
-        return null;
     }
 }
 
-internal enum ValidationResult
+public class FileHash
 {
-    SUCCESS = 0,
-    FAILED = 1,
-    NOT_FOUND = 2,
-    UNDEFINED = 3
+    public string Path { get; set; } = string.Empty;
+    public string Hash { get; set; } = string.Empty;
 }
+

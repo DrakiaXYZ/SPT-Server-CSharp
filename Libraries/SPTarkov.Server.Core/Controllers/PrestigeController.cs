@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Prestige;
@@ -59,7 +59,7 @@ public class PrestigeController(
     ///     </list>
     /// </summary>
     /// <returns></returns>
-    public void ObtainPrestige(
+    public async Task ObtainPrestige(
         string sessionId,
         ObtainPrestigeRequestList request)
     {
@@ -75,7 +75,7 @@ public class PrestigeController(
             profile.SptData.PendingPrestige = pendingPrestige;
             profile.ProfileInfo.IsWiped = true;
 
-            _saveServer.SaveProfile(sessionId);
+            await _saveServer.SaveProfileAsync(sessionId);
         }
     }
 }

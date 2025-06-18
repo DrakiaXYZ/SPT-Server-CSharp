@@ -1,9 +1,10 @@
 using System.Text.RegularExpressions;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando.SptCommands;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
+using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Dialog;
 using SPTarkov.Server.Core.Models.Utils;
@@ -31,7 +32,7 @@ public class TraderSptCommand(
     public string GetCommandHelp()
     {
         return
-            "spt trader\n========\nSets the reputation or money spent to the input quantity through the message system.\n\n\tspt trader [trader] rep [quantity]\n\t\tEx: spt trader prapor rep 2\n\n\tspt trader [trader] spend [quantity]\n\t\tEx: spt trader therapist spend 1000000";
+            "spt trader \n ======== \n Sets the reputation or money spent to the input quantity through the message system.\n\n\tspt trader [trader] rep [quantity]\n\t\tEx: spt trader prapor rep 2\n\n\tspt trader [trader] spend [quantity]\n\t\tEx: spt trader therapist spend 1000000";
     }
 
     public string PerformAction(UserDialogInfo commandHandler, string sessionId, SendMessageRequest request)
@@ -48,11 +49,11 @@ public class TraderSptCommand(
 
         var result = _commandRegex.Match(request.Text);
 
-        var trader = result.Groups["trader"].Captures[0].Value;
-        var command = result.Groups["command"].Captures[0].Value;
-        var quantity = int.Parse(result.Groups["quantity"].Captures[0].Value);
+        var trader = result.Groups["trader"].Captures.Count > 0 ? result.Groups["trader"].Captures[0].Value : null;
+        var command = result.Groups["command"].Captures.Count > 0 ? result.Groups["command"].Captures[0].Value : null;
+        var quantity = double.Parse(result.Groups["command"].Captures.Count > 0 ? result.Groups["quantity"].Captures[0].Value : "0");
 
-        var dbTrader = _traderHelper.GetTrader(trader, sessionId);
+        var dbTrader = _traderHelper.GetTraderByNickName(trader);
         if (dbTrader == null)
         {
             _mailSendService.SendUserMessageToPlayer(
@@ -64,15 +65,15 @@ public class TraderSptCommand(
             return request.DialogId;
         }
 
-        ProfileChangeEventType profileChangeEventType;
+        NotificationEventType profileChangeEventType;
         switch (command)
         {
             case "rep":
                 quantity /= 100;
-                profileChangeEventType = ProfileChangeEventType.TraderStanding;
+                profileChangeEventType = NotificationEventType.TraderStanding;
                 break;
             case "spend":
-                profileChangeEventType = ProfileChangeEventType.TraderSalesSum;
+                profileChangeEventType = NotificationEventType.TraderSalesSum;
                 break;
             default:
                 {
@@ -109,12 +110,12 @@ public class TraderSptCommand(
         return request.DialogId;
     }
 
-    protected ProfileChangeEvent CreateProfileChangeEvent(ProfileChangeEventType profileChangeEventType, int quantity, string dbTraderId)
+    protected ProfileChangeEvent CreateProfileChangeEvent(NotificationEventType profileChangeEventType, double quantity, string dbTraderId)
     {
         return new ProfileChangeEvent
         {
             Id = _hashUtil.Generate(),
-            Type = profileChangeEventType,
+            Type = profileChangeEventType.ToString(),
             Value = quantity,
             Entity = dbTraderId
         };

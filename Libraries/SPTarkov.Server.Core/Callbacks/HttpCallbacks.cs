@@ -1,24 +1,16 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Servers;
 
 namespace SPTarkov.Server.Core.Callbacks;
-
-[Injectable(InjectionType.Singleton, InjectableTypeOverride = typeof(IOnLoad), TypePriority = OnLoadOrder.HttpCallbacks)]
-public class HttpCallbacks(HttpServer _httpServer, ApplicationContext _applicationContext) : IOnLoad
+[Injectable(InjectionType.Singleton, TypePriority = OnLoadOrder.HttpCallbacks)]
+public class HttpCallbacks(HttpServer _httpServer) : IOnLoad
 {
     public Task OnLoad()
     {
-        _httpServer.Load(_applicationContext.GetLatestValue(ContextVariableType.APP_BUILDER)?.GetValue<WebApplicationBuilder>());
-        _applicationContext.ClearValues(ContextVariableType.APP_BUILDER);
+        _httpServer.Load();
 
         return Task.CompletedTask;
-    }
-
-    public string GetRoute()
-    {
-        return "spt-http";
     }
 
     public string GetImage()

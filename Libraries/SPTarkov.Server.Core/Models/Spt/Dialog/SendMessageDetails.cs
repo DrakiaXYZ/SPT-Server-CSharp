@@ -7,6 +7,9 @@ namespace SPTarkov.Server.Core.Models.Spt.Dialog;
 
 public record SendMessageDetails
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     /// <summary>
     ///     Player id
     /// </summary>
@@ -140,6 +143,9 @@ public record SendMessageDetails
 
 public record ProfileChangeEvent
 {
+    [JsonExtensionData]
+    public Dictionary<string, object> ExtensionData { get; set; }
+
     [JsonPropertyName("_id")]
     public string? Id
     {
@@ -148,7 +154,7 @@ public record ProfileChangeEvent
     }
 
     [JsonPropertyName("Type")]
-    public ProfileChangeEventType? Type
+    public string Type
     {
         get;
         set;
@@ -174,16 +180,4 @@ public record ProfileChangeEvent
         get;
         set;
     }
-}
-
-public enum ProfileChangeEventType
-{
-    TraderSalesSum,
-    TraderStanding,
-    ProfileLevel,
-    SkillPoints,
-    ExamineAllItems,
-    UnlockTrader,
-    AssortmentUnlockRule,
-    HideoutAreaLevel
 }

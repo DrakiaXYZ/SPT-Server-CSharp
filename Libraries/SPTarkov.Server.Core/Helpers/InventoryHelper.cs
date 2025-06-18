@@ -1,8 +1,8 @@
 using System.Collections.Frozen;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Inventory;
@@ -846,9 +846,6 @@ public class InventoryHelper(
             var iH = tmpSize[1]; // y
             var fH = IsVertical(itemLocation) ? iW : iH;
             var fW = IsVertical(itemLocation) ? iH : iW;
-
-            // Find the ending x coord of container
-            var fillTo = itemLocation.X + fW;
 
             for (var y = 0; y < fH; y++)
             {

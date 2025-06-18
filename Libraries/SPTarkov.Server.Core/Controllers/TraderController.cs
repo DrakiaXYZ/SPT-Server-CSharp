@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -140,7 +140,7 @@ public class TraderController(
     {
         var traders = new List<TraderBase>();
         var pmcData = _profileHelper.GetPmcProfile(sessionId);
-        foreach (var (traderId, data) in _databaseService.GetTables().Traders)
+        foreach (var (traderId, _) in _databaseService.GetTables().Traders)
         {
             traders.Add(_traderHelper.GetTrader(traderId, sessionId));
 

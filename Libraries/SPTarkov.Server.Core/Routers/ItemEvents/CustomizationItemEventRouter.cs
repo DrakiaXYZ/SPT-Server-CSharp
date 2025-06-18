@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -10,7 +10,7 @@ using SPTarkov.Server.Core.Models.Utils;
 
 namespace SPTarkov.Server.Core.Routers.ItemEvents;
 
-[Injectable(InjectableTypeOverride = typeof(ItemEventRouterDefinition))]
+[Injectable]
 public class CustomizationItemEventRouter : ItemEventRouterDefinition
 {
     protected CustomizationCallbacks _customizationCallbacks;
@@ -35,15 +35,15 @@ public class CustomizationItemEventRouter : ItemEventRouterDefinition
         };
     }
 
-    public override ItemEventRouterResponse HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
+    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
         ItemEventRouterResponse output)
     {
         switch (url)
         {
             case ItemEventActions.CUSTOMIZATION_BUY:
-                return _customizationCallbacks.BuyCustomisation(pmcData, body as BuyClothingRequestData, sessionID);
+                return new ValueTask<ItemEventRouterResponse>(_customizationCallbacks.BuyCustomisation(pmcData, body as BuyClothingRequestData, sessionID));
             case ItemEventActions.CUSTOMIZATION_SET:
-                return _customizationCallbacks.SetCustomisation(pmcData, body as CustomizationSetRequest, sessionID);
+                return new ValueTask<ItemEventRouterResponse>(_customizationCallbacks.SetCustomisation(pmcData, body as CustomizationSetRequest, sessionID));
             default:
                 throw new Exception($"CustomizationItemEventRouter being used when it cant handle route {url}");
         }

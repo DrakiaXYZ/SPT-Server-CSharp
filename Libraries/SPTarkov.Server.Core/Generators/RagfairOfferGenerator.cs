@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Ragfair;
@@ -358,7 +358,7 @@ public class RagfairOfferGenerator(
             ? expiredOffers ?? []
             : ragfairAssortGenerator.GetAssortItems();
         stopwatch.Stop();
-        if (logger.IsLogEnabled(LogLevel.Debug))
+        if (logger.IsLogEnabled(LogLevel.Debug) && stopwatch.ElapsedMilliseconds > 0)
         {
             logger.Debug($"Took {stopwatch.ElapsedMilliseconds}ms to GetRagfairAssorts - {assortItemsToProcess.Count} items");
         }
@@ -415,13 +415,7 @@ public class RagfairOfferGenerator(
         // Limit to 1 offer when processing expired - like-for-like replacement
         var offerCount = isExpiredOffer
             ? 1
-            : randomUtil.GetDouble(config.OfferItemCount.Min, config.OfferItemCount.Max);
-
-        /* // TODO: ???????
-        if (ProgramStatics.DEBUG && !ProgramStatics.COMPILED) {
-            offerCount = 2;
-        }
-        */
+            : ragfairServerHelper.GetOfferCountByBaseType(itemToSellDetails.Value.Parent);
 
         for (var index = 0; index < offerCount; index++)
         {
@@ -555,7 +549,11 @@ public class RagfairOfferGenerator(
             barterScheme = CreateBarterBarterScheme(itemWithChildren, ragfairConfig.Dynamic.Barter);
             if (ragfairConfig.Dynamic.Barter.MakeSingleStackOnly)
             {
-                itemWithChildren[0].Upd.StackObjectsCount = 1;
+                var rootItem = itemWithChildren.FirstOrDefault();
+                if (rootItem?.Upd != null)
+                {
+                    rootItem.Upd.StackObjectsCount = 1;
+                }
             }
         }
         else
@@ -565,7 +563,7 @@ public class RagfairOfferGenerator(
             barterScheme = CreateCurrencyBarterScheme(itemWithChildren, isPackOffer);
         }
 
-        var offer = CreateAndAddFleaOffer(
+        CreateAndAddFleaOffer(
             sellerId,
             timeUtil.GetTimeStamp(),
             itemWithChildren,
@@ -654,7 +652,7 @@ public class RagfairOfferGenerator(
             var barterSchemeItems = barterScheme[0];
             var loyalLevel = assortsClone.LoyalLevelItems[item.Id];
 
-            var offer = CreateAndAddFleaOffer(traderID, time, items, barterSchemeItems, loyalLevel, (int?) item.Upd.StackObjectsCount ?? 1);
+           CreateAndAddFleaOffer(traderID, time, items, barterSchemeItems, loyalLevel, (int?) item.Upd.StackObjectsCount ?? 1);
 
             // Refresh complete, reset flag to false
             trader.Base.RefreshTraderRagfairOffers = false;

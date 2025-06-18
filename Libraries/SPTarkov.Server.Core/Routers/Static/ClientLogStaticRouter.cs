@@ -1,4 +1,4 @@
-﻿using SPTarkov.Common.Annotations;
+﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Logging;
@@ -6,7 +6,7 @@ using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Routers.Static;
 
-[Injectable(InjectableTypeOverride = typeof(StaticRouter))]
+[Injectable]
 public class ClientLogStaticRouter : StaticRouter
 {
     public ClientLogStaticRouter(
@@ -17,31 +17,31 @@ public class ClientLogStaticRouter : StaticRouter
         [
             new RouteAction(
                 "/singleplayer/log",
-                (
+                async (
                     url,
                     info,
                     sessionID,
                     output
-                ) => clientLogCallbacks.ClientLog(url, info as ClientLogRequest, sessionID),
+                ) => await clientLogCallbacks.ClientLog(url, info as ClientLogRequest, sessionID),
                 typeof(ClientLogRequest)
             ),
             new RouteAction(
                 "/singleplayer/release",
-                (
+                async (
                     url,
                     info,
                     sessionID,
                     output
-                ) => clientLogCallbacks.ReleaseNotes()
+                ) => await clientLogCallbacks.ReleaseNotes()
             ),
             new RouteAction(
                 "/singleplayer/enableBSGlogging",
-                (
+                async (
                     url,
                     info,
                     sessionID,
                     output
-                ) => clientLogCallbacks.BsgLogging()
+                ) => await clientLogCallbacks.BsgLogging()
             )
         ]
     )

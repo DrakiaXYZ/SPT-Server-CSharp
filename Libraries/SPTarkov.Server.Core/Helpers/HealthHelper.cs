@@ -1,11 +1,9 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Servers;
-using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using BodyPartHealth = SPTarkov.Server.Core.Models.Eft.Common.Tables.BodyPartHealth;
 using Vitality = SPTarkov.Server.Core.Models.Eft.Profile.Vitality;
@@ -16,7 +14,7 @@ namespace SPTarkov.Server.Core.Helpers;
 public class HealthHelper(
     TimeUtil _timeUtil,
     SaveServer _saveServer,
-    DatabaseService _databaseService,
+    ProfileHelper _profileHelper,
     ConfigServer _configServer
 )
 {
@@ -128,8 +126,6 @@ public class HealthHelper(
     /// <param name="postRaidHealth">Post raid data</param>
     /// <param name="sessionID">Session id</param>
     /// <param name="isDead">Is player dead</param>
-    /// <param name="addEffects">Should effects be added to profile (default - true)</param>
-    /// <param name="deleteExistingEffects">Should all prior effects be removed before apply new ones  (default - true)</param>
     public void UpdateProfileHealthPostRaid(
         PmcData pmcData,
         BotBaseHealth postRaidHealth,
@@ -139,16 +135,14 @@ public class HealthHelper(
         var fullProfile = _saveServer.GetProfile(sessionID);
         var profileEdition = fullProfile.ProfileInfo.Edition;
         var profileSide = fullProfile.CharacterData.PmcData.Info.Side;
+        
+        // Get matching 'side e.g. USEC
+        var matchingSide = _profileHelper.GetProfileTemplateForSide(profileEdition, profileSide);
 
-        var defaultTemperature =
-            _databaseService.GetProfiles()
-                .GetByJsonProp<ProfileSides>(profileEdition)
-                .GetByJsonProp<TemplateSide>(profileSide.ToLower())
-                ?.Character?.Health?.Temperature ??
-            new CurrentMinMax
-            {
-                Current = 36.6
-            };
+        var defaultTemperature = matchingSide?.Character?.Health?.Temperature ?? new CurrentMinMax
+        {
+            Current = 36.6
+        };
 
         StoreHydrationEnergyTempInProfile(
             fullProfile,
@@ -181,7 +175,7 @@ public class HealthHelper(
 
         TransferPostRaidLimbEffectsToProfile(postRaidHealth.BodyParts, pmcData);
 
-        // Adjust hydration/energy/temp and limb hp using temp storage hydated above
+        // Adjust hydration/energy/temp and limb hp using temp storage hydrated above
         SaveHealth(pmcData, sessionID);
 
         // Reset temp storage
@@ -195,11 +189,11 @@ public class HealthHelper(
         SptProfile fullProfile,
         double hydration,
         double energy,
-        double temprature)
+        double temperature)
     {
         fullProfile.VitalityData.Hydration = hydration;
         fullProfile.VitalityData.Energy = energy;
-        fullProfile.VitalityData.Temperature = temprature;
+        fullProfile.VitalityData.Temperature = temperature;
     }
 
     /// <summary>
@@ -215,27 +209,25 @@ public class HealthHelper(
         {
             // Get effects on body part from profile
             var bodyPartEffects = postRaidBodyParts[bodyPartId.Key].Effects;
-            foreach (var effect in bodyPartEffects)
+            foreach (var(key, effectDetails) in bodyPartEffects)
             {
-                var effectDetails = bodyPartEffects[effect.Key];
-
                 // Null guard
                 profileData.Health.BodyParts[bodyPartId.Key].Effects ??= new Dictionary<string, BodyPartEffectProperties>();
 
                 // Effect already exists on limb in server profile, skip
                 var profileBodyPartEffects = profileData.Health.BodyParts[bodyPartId.Key].Effects;
-                if (profileBodyPartEffects.TryGetValue(effect.Key, out var dictEffect))
+                if (profileBodyPartEffects.ContainsKey(key))
                 {
-                    if (effectsToIgnore.Contains(effect.Key))
-                        // Get rid of certain effects we dont want to persist out of raid
+                    if (effectsToIgnore.Contains(key))
+                        // Get rid of certain effects we don't want to persist out of raid
                     {
-                        dictEffect = null;
+                        profileBodyPartEffects[key] = null;
                     }
 
                     continue;
                 }
 
-                if (effectsToIgnore.Contains(effect.Key))
+                if (effectsToIgnore.Contains(key))
                     // Do not pass some effects to out of raid profile
                 {
                     continue;
@@ -246,16 +238,16 @@ public class HealthHelper(
                     Time = effectDetails.Time ?? -1
                 };
                 // Add effect to server profile
-                if (profileBodyPartEffects.TryAdd(effect.Key, effectToAdd))
+                if (profileBodyPartEffects.TryAdd(key, effectToAdd))
                 {
-                    profileBodyPartEffects[effect.Key] = effectToAdd;
+                    profileBodyPartEffects[key] = effectToAdd;
                 }
             }
         }
     }
 
     /// <summary>
-    ///     Adjust hydration/energy/temperate and body part hp values in player profile to values in profile.vitality
+    ///     Adjust hydration/energy/temperate and body part hp values in player profile to values in `profile.vitality`
     /// </summary>
     /// <param name="pmcData">Profile to update</param>
     /// <param name="sessionID">Session id</param>

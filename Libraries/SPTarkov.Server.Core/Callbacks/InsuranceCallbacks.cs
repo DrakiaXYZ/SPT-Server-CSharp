@@ -1,4 +1,4 @@
-﻿using SPTarkov.Common.Annotations;
+﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -11,8 +11,7 @@ using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
-[Injectable(InjectableTypeOverride = typeof(IOnUpdate), TypePriority = OnUpdateOrder.InsuranceCallbacks)]
-[Injectable(InjectableTypeOverride = typeof(InsuranceCallbacks))]
+[Injectable(TypePriority = OnUpdateOrder.InsuranceCallbacks)]
 public class InsuranceCallbacks(
     InsuranceController _insuranceController,
     InsuranceService _insuranceService,
@@ -23,20 +22,16 @@ public class InsuranceCallbacks(
 {
     private readonly InsuranceConfig _insuranceConfig = _configServer.GetConfig<InsuranceConfig>();
 
-    public bool OnUpdate(long timeSinceLastRun)
+    public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        if (timeSinceLastRun > Math.Max(_insuranceConfig.RunIntervalSeconds, 1))
+        if (secondsSinceLastRun < _insuranceConfig.RunIntervalSeconds)
         {
-            _insuranceController.ProcessReturn();
-            return true;
+            return Task.FromResult(false);
         }
 
-        return false;
-    }
+        _insuranceController.ProcessReturn();
 
-    public string GetRoute()
-    {
-        return "spt-insurance";
+        return Task.FromResult(true);
     }
 
     /// <summary>
@@ -46,9 +41,9 @@ public class InsuranceCallbacks(
     /// <param name="info"></param>
     /// <param name="sessionID">Session/player id</param>
     /// <returns></returns>
-    public string GetInsuranceCost(string url, GetInsuranceCostRequestData info, string sessionID)
+    public ValueTask<string> GetInsuranceCost(string url, GetInsuranceCostRequestData info, string sessionID)
     {
-        return _httpResponseUtil.GetBody(_insuranceController.Cost(info, sessionID));
+        return new ValueTask<string>(_httpResponseUtil.GetBody(_insuranceController.Cost(info, sessionID)));
     }
 
     /// <summary>

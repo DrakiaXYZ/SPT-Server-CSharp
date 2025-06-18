@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando;
 using SPTarkov.Server.Core.Helpers.Dialogue.SPTFriend.Commands;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
@@ -8,7 +8,6 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Utils.Callbacks;
 
 namespace SPTarkov.Server.Core.Helpers.Dialogue;
 
@@ -47,16 +46,12 @@ public class SptDialogueChatBot(
         var sender = _profileHelper.GetPmcProfile(sessionId);
         var sptFriendUser = GetChatBot();
 
-        if (request.Text?.ToLower() == "help")
+        if (string.Equals(request.Text, "help", StringComparison.OrdinalIgnoreCase))
         {
             return SendPlayerHelpMessage(sessionId, request);
         }
 
-        var handler = _chatMessageHandlers.FirstOrDefault(h =>
-        {
-            return h.CanHandle(request.Text);
-        });
-
+        var handler = _chatMessageHandlers.FirstOrDefault(h => h.CanHandle(request.Text));
         if (handler is not null)
         {
             handler.Process(sessionId, sptFriendUser, sender, request);
@@ -93,43 +88,9 @@ public class SptDialogueChatBot(
         _mailSendService.SendUserMessageToPlayer(
             sessionId,
             GetChatBot(),
-            "The available commands are:\\n GIVEMESPACE \\n HOHOHO \\n VERYSPOOKY \\n ITSONLYSNOWALAN \\n GIVEMESUNSHINE",
+            "The available commands are:\n GIVEMESPACE \n HOHOHO \n VERYSPOOKY \n ITSONLYSNOWALAN \n GIVEMESUNSHINE \n GARBAGE",
             [],
             null
-        );
-        // due to BSG being dumb with messages we need a mandatory timeout between messages so they get out on the right order
-        TimeoutCallback.RunInTimespan(
-            () =>
-            {
-                foreach (var chatCommand in _chatCommands)
-                {
-                    _mailSendService.SendUserMessageToPlayer(
-                        sessionId,
-                        GetChatBot(),
-                        $"Commands available for \"{chatCommand.GetCommandPrefix()}\" prefix:",
-                        [],
-                        null
-                    );
-
-                    TimeoutCallback.RunInTimespan(
-                        () =>
-                        {
-                            foreach (var subCommand in chatCommand.GetCommands())
-                            {
-                                _mailSendService.SendUserMessageToPlayer(
-                                    sessionId,
-                                    GetChatBot(),
-                                    $"Subcommand {subCommand}:\\n{chatCommand.GetCommandHelp(subCommand)}",
-                                    [],
-                                    null
-                                );
-                            }
-                        },
-                        TimeSpan.FromSeconds(1)
-                    );
-                }
-            },
-            TimeSpan.FromSeconds(1)
         );
 
         return request.DialogId;

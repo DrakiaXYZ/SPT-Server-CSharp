@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -41,7 +41,55 @@ public class RepeatableQuestController(
     ICloner _cloner
 )
 {
+    protected static readonly List<string> _questTypes = ["PickUp", "Exploration", "Elimination"];
     protected QuestConfig _questConfig = _configServer.GetConfig<QuestConfig>();
+
+    /// <summary>
+    ///     Handle the client accepting a repeatable quest and starting it
+    ///     Send starting rewards if any to player and
+    ///     Send start notification if any to player
+    /// </summary>
+    /// <param name="pmcData">Players PMC profile</param>
+    /// <param name="acceptedQuest">Repeatable quest accepted</param>
+    /// <param name="sessionID">Session/Player id</param>
+    /// <returns>ItemEventRouterResponse</returns>
+    public ItemEventRouterResponse AcceptRepeatableQuest(PmcData pmcData, AcceptQuestRequestData acceptedQuest, string sessionID)
+    {
+        // Create and store quest status object inside player profile
+        var newRepeatableQuest = _questHelper.GetQuestReadyForProfile(
+            pmcData,
+            QuestStatusEnum.Started,
+            acceptedQuest
+        );
+        pmcData.Quests.Add(newRepeatableQuest);
+
+        // Look for the generated quest cache in profile.RepeatableQuests
+        var repeatableQuestProfile = GetRepeatableQuestFromProfile(pmcData, acceptedQuest.QuestId);
+        if (repeatableQuestProfile is null)
+        {
+            _logger.Error(
+                _localisationService.GetText(
+                    "repeatable-accepted_repeatable_quest_not_found_in_active_quests",
+                    acceptedQuest.QuestId
+                )
+            );
+
+            throw new Exception(_localisationService.GetText("repeatable-unable_to_accept_quest_see_log"));
+        }
+
+        // Some scav quests need to be added to scav profile for them to show up in-raid
+        if (repeatableQuestProfile.Side == "Scav" && _questTypes.Contains(repeatableQuestProfile.Type.ToString()))
+        {
+            var fullProfile = _profileHelper.GetFullProfile(sessionID);
+
+            fullProfile.CharacterData.ScavData.Quests ??= [];
+            fullProfile.CharacterData.ScavData.Quests.Add(newRepeatableQuest);
+        }
+
+        var response = _eventOutputHolder.GetOutput(sessionID);
+
+        return response;
+    }
 
     /// <summary>
     ///     Handle RepeatableQuestChange event
@@ -89,7 +137,7 @@ public class RepeatableQuestController(
         // Delete the replaced quest change requirement data as we're going to add new data below
         repeatablesOfTypeInProfile.ChangeRequirement.Remove(changeRequest.QuestId);
 
-        // Get config for this repeatable sub-type (daily/weekly/scav)
+        // Get config for this repeatable subtype (daily/weekly/scav)
         var repeatableConfig = _questConfig.RepeatableQuests.FirstOrDefault(config => config.Name == repeatablesOfTypeInProfile.Name
         );
 
@@ -99,8 +147,8 @@ public class RepeatableQuestController(
             repeatableConfig.Types = [questToReplace.Type.ToString()];
         }
 
-        // Generate meta-data for what type/levelrange of quests can be generated for player
-        var allowedQuestTypes = GenerateQuestPool(repeatableConfig, pmcData.Info.Level);
+        // Generate meta-data for what type/level range of quests can be generated for player
+        var allowedQuestTypes = GenerateQuestPool(repeatableConfig, pmcData.Info.Level.GetValueOrDefault(1));
         var newRepeatableQuest = AttemptToGenerateRepeatableQuest(
             sessionID,
             pmcData,
@@ -128,6 +176,7 @@ public class RepeatableQuestController(
             );
         }
 
+        // Remove the replaced quest from profile
         RemoveQuestFromProfile(fullProfile, questToReplace.Id);
 
         // Delete the replaced quest change requirement from profile
@@ -155,7 +204,7 @@ public class RepeatableQuestController(
             var charismaBonus = _profileHelper.GetSkillFromProfile(pmcData, SkillTypes.Charisma)?.Progress ?? 0;
             foreach (var cost in previousChangeRequirement.ChangeCost)
             {
-                // Not free, Charge player + appy charisma bonus to cost of replacement
+                // Not free, Charge player + apply charisma bonus to cost of replacement
                 cost.Count = (int) Math.Truncate(cost.Count.Value * (1 - Math.Truncate(charismaBonus / 100) * 0.001));
                 _paymentService.AddPaymentToOutput(pmcData, cost.TemplateId, cost.Count.Value, sessionID, output);
                 if (output.Warnings.Count > 0)
@@ -171,13 +220,41 @@ public class RepeatableQuestController(
         // Purge inactive repeatables
         repeatableToChangeClone.InactiveQuests = [];
 
-        // Nullguard
-        output.ProfileChanges[sessionID].RepeatableQuests ??= [];
-
         // Update client output with new repeatable
+        output.ProfileChanges[sessionID].RepeatableQuests ??= [];
         output.ProfileChanges[sessionID].RepeatableQuests.Add(repeatableToChangeClone);
 
         return output;
+    }
+
+    /// <summary>
+    ///     Look for an accepted quest inside player profile, return quest that matches
+    /// </summary>
+    /// <param name="pmcData">Players PMC profile</param>
+    /// <param name="questId">Quest id to return</param>
+    /// <returns>RepeatableQuest</returns>
+    protected RepeatableQuest? GetRepeatableQuestFromProfile(PmcData pmcData, string questId)
+    {
+        foreach (var repeatableQuest in pmcData.RepeatableQuests)
+        {
+            var matchingQuest = repeatableQuest.ActiveQuests?.FirstOrDefault(x => x.Id == questId);
+            if (matchingQuest is null)
+            {
+                // No daily/weekly/scav repeatable, skip over to next subtype
+                continue;
+            }
+
+            if (_logger.IsLogEnabled(LogLevel.Debug))
+            {
+                _logger.Debug($"Accepted repeatable quest: {questId} from: {repeatableQuest.Name}");
+            }
+
+            matchingQuest.SptRepatableGroupName = repeatableQuest.Name;
+
+            return matchingQuest;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -236,18 +313,18 @@ public class RepeatableQuestController(
             // Will assist in cleanup of existing profiles data
         {
             repeatablesOfTypeInProfile.ChangeRequirement.Clear();
+
+            return;
         }
-        else
-            // Multiple active quests of this type (e.g. daily or weekly) are active, just remove the single replaced quest
-        {
-            repeatablesOfTypeInProfile.ChangeRequirement.Remove(replacedQuestId);
-        }
+
+        // Multiple active quests of this type (e.g. daily or weekly) are active, just remove the single replaced quest
+        repeatablesOfTypeInProfile.ChangeRequirement.Remove(replacedQuestId);
     }
 
     /// <summary>
     ///     Generate a repeatable quest
     /// </summary>
-    /// <param name="sessionID">Session/Player id</param>
+    /// <param name="sessionId">Session/Player id</param>
     /// <param name="pmcData">Players PMC profile</param>
     /// <param name="questTypePool">What type/level range of quests can be generated for player</param>
     /// <param name="repeatableConfig">Config for the quest type to generate</param>
@@ -256,7 +333,7 @@ public class RepeatableQuestController(
         QuestTypePool questTypePool, RepeatableQuestConfig repeatableConfig)
     {
         const int maxAttempts = 10;
-        RepeatableQuest newRepeatableQuest = null;
+        RepeatableQuest? newRepeatableQuest = null;
         var attempts = 0;
         while (attempts < maxAttempts && questTypePool.Types.Count > 0)
         {
@@ -279,7 +356,7 @@ public class RepeatableQuestController(
 
         if (attempts > maxAttempts)
         {
-            _logger.Error("We were stuck in repeatable quest generation. This should never happen. Please report");
+            _logger.Error(_localisationService.GetText("quest-repeatable_generation_failed_please_report", attempts));
         }
 
         return newRepeatableQuest;
@@ -290,12 +367,12 @@ public class RepeatableQuestController(
     /// </summary>
     /// <param name="fullProfile">Profile to remove quest from</param>
     /// <param name="questToReplaceId">Quest id to remove from profile</param>
-    protected void RemoveQuestFromProfile(SptProfile? fullProfile, string questToReplaceId)
+    protected void RemoveQuestFromProfile(SptProfile fullProfile, string questToReplaceId)
     {
         // Find quest we're replacing in pmc profile quests array and remove it
         _questHelper.FindAndRemoveQuestFromArrayIfExists(questToReplaceId, fullProfile.CharacterData.PmcData.Quests);
 
-        // Find quest we're replacing in scav profile quests array and remove it
+        // Look for and remove quest we're replacing in scav profile too
         if (fullProfile.CharacterData.ScavData is not null)
         {
             _questHelper.FindAndRemoveQuestFromArrayIfExists(
@@ -317,9 +394,9 @@ public class RepeatableQuestController(
         {
             // Check for existing quest in (daily/weekly/scav arrays)
             var questToReplace =
-                repeatablesInProfile.ActiveQuests.FirstOrDefault(repeatable => repeatable.Id == questId);
+                repeatablesInProfile.ActiveQuests?.FirstOrDefault(repeatable => repeatable.Id == questId);
             if (questToReplace is null)
-                // Not found, skip to next repeatable sub-type
+                // Not found, skip to next repeatable subtype
             {
                 continue;
             }
@@ -335,7 +412,7 @@ public class RepeatableQuestController(
     }
 
     /// <summary>
-    ///     Handle client/repeatalbeQuests/activityPeriods
+    ///     Handle client/repeatableQuests/activityPeriods
     ///     Returns an array of objects in the format of repeatable quests to the client.
     ///     repeatableQuestObject = {
     ///     *id: Unique Id,
@@ -406,7 +483,7 @@ public class RepeatableQuestController(
             ProcessExpiredQuests(generatedRepeatables, pmcData);
 
             // Create dynamic quest pool to avoid generating duplicates
-            var questTypePool = GenerateQuestPool(repeatableConfig, pmcData.Info.Level);
+            var questTypePool = GenerateQuestPool(repeatableConfig, pmcData.Info.Level.GetValueOrDefault(1));
 
             // Add repeatable quests of this loops sub-type (daily/weekly)
             for (var i = 0; i < GetQuestCount(repeatableConfig, fullProfile); i++)
@@ -573,7 +650,7 @@ public class RepeatableQuestController(
     /// <returns>True if unlocked</returns>
     protected bool PlayerHasDailyScavQuestsUnlocked(PmcData pmcData)
     {
-        return pmcData?.Hideout?.Areas?.FirstOrDefault(hideoutArea => hideoutArea.Type == HideoutAreas.INTEL_CENTER)
+        return pmcData?.Hideout?.Areas?.FirstOrDefault(hideoutArea => hideoutArea.Type == HideoutAreas.IntelligenceCenter)
                    ?.Level >=
                1;
     }
@@ -629,15 +706,12 @@ public class RepeatableQuestController(
     /// <param name="repeatableConfig">main repeatable quest config</param>
     /// <param name="pmcLevel">Players level</param>
     /// <returns>Allowed quest pool</returns>
-    protected QuestTypePool GenerateQuestPool(RepeatableQuestConfig repeatableConfig, int? pmcLevel)
+    protected QuestTypePool GenerateQuestPool(RepeatableQuestConfig repeatableConfig, int pmcLevel)
     {
-        var questPool = CreateBaseQuestPool(repeatableConfig);
-
-        // Get the allowed locations based on the PMC's level
-        var locations = GetAllowedLocationsForPmcLevel(repeatableConfig.Locations, pmcLevel.Value);
+        var questPool = CreateEmptyQuestPool(repeatableConfig);
 
         // Populate Exploration and Pickup quest locations
-        foreach (var (location, value) in locations)
+        foreach (var (location, value) in repeatableConfig.Locations)
         {
             if (location != ELocationName.any)
             {
@@ -649,39 +723,40 @@ public class RepeatableQuestController(
         // Add "any" to pickup quest pool
         questPool.Pool.Pickup.Locations[ELocationName.any] = ["any"];
 
-        var eliminationConfig = _repeatableQuestHelper.GetEliminationConfigByPmcLevel(pmcLevel.Value, repeatableConfig);
+        var eliminationConfig = _repeatableQuestHelper.GetEliminationConfigByPmcLevel(pmcLevel, repeatableConfig);
         var targetsConfig = new ProbabilityObjectArray<string, BossInfo>(_mathUtil, _cloner, eliminationConfig.Targets);
 
         // Populate Elimination quest targets and their locations
-        foreach (var targetKvP in targetsConfig)
-            // Target is boss
+        foreach (var target in targetsConfig)
         {
-            if (targetKvP.Data.IsBoss.GetValueOrDefault(false))
+            // Target is boss
+            if (target.Data.IsBoss.GetValueOrDefault(false))
             {
                 questPool.Pool.Elimination.Targets.Add(
-                    targetKvP.Key,
+                    target.Key,
                     new TargetLocation
                     {
                         Locations = ["any"]
                     }
                 );
+
+                continue;
             }
-            else
-            {
-                // Non-boss targets
-                var possibleLocations = locations.Keys;
 
-                var allowedLocations =
-                    targetKvP.Key == "Savage"
-                        ? possibleLocations.Where(location => location != ELocationName.laboratory
-                        ) // Exclude labs for Savage targets.
-                        : possibleLocations;
+            // Target is not boss
+            var possibleLocations = repeatableConfig.Locations.Keys;
+            var allowedLocations =
+                target.Key == "Savage"
+                    ? possibleLocations.Where(location => location != ELocationName.laboratory
+                    ) // Exclude labs for Savage targets.
+                    : possibleLocations;
 
-                questPool.Pool.Elimination.Targets[targetKvP.Key] = new TargetLocation
+            questPool.Pool.Elimination.Targets.Add(
+                target.Key,
+                new TargetLocation
                 {
                     Locations = allowedLocations.Select(x => x.ToString()).ToList()
-                };
-            }
+                });
         }
 
         return questPool;
@@ -692,7 +767,7 @@ public class RepeatableQuestController(
     /// </summary>
     /// <param name="repeatableConfig">Main repeatable config</param>
     /// <returns>QuestTypePool</returns>
-    protected QuestTypePool CreateBaseQuestPool(RepeatableQuestConfig repeatableConfig)
+    protected QuestTypePool CreateEmptyQuestPool(RepeatableQuestConfig repeatableConfig)
     {
         return new QuestTypePool
         {
@@ -716,71 +791,17 @@ public class RepeatableQuestController(
     }
 
     /// <summary>
-    ///     Get a dictionary of map locations the player can access based on their current level
-    /// </summary>
-    /// <param name="locations"></param>
-    /// <param name="pmcLevel"></param>
-    /// <returns>Dictionary</returns>
-    protected Dictionary<ELocationName, List<string>> GetAllowedLocationsForPmcLevel(
-        Dictionary<ELocationName, List<string>> locations, int pmcLevel)
-    {
-        var allowedLocation = new Dictionary<ELocationName, List<string>>();
-        foreach (var (location, value) in locations)
-        {
-            var locationNames = new List<string>();
-            foreach (var locationName in value)
-            {
-                if (IsPmcLevelAllowedOnLocation(locationName, pmcLevel))
-                {
-                    locationNames.Add(locationName);
-                }
-            }
-
-            if (locationNames.Count > 0)
-            {
-                allowedLocation[location] = locationNames;
-            }
-        }
-
-        return allowedLocation;
-    }
-
-    /// <summary>
-    ///     Return true if the given pmcLevel is allowed on the given location
-    /// </summary>
-    /// <param name="location">location name to check</param>
-    /// <param name="pmcLevel">level of the pmc</param>
-    /// <returns>True if the given pmc level is allowed to access the given location</returns>
-    protected bool IsPmcLevelAllowedOnLocation(string location, int pmcLevel)
-    {
-        // All PMC levels are allowed for 'any' location requirement
-        if (location == ELocationName.any.ToString())
-        {
-            return true;
-        }
-
-        var locationBase = _databaseService.GetLocation(location.ToLower())?.Base;
-        if (locationBase is null)
-        {
-            return true;
-        }
-
-        return pmcLevel <= locationBase.RequiredPlayerLevelMax && pmcLevel >= locationBase.RequiredPlayerLevelMin;
-    }
-
-    /// <summary>
     ///     Get count of repeatable quests profile should have access to
     /// </summary>
     /// <param name="repeatableConfig"></param>
-    /// <param name="fullProfile"></param>
-    /// <param name="pmcData">Player profile</param>
+    /// <param name="fullProfile">Full player profile</param>
     /// <returns>Quest count</returns>
     protected int GetQuestCount(RepeatableQuestConfig repeatableConfig, SptProfile fullProfile)
     {
         var questCount = repeatableConfig.NumQuests.GetValueOrDefault(0);
         if (questCount == 0)
         {
-            _logger.Warning($"Repeatable {repeatableConfig.Name} quests have a count of 0");
+            _logger.Warning($"Repeatable: {repeatableConfig.Name} quests have a count of 0");
         }
 
         // Add elite bonus to daily quests

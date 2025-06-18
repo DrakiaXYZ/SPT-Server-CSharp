@@ -1,35 +1,19 @@
-﻿using SPTarkov.Common.Annotations;
+﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
-using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Generators;
 
 [Injectable]
-public class PmcWaveGenerator
+public class PmcWaveGenerator(
+    ISptLogger<PmcWaveGenerator> logger,
+    DatabaseService databaseService,
+    ConfigServer configServer)
 {
-    protected ConfigServer _configServer;
-    protected DatabaseService _databaseService;
-    protected ISptLogger<PmcWaveGenerator> _logger;
-    protected PmcConfig _pmcConfig;
-    protected RandomUtil _randomUtil;
-
-    public PmcWaveGenerator(
-        ISptLogger<PmcWaveGenerator> _logger,
-        RandomUtil _randomUtil,
-        DatabaseService _databaseService,
-        ConfigServer _configServer
-    )
-    {
-        this._logger = _logger;
-        this._randomUtil = _randomUtil;
-        this._databaseService = _databaseService;
-        this._configServer = _configServer;
-        _pmcConfig = _configServer.GetConfig<PmcConfig>();
-    }
+    protected readonly PmcConfig _pmcConfig = configServer.GetConfig<PmcConfig>();
 
     /// <summary>
     ///     Add a pmc wave to a map
@@ -63,13 +47,8 @@ public class PmcWaveGenerator
             return;
         }
 
-        var location = _databaseService.GetLocation(name);
-        if (location is null)
-        {
-            return;
-        }
-
-        location.Base.BossLocationSpawn.AddRange(pmcWavesToAdd);
+        var location = databaseService.GetLocation(name);
+        location?.Base.BossLocationSpawn.AddRange(pmcWavesToAdd);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -103,7 +103,7 @@ public class InsuranceService(
             _mailSendService.SendLocalisedNpcMessageToPlayer(
                 sessionID,
                 traderKvP.Key,
-                MessageType.NPC_TRADER,
+                MessageType.NpcTraderMessage,
                 _randomUtil.GetArrayValue(dialogueTemplates["insuranceStart"] ?? ["INSURANCE START MESSAGE MISSING"]),
                 null,
                 _timeUtil.GetHoursAsSeconds((int) globals.Configuration?.Insurance?.MaxStorageTimeInHour),
@@ -120,7 +120,7 @@ public class InsuranceService(
                         TraderId = traderKvP.Key,
                         MaxStorageTime = (int) GetMaxInsuranceStorageTime(traderBase),
                         SystemData = systemData,
-                        MessageType = MessageType.INSURANCE_RETURN,
+                        MessageType = MessageType.InsuranceReturn,
                         MessageTemplateId = _randomUtil.GetArrayValue(dialogueTemplates["insuranceFound"]),
                         Items = GetInsurance(sessionID)[traderKvP.Key]
                     }

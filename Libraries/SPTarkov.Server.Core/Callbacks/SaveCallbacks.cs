@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Servers;
@@ -6,8 +6,7 @@ using SPTarkov.Server.Core.Services;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
-[Injectable(InjectableTypeOverride = typeof(IOnLoad), TypePriority = OnLoadOrder.SaveCallbacks)]
-[Injectable(InjectableTypeOverride = typeof(IOnUpdate), TypePriority = OnUpdateOrder.SaveCallbacks)]
+[Injectable(TypePriority = OnLoadOrder.SaveCallbacks)]
 public class SaveCallbacks(
     SaveServer _saveServer,
     ConfigServer _configServer,
@@ -20,22 +19,19 @@ public class SaveCallbacks(
     public async Task OnLoad()
     {
         _backupService.StartBackupSystem();
-        _saveServer.Load();
+        await _saveServer.LoadAsync();
     }
 
-    public string GetRoute()
+    public async Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        return "spt-save";
-    }
-
-    public bool OnUpdate(long timeSinceLastRun)
-    {
-        if (timeSinceLastRun > _coreConfig.ProfileSaveIntervalInSeconds)
+        if (secondsSinceLastRun < _coreConfig.ProfileSaveIntervalInSeconds)
         {
-            _saveServer.Save();
-            return true;
+            // Not enough time has passed since last run, exit early
+            return false;
         }
 
-        return false;
+        await _saveServer.SaveAsync();
+
+        return true;
     }
 }

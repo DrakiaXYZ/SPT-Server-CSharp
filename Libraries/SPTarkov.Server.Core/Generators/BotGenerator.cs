@@ -1,4 +1,5 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.Server.Core.Constants;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -12,6 +13,7 @@ using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 using BodyPart = SPTarkov.Server.Core.Models.Eft.Common.Tables.BodyPart;
+using BodyParts = SPTarkov.Server.Core.Constants.BodyParts;
 using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 
@@ -53,12 +55,12 @@ public class BotGenerator(
         var bot = GetCloneOfBotBase();
         bot.Info.Settings.BotDifficulty = difficulty;
         bot.Info.Settings.Role = role;
-        bot.Info.Side = "Savage";
+        bot.Info.Side = Sides.Savage;
 
         var botGenDetails = new BotGenerationDetails
         {
             IsPmc = false,
-            Side = "Savage",
+            Side = Sides.Savage,
             Role = role,
             BotRelativeLevelDeltaMax = 0,
             BotRelativeLevelDeltaMin = 0,
@@ -116,7 +118,7 @@ public class BotGenerator(
     public BotBase PrepareAndGenerateBot(string sessionId, BotGenerationDetails? botGenerationDetails)
     {
         var preparedBotBase = GetPreparedBotBase(
-            botGenerationDetails.EventRole ?? botGenerationDetails.Role, // Use eventRole if provided,
+            botGenerationDetails.EventRole ?? botGenerationDetails.Role, // Use eventRole if provided
             botGenerationDetails.Side,
             botGenerationDetails.BotDifficulty
         );
@@ -306,7 +308,7 @@ public class BotGenerator(
     /// <returns>True if name should be simulated pscav</returns>
     public bool ShouldSimulatePlayerScav(string botRole)
     {
-        return botRole == "assault" && _randomUtil.GetChance100(_botConfig.ChanceAssaultScavHasPlayerScavName);
+        return botRole == Roles.Assault && _randomUtil.GetChance100(_botConfig.ChanceAssaultScavHasPlayerScavName);
     }
 
     /// <summary>
@@ -504,7 +506,7 @@ public class BotGenerator(
             BodyParts = new Dictionary<string, BodyPartHealth>
             {
                 {
-                    "Head", new BodyPartHealth
+                    BodyParts.Head, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -514,7 +516,7 @@ public class BotGenerator(
                     }
                 },
                 {
-                    "Chest", new BodyPartHealth
+                    BodyParts.Chest, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -524,7 +526,7 @@ public class BotGenerator(
                     }
                 },
                 {
-                    "Stomach", new BodyPartHealth
+                    BodyParts.Stomach, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -534,7 +536,7 @@ public class BotGenerator(
                     }
                 },
                 {
-                    "LeftArm", new BodyPartHealth
+                    BodyParts.LeftArm, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -544,7 +546,7 @@ public class BotGenerator(
                     }
                 },
                 {
-                    "RightArm", new BodyPartHealth
+                    BodyParts.RightArm, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -554,7 +556,7 @@ public class BotGenerator(
                     }
                 },
                 {
-                    "LeftLeg", new BodyPartHealth
+                    BodyParts.LeftLeg, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -564,7 +566,7 @@ public class BotGenerator(
                     }
                 },
                 {
-                    "RightLeg", new BodyPartHealth
+                    BodyParts.RightLeg, new BodyPartHealth
                     {
                         Health = new CurrentMinMax
                         {
@@ -600,7 +602,7 @@ public class BotGenerator(
         {
             double? hpTotal = 0;
 
-            foreach (var prop in props)
+            foreach (var prop in props.Where(property => !property.Name.Equals("extensiondata", StringComparison.OrdinalIgnoreCase)))
             {
                 var value = (MinMax<double>) prop.GetValue(bodyPart);
                 hpTotal += value.Max;
@@ -626,8 +628,8 @@ public class BotGenerator(
     {
         var skillsToReturn = new Skills
         {
-            Common = GetSkillsWithRandomisedProgressValue(botSkills.Common, true),
-            Mastering = GetSkillsWithRandomisedProgressValue(botSkills.Mastering, false),
+            Common = GetCommonSkillsWithRandomisedProgressValue(botSkills.Common),
+            Mastering = GetMasteringSkillsWithRandomisedProgressValue(botSkills.Mastering),
             Points = 0
         };
 
@@ -638,9 +640,43 @@ public class BotGenerator(
     ///     Randomise the progress value of passed in skills based on the min/max value
     /// </summary>
     /// <param name="skills">Skills to randomise</param>
-    /// <param name="isCommonSkills">Are the skills 'common' skills</param>
-    /// <returns>Skills with randomised progress values as an array</returns>
-    public List<BaseSkill> GetSkillsWithRandomisedProgressValue(Dictionary<string, MinMax<double>>? skills, bool isCommonSkills)
+    /// <returns>Skills with randomised progress values as a collection</returns>
+    public List<CommonSkill> GetCommonSkillsWithRandomisedProgressValue(Dictionary<string, MinMax<double>>? skills)
+    {
+        if (skills is null)
+        {
+            return [];
+        }
+
+        return skills
+            .Select(kvp =>
+                {
+                    // Get skill from dict, skip if not found
+                    var skill = kvp.Value;
+                    if (skill == null)
+                    {
+                        return null;
+                    }
+
+                    return new CommonSkill
+                    {
+                        Id = Enum.Parse<SkillTypes>(kvp.Key),
+                        Progress = _randomUtil.GetDouble(skill.Min, skill.Max),
+                        PointsEarnedDuringSession = 0,
+                        LastAccess = 0
+                    };
+                }
+            )
+            .Where(baseSkill => baseSkill != null)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Randomise the progress value of passed in skills based on the min/max value
+    /// </summary>
+    /// <param name="skills">Skills to randomise</param>
+    /// <returns>Skills with randomised progress values as a collection</returns>
+    public List<MasterySkill> GetMasteringSkillsWithRandomisedProgressValue(Dictionary<string, MinMax<double>>? skills)
     {
         if (skills is null)
         {
@@ -658,20 +694,11 @@ public class BotGenerator(
                     }
 
                     // All skills have id and progress props
-                    var skillToAdd = new BaseSkill
+                    return new MasterySkill
                     {
                         Id = kvp.Key,
                         Progress = _randomUtil.GetDouble(skill.Min, skill.Max)
                     };
-
-                    // Common skills have additional props
-                    if (isCommonSkills)
-                    {
-                        skillToAdd.PointsEarnedDuringSession = 0;
-                        skillToAdd.LastAccess = 0;
-                    }
-
-                    return skillToAdd;
                 }
             )
             .Where(baseSkill => baseSkill != null)
@@ -783,7 +810,7 @@ public class BotGenerator(
             Id = _hashUtil.Generate(),
             Template = GetDogtagTplByGameVersionAndSide(bot.Info.Side, bot.Info.GameVersion),
             ParentId = bot.Inventory.Equipment,
-            SlotId = "Dogtag",
+            SlotId = Slots.Dogtag,
             Upd = new Upd
             {
                 SpawnedInSession = true
@@ -801,7 +828,7 @@ public class BotGenerator(
     /// <returns>item tpl</returns>
     public string GetDogtagTplByGameVersionAndSide(string side, string gameVersion)
     {
-        if (string.Equals(side, "usec", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(side, Sides.Usec, StringComparison.OrdinalIgnoreCase))
         {
             switch (gameVersion)
             {

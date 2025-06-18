@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -9,8 +9,7 @@ using SPTarkov.Server.Core.Servers;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
-[Injectable(InjectableTypeOverride = typeof(IOnUpdate), TypePriority = OnUpdateOrder.HideoutCallbacks)]
-[Injectable(InjectableTypeOverride = typeof(HideoutCallbacks))]
+[Injectable(TypePriority = OnUpdateOrder.HideoutCallbacks)]
 public class HideoutCallbacks(
     HideoutController _hideoutController,
     ConfigServer _configServer
@@ -18,20 +17,17 @@ public class HideoutCallbacks(
 {
     private readonly HideoutConfig _hideoutConfig = _configServer.GetConfig<HideoutConfig>();
 
-    public bool OnUpdate(long timeSinceLastRun)
+    public Task<bool> OnUpdate(long secondsSinceLastRun)
     {
-        if (timeSinceLastRun > _hideoutConfig.RunIntervalSeconds)
+        if (secondsSinceLastRun < _hideoutConfig.RunIntervalSeconds)
         {
-            _hideoutController.Update();
-            return true;
+            // Not enough time has passed since last run, exit early
+            return Task.FromResult(false);
         }
 
-        return false;
-    }
+        _hideoutController.Update();
 
-    public string GetRoute()
-    {
-        return "spt-hideout";
+        return Task.FromResult(true);
     }
 
     /// <summary>

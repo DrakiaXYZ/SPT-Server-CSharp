@@ -1,5 +1,5 @@
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
@@ -51,11 +51,14 @@ public class BotEquipmentFilterService
         var botWeightingAdjustments = GetBotWeightingAdjustments(botRole, botLevel);
         var botWeightingAdjustmentsByPlayerLevel = GetBotWeightingAdjustmentsByPlayerLevel(
             botRole,
-            pmcProfile?.Info?.Level ?? 0
+            pmcProfile?.Info?.Level ?? 1
         );
 
-        _botEquipmentConfig.TryGetValue(botRole.ToLower(), out var botEquipConfig);
-        var randomisationDetails = _botHelper.GetBotRandomizationDetails(botLevel, botEquipConfig);
+        RandomisationDetails? randomisationDetails = null;
+        if (_botEquipmentConfig.TryGetValue(botRole.ToLower(), out var botEquipmentConfig))
+        {
+            randomisationDetails = _botHelper.GetBotRandomizationDetails(botLevel, botEquipmentConfig);
+        }
 
         if (botEquipmentBlacklist is not null || botEquipmentWhitelist is not null)
         {
@@ -67,8 +70,9 @@ public class BotEquipmentFilterService
         {
             AdjustWeighting(botWeightingAdjustments.Equipment, baseBotNode.BotInventory.Equipment);
             AdjustWeighting(botWeightingAdjustments.Ammo, baseBotNode.BotInventory.Ammo);
-            // Dont warn when edited item not found, we're editing usec/bear clothing and they dont have each others clothing
-            AdjustWeighting(botWeightingAdjustments?.Clothing, baseBotNode.BotAppearance, false);
+
+            // Don't warn when edited item not found, we're editing usec/bear clothing and they don't have each others clothing
+            AdjustWeighting(botWeightingAdjustments.Clothing, baseBotNode.BotAppearance, false);
         }
 
         if (botWeightingAdjustmentsByPlayerLevel is not null)
@@ -202,14 +206,14 @@ public class BotEquipmentFilterService
     ///     Retrieve item weighting adjustments from bot.json config based on player level
     /// </summary>
     /// <param name="botRole">Bot type to get adjustments for</param>
-    /// <param name="playerlevel">Level of bot</param>
+    /// <param name="playerLevel">Level of bot</param>
     /// <returns>Weighting adjustments for bot items</returns>
-    protected WeightingAdjustmentDetails? GetBotWeightingAdjustmentsByPlayerLevel(string botRole, int playerlevel)
+    protected WeightingAdjustmentDetails? GetBotWeightingAdjustmentsByPlayerLevel(string botRole, int playerLevel)
     {
         var weightingDetailsForBot = _botEquipmentConfig.GetValueOrDefault(botRole, null);
 
         return (weightingDetailsForBot?.WeightingAdjustmentsByBotLevel ?? []).FirstOrDefault(x =>
-            playerlevel >= x.LevelRange.Min && playerlevel <= x.LevelRange.Max
+            playerLevel >= x.LevelRange.Min && playerLevel <= x.LevelRange.Max
         );
     }
 
@@ -316,12 +320,10 @@ public class BotEquipmentFilterService
 
         if (blacklist is not null)
         {
-            foreach (var ammoCaliberKvP in baseBotNode.BotInventory.Ammo)
+            foreach (var (caliber, cartridgesAndWeights) in baseBotNode.BotInventory.Ammo)
             {
-                var botAmmo = baseBotNode.BotInventory.Ammo[ammoCaliberKvP.Key];
-
                 // Skip cartridge slot if blacklist doesn't exist / is empty
-                blacklist.Cartridge.TryGetValue(ammoCaliberKvP.Key, out var cartridgeCaliberBlacklist);
+                blacklist.Cartridge.TryGetValue(caliber, out var cartridgeCaliberBlacklist);
                 if (cartridgeCaliberBlacklist is null || cartridgeCaliberBlacklist.Count == 0)
                 {
                     continue;
@@ -329,9 +331,9 @@ public class BotEquipmentFilterService
 
                 // Filter cartridge slot items to just items not in blacklist
                 foreach (var blacklistedTpl in cartridgeCaliberBlacklist
-                             .Where(blacklistedTpl => ammoCaliberKvP.Value.ContainsKey(blacklistedTpl)))
+                             .Where(blacklistedTpl => cartridgesAndWeights.ContainsKey(blacklistedTpl)))
                 {
-                    ammoCaliberKvP.Value.Remove(blacklistedTpl);
+                    cartridgesAndWeights.Remove(blacklistedTpl);
                 }
             }
         }
@@ -452,8 +454,9 @@ public class BotEquipmentFilterService
     /// </summary>
     /// <param name="weightingAdjustments">Weighting change to apply to bot</param>
     /// <param name="botItemPool">Bot item dictionary to adjust</param>
+    /// <param name="showEditWarnings">When item being adjusted cannot be found at source, show warning message</param>
     protected void AdjustWeighting(
-        AdjustmentDetails weightingAdjustments,
+        AdjustmentDetails? weightingAdjustments,
         Appearance botItemPool,
         bool showEditWarnings = true)
     {
@@ -467,6 +470,11 @@ public class BotEquipmentFilterService
             foreach (var poolAdjustmentKvP in weightingAdjustments.Add)
             {
                 var locationToUpdate = botItemPool.GetByJsonProp<Dictionary<string, double>>(poolAdjustmentKvP.Key);
+                if (locationToUpdate is null)
+                {
+                    continue;
+                }
+
                 foreach (var itemToAddKvP in poolAdjustmentKvP.Value)
                 {
                     locationToUpdate[itemToAddKvP.Key] = itemToAddKvP.Value;
@@ -479,21 +487,27 @@ public class BotEquipmentFilterService
             foreach (var poolAdjustmentKvP in weightingAdjustments.Edit)
             {
                 var locationToUpdate = botItemPool.GetByJsonProp<Dictionary<string, double>>(poolAdjustmentKvP.Key);
+                if (locationToUpdate is null)
+                {
+                    continue;
+                }
+
                 foreach (var itemToEditKvP in poolAdjustmentKvP.Value)
                     // Only make change if item exists as we're editing, not adding
                 {
-                    if (locationToUpdate.GetValueOrDefault(itemToEditKvP.Key) != null || locationToUpdate.GetValueOrDefault(itemToEditKvP.Key) == 0)
+                    if (locationToUpdate.ContainsKey(itemToEditKvP.Key))
                     {
                         locationToUpdate[itemToEditKvP.Key] = itemToEditKvP.Value;
+
+                        continue;
                     }
-                    else
+
+                    // We tried to add an item flagged as edit only
+                    if (showEditWarnings)
                     {
-                        if (showEditWarnings)
+                        if (_logger.IsLogEnabled(LogLevel.Debug))
                         {
-                            if (_logger.IsLogEnabled(LogLevel.Debug))
-                            {
-                                _logger.Debug($"Tried to edit a non - existent item for slot: {poolAdjustmentKvP} {itemToEditKvP}");
-                            }
+                            _logger.Debug($"Tried to edit a non - existent item for slot: {poolAdjustmentKvP} {itemToEditKvP}");
                         }
                     }
                 }

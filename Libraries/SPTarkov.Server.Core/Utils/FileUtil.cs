@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.Server.Core.Utils;
 
@@ -88,6 +88,31 @@ public class FileUtil()
         }
 
         File.WriteAllBytes(filePath, fileContent);
+    }
+
+    public async Task WriteFileAsync(string filePath, string fileContent)
+    {
+        if (!DirectoryExists(Path.GetDirectoryName(filePath)))
+        {
+            CreateDirectory(Path.GetDirectoryName(filePath));
+        }
+
+        if (!FileExists(filePath))
+        {
+            CreateFile(filePath);
+        }
+
+        await File.WriteAllTextAsync(filePath, fileContent);
+    }
+
+    public async Task WriteFileAsync(string filePath, byte[] fileContent)
+    {
+        if (!FileExists(filePath))
+        {
+            CreateFile(filePath);
+        }
+
+        await File.WriteAllBytesAsync(filePath, fileContent);
     }
 
     private void CreateFile(string filePath)

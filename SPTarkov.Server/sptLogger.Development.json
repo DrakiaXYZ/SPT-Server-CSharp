@@ -4,12 +4,15 @@
       "type": "File",
       "logLevel": "Trace",
       "format": "[%date% %time%][%level%][%logger%] %message%",
-      "filePath": "./user/logs/kestrel/kestrel.txt",
+      "filePath": "./user/logs/kestrel/",
+      "filePattern": "kestrel%DATE%.txt",
+      "maxFileSizeMB": 10,
+      "maxRollingFiles": 10,
       "filters": [
 
         {
           "type": "Include",
-          "name": "Microsoft\\.AspNetCore\\.Server\\.Kestrel.*",
+          "name": "Microsoft.*",
           "matchingType": "Regex"
         }
       ]
@@ -18,7 +21,10 @@
       "type": "File",
       "logLevel": "Trace",
       "format": "[%date% %time%][%level%][%logger%] %message%",
-      "filePath": "./user/logs/spt/spt.txt",
+      "filePath": "./user/logs/spt/",
+      "filePattern": "spt%DATE%.txt",
+      "maxFileSizeMB": 10,
+      "maxRollingFiles": 10,
       "filters": [
         {
           "type": "Exclude",
@@ -27,7 +33,7 @@
         },
         {
           "type": "Exclude",
-          "name": "Microsoft\\.AspNetCore\\.Server\\.Kestrel.*",
+          "name": "Microsoft.*",
           "matchingType": "Regex"
         }
       ]
@@ -36,7 +42,10 @@
       "type": "File",
       "logLevel": "Trace",
       "format": "[%date% %time%][%level%][%logger%] %message%",
-      "filePath": "./user/logs/requests/requests.txt",
+      "filePath": "./user/logs/requests/",
+      "filePattern": "requests%DATE%.txt",
+      "maxFileSizeMB": 25,
+      "maxRollingFiles": 10,
       "filters": [
         {
           "type": "Include",

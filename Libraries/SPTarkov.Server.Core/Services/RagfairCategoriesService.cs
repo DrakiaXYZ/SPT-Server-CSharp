@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Ragfair;
 using SPTarkov.Server.Core.Models.Enums;
@@ -36,8 +36,12 @@ public class RagfairCategoriesService(
                         return false;
                     }
 
-                    // Skip items not for currency when `removeBartering` is enabled
+                    // Skip when:
+                    // Not a 'required' search
+                    // Remove barters checkbox checked
+                    // Offer requirement has children or requirement is not money 
                     if (
+                        string.IsNullOrEmpty(searchRequestData.NeededSearchId) &&
                         searchRequestData.RemoveBartering.GetValueOrDefault(false) &&
                         (offer.Requirements.Count > 1 || !_paymentHelper.IsMoneyTpl(offer.Requirements.FirstOrDefault().Template))
                     )

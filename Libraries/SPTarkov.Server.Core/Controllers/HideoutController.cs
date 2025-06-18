@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
@@ -49,10 +49,10 @@ public class HideoutController(
 
     protected List<HideoutAreas> _hideoutAreas =
     [
-        HideoutAreas.AIR_FILTERING,
-        HideoutAreas.WATER_COLLECTOR,
-        HideoutAreas.GENERATOR,
-        HideoutAreas.BITCOIN_FARM
+        HideoutAreas.AirFilteringUnit,
+        HideoutAreas.WaterCollector,
+        HideoutAreas.Generator,
+        HideoutAreas.BitcoinFarm
     ];
 
     protected HideoutConfig _hideoutConfig = _configServer.GetConfig<HideoutConfig>();
@@ -209,15 +209,15 @@ public class HideoutController(
 
         // Upgrading water collector / med station
         if (
-            profileHideoutArea.Type == HideoutAreas.WATER_COLLECTOR ||
-            profileHideoutArea.Type == HideoutAreas.MEDSTATION
+            profileHideoutArea.Type == HideoutAreas.WaterCollector ||
+            profileHideoutArea.Type == HideoutAreas.MedStation
         )
         {
             SetWallVisibleIfPrereqsMet(pmcData);
         }
 
         // Cleanup temporary buffs/debuffs from wall if complete
-        if (profileHideoutArea.Type == HideoutAreas.EMERGENCY_WALL && profileHideoutArea.Level == 6)
+        if (profileHideoutArea.Type == HideoutAreas.EmergencyWall && profileHideoutArea.Level == 6)
         {
             _hideoutHelper.RemoveHideoutWallBuffsAndDebuffs(hideoutData, pmcData);
         }
@@ -236,11 +236,11 @@ public class HideoutController(
     /// <param name="pmcData">Player profile</param>
     protected void SetWallVisibleIfPrereqsMet(PmcData pmcData)
     {
-        var medStation = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.MEDSTATION);
-        var waterCollector = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.WATER_COLLECTOR);
+        var medStation = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.MedStation);
+        var waterCollector = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.WaterCollector);
         if (medStation?.Level >= 1 && waterCollector?.Level >= 1)
         {
-            var wall = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.EMERGENCY_WALL);
+            var wall = pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == HideoutAreas.EmergencyWall);
             if (wall?.Level == 0)
             {
                 wall.Level = 3;
@@ -275,7 +275,7 @@ public class HideoutController(
         AddUpdateInventoryItemToProfile(sessionId, pmcData, dbHideoutArea, hideoutStage);
 
         // Edge case, add/update `stand1/stand2/stand3` children
-        if (dbHideoutArea.Type == HideoutAreas.EQUIPMENT_PRESETS_STAND)
+        if (dbHideoutArea.Type == HideoutAreas.EquipmentPresetsStand)
             // Can have multiple 'standx' children depending on upgrade level
         {
             AddMissingPresetStandItemsToProfile(sessionId, hideoutStage, pmcData, dbHideoutArea, output);
@@ -283,8 +283,8 @@ public class HideoutController(
 
         // Don't inform client when upgraded area is hall of fame or equipment stand, BSG doesn't inform client this specific upgrade has occurred
         // will break client if sent
-        HashSet<HideoutAreas> check = [HideoutAreas.PLACE_OF_FAME];
-        if (!check.Contains(dbHideoutArea.Type ?? HideoutAreas.NOTSET))
+        
+        if (ShouldAddContainerUpgradeToClientResponse(dbHideoutArea, profileParentHideoutArea.Level.GetValueOrDefault(1)))
         {
             AddContainerUpgradeToClientOutput(sessionId, keyForHideoutAreaStash, dbHideoutArea, hideoutStage, output);
         }
@@ -293,26 +293,52 @@ public class HideoutController(
         var childDbArea = _databaseService
             .GetHideout()
             .Areas.FirstOrDefault(area => area.ParentArea == dbHideoutArea.Id);
-        if (childDbArea is not null)
+        if (childDbArea is null)
         {
-            // Add key/value to `hideoutAreaStashes` dictionary - used to link hideout area to inventory stash by its id
-            var childAreaTypeKey = ((int) childDbArea.Type).ToString();
-            if (pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(childAreaTypeKey) is null)
-            {
-                pmcData.Inventory.HideoutAreaStashes[childAreaTypeKey] = childDbArea.Id;
-            }
-
-            // Set child area level to same as parent area
-            pmcData.Hideout.Areas.FirstOrDefault(hideoutArea => hideoutArea.Type == childDbArea.Type).Level =
-                pmcData.Hideout.Areas.FirstOrDefault(x => x.Type == profileParentHideoutArea.Type).Level;
-
-            // Add/upgrade stash item in player inventory
-            var childDbAreaStage = childDbArea.Stages[profileParentHideoutArea.Level.ToString()];
-            AddUpdateInventoryItemToProfile(sessionId, pmcData, childDbArea, childDbAreaStage);
-
-            // Inform client of the changes
-            AddContainerUpgradeToClientOutput(sessionId, childAreaTypeKey, childDbArea, childDbAreaStage, output);
+            // No child db area, we're complete
+            return;
         }
+
+        // Add key/value to `hideoutAreaStashes` dictionary - used to link hideout area to inventory stash by its id
+        var childAreaTypeKey = ((int) childDbArea.Type).ToString();
+        if (pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(childAreaTypeKey) is null)
+        {
+            pmcData.Inventory.HideoutAreaStashes[childAreaTypeKey] = childDbArea.Id;
+        }
+
+        // Set child area level to same as parent area
+        pmcData.Hideout.Areas.FirstOrDefault(hideoutArea => hideoutArea.Type == childDbArea.Type).Level =
+            pmcData.Hideout.Areas.FirstOrDefault(area => area.Type == profileParentHideoutArea.Type).Level;
+
+        // Add/upgrade stash item in player inventory
+        if (!childDbArea.Stages.TryGetValue(profileParentHideoutArea.Level.ToString(), out var childDbAreaStage))
+        {
+            _logger.Error($"Unable to find stage: {profileParentHideoutArea.Level} of area: {dbHideoutArea.Id}");
+
+            return;
+        }
+
+        AddUpdateInventoryItemToProfile(sessionId, pmcData, childDbArea, childDbAreaStage);
+
+        // Inform client of the changes
+        AddContainerUpgradeToClientOutput(sessionId, childAreaTypeKey, childDbArea, childDbAreaStage, output);
+
+    }
+
+    /// <summary>
+    /// Should the newly completed hideout area container upgrade/addition be included in client response
+    /// Deny when: area is place of fame + we're upgrading to level 1
+    /// </summary>
+    /// <param name="dbHideoutArea">Hideout area upgraded</param>
+    /// <param name="areaLevel">Level of area upgraded to</param>
+    /// <returns>True = it should be included</returns>
+    private bool ShouldAddContainerUpgradeToClientResponse(HideoutArea dbHideoutArea, int areaLevel)
+    {
+        HashSet<HideoutAreas> areaBlacklist = [HideoutAreas.PlaceOfFame];
+        var isOnAreaBlacklist = areaBlacklist.Contains(dbHideoutArea.Type ?? HideoutAreas.NotSet);
+        var isFirstStage = areaLevel == 1;
+
+        return isOnAreaBlacklist && !isFirstStage;
     }
 
     /// <summary>
@@ -477,7 +503,7 @@ public class HideoutController(
 
         // Handle areas that have resources that can be placed in/taken out of slots from the area
         if (
-            _hideoutAreas.Contains(hideoutArea.Type ?? HideoutAreas.NOTSET)
+            _hideoutAreas.Contains(hideoutArea.Type ?? HideoutAreas.NotSet)
         )
         {
             var response = RemoveResourceFromArea(sessionID, pmcData, request, output, hideoutArea);
@@ -504,10 +530,10 @@ public class HideoutController(
     protected ItemEventRouterResponse RemoveResourceFromArea(string sessionID, PmcData pmcData, HideoutTakeItemOutRequestData removeResourceRequest,
         ItemEventRouterResponse output, BotHideoutArea hideoutArea)
     {
-        var slotIndexToRemove = removeResourceRequest?.Slots.FirstOrDefault();
+        var slotIndexToRemove = removeResourceRequest?.Slots?.FirstOrDefault();
         if (slotIndexToRemove is null)
         {
-            _logger.Warning(
+            _logger.Error(
                 $"Unable to remove resource from area: {removeResourceRequest.AreaType} slot as no slots found in request, RESTART CLIENT IMMEDIATELY"
             );
 
@@ -515,14 +541,15 @@ public class HideoutController(
         }
 
         // Assume only one item in slot
-        var itemToReturn = hideoutArea.Slots?.FirstOrDefault(slot => slot.LocationIndex == slotIndexToRemove)?.Items.FirstOrDefault();
+        var itemToReturn = hideoutArea.Slots?.FirstOrDefault(slot => slot.LocationIndex == slotIndexToRemove)?.Items?.FirstOrDefault();
         if (itemToReturn is null)
         {
-            _logger.Warning($"Unable to remove resource from area: {removeResourceRequest.AreaType} slot as no item found, RESTART CLIENT IMMEDIATELY");
+            _logger.Error($"Unable to remove resource from area: {removeResourceRequest.AreaType} slot as no item found, RESTART CLIENT IMMEDIATELY");
 
             return output;
         }
 
+        // Add the item found in hideout area slot to player stash
         var request = new AddItemDirectRequest
         {
             ItemWithModsToAdd = [itemToReturn.ConvertToItem()],
@@ -538,7 +565,7 @@ public class HideoutController(
             return output;
         }
 
-        // Remove items from slot, locationIndex remains
+        // Remove items from slot, keep locationIndex object
         var hideoutSlotIndex = hideoutArea.Slots.FindIndex(slot => slot.LocationIndex == slotIndexToRemove);
         hideoutArea.Slots[hideoutSlotIndex].Items = null;
 
@@ -923,7 +950,7 @@ public class HideoutController(
             var addToolsRequest = new AddItemsDirectRequest
             {
                 ItemsWithModsToAdd = [toolItem],
-                FoundInRaid = toolItem[0].Upd?.SpawnedInSession ?? false,
+                FoundInRaid = toolItem.FirstOrDefault()?.Upd?.SpawnedInSession ?? false,
                 UseSortingTable = false,
                 Callback = null
             };
@@ -1550,7 +1577,8 @@ public class HideoutController(
     }
 
     /// <summary>
-    ///     Function called every `hideoutConfig.runIntervalSeconds` seconds as part of onUpdate event
+    ///     Called every `hideoutConfig.runIntervalSeconds` seconds as part of onUpdate event
+    /// Updates hideout craft times
     /// </summary>
     public void Update()
     {

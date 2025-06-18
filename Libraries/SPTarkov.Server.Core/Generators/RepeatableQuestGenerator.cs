@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -28,6 +28,7 @@ public class RepeatableQuestGenerator(
     DatabaseService _databaseService,
     LocalisationService _localisationService,
     ConfigServer _configServer,
+    SeasonalEventService _seasonalEventService,
     ICloner _cloner
 )
 {
@@ -155,9 +156,9 @@ public class RepeatableQuestGenerator(
         // the actual difficulty we calculate the minimum and maximum difficulty (max being the sum of max of each condition type
         // times the number of kills we have to perform):
 
-        // the minimum difficulty is the difficulty for the most probable (= easiest target) with no additional conditions
+        // The minimum difficulty is the difficulty for the most probable (= easiest target) with no additional conditions
         var minDifficulty =
-            1 / targetsConfig.MaxProbability(); // min difficulty is lowest amount of scavs without any constraints
+            1 / targetsConfig.MaxProbability(); // min difficulty is the lowest amount of scavs without any constraints
 
         // Target on bodyPart max. difficulty is that of the least probable element
         var maxTargetDifficulty = 1 / targetsConfig.MinProbability();
@@ -169,7 +170,7 @@ public class RepeatableQuestGenerator(
         var maxKillDifficulty = eliminationConfig.MaxKills;
 
         var targetPool = questTypePool.Pool.Elimination;
-        targetsConfig = targetsConfig.Filter(x => questTypePool.Pool.Elimination.Targets.ContainsKey(x.Key));
+        targetsConfig = targetsConfig.Filter(x => targetPool.Targets.ContainsKey(x.Key));
 
         if (targetsConfig.Count == 0 || targetsConfig.All(x => x.Data.IsBoss.GetValueOrDefault(false)))
         {
@@ -183,10 +184,10 @@ public class RepeatableQuestGenerator(
         var botTypeToEliminate = targetsConfig.Draw()[0];
         var targetDifficulty = 1 / targetsConfig.Probability(botTypeToEliminate);
 
-        questTypePool.Pool.Elimination.Targets.TryGetValue(botTypeToEliminate, out var targetLocationPool);
+        targetPool.Targets.TryGetValue(botTypeToEliminate, out var targetLocationPool);
         var locations = targetLocationPool.Locations;
 
-        // we use any as location if "any" is in the pool and we don't hit the specific location random
+        // we use any as location if "any" is in the pool, and we don't hit the specific location random
         // we use any also if the random condition is not met in case only "any" was in the pool
         var locationKey = "any";
         if (locations.Contains("any") &&
@@ -194,7 +195,7 @@ public class RepeatableQuestGenerator(
            )
         {
             locationKey = "any";
-            questTypePool.Pool.Elimination.Targets.Remove(botTypeToEliminate);
+            targetPool.Targets.Remove(botTypeToEliminate);
         }
         else
         {
@@ -206,7 +207,7 @@ public class RepeatableQuestGenerator(
                 locationKey = _randomUtil.DrawRandomFromList(locations).FirstOrDefault();
 
                 // Get a pool of locations the chosen bot type can be eliminated on
-                if (!questTypePool.Pool.Elimination.Targets.TryGetValue(
+                if (!targetPool.Targets.TryGetValue(
                         botTypeToEliminate,
                         out var possibleLocationPool
                     ))
@@ -224,13 +225,13 @@ public class RepeatableQuestGenerator(
                 {
                     // TODO: Why do any of this?!
                     // Remove chosen bot to eliminate from pool
-                    questTypePool.Pool.Elimination.Targets.Remove(botTypeToEliminate);
+                    targetPool.Targets.Remove(botTypeToEliminate);
                 }
             }
             else
             {
-                // never should reach this if everything works out
-                _logger.Error("Encountered issue when creating Elimination quest. Please report.");
+                // Never should reach this if everything works out
+                _logger.Error(_localisationService.GetText("quest-repeatable_elimination_generation_failed_please_report"));
             }
         }
 
@@ -557,25 +558,27 @@ public class RepeatableQuestGenerator(
         RepeatableQuestConfig repeatableConfig
     )
     {
-        var completionConfig = repeatableConfig.QuestConfig.Completion;
+        var completionConfig = repeatableConfig?.QuestConfig?.Completion;
+        if (completionConfig is null)
+        {
+            _logger.Error("Unable to generate Completion quest, no Completion config found");
+            return null;
+        }
         var levelsConfig = repeatableConfig.RewardScaling.Levels;
         var roublesConfig = repeatableConfig.RewardScaling.Roubles;
 
         var quest = GenerateRepeatableTemplate("Completion", traderId, repeatableConfig.Side, sessionId);
 
-        // Filter the items.json items to items the player must retrieve to complete quest: shouldn't be a quest item or "non-existant"
-        var possibleItemsToRetrievePool = _repeatableQuestRewardGenerator.GetRewardableItems(
-            repeatableConfig,
-            traderId
-        );
+        // Filter the items.json items to items the player must retrieve to complete quest: shouldn't be a quest item or "non-existent"
+        var itemsToRetrievePool = GetItemsToRetrievePool(completionConfig, repeatableConfig.RewardBlacklist);
 
-        // Be fair, don't var the items be more expensive than the reward
-        var multi = _randomUtil.GetDouble(0.5, 1);
+        // Be fair, don't value the items be more expensive than the reward
+        var multiplier = _randomUtil.GetDouble(0.5, 1);
         var roublesBudget = Math.Floor(
-            (double) (_mathUtil.Interp1(pmcLevel, levelsConfig, roublesConfig) * multi)
+            (double) (_mathUtil.Interp1(pmcLevel, levelsConfig, roublesConfig) * multiplier)
         );
         roublesBudget = Math.Max(roublesBudget, 5000d);
-        var itemSelection = possibleItemsToRetrievePool.Where(x => _itemHelper.GetItemPrice(x.Id) < roublesBudget
+        var itemSelection = itemsToRetrievePool.Where(itemTpl => _itemHelper.GetItemPrice(itemTpl) < roublesBudget
             )
             .ToList();
 
@@ -585,7 +588,7 @@ public class RepeatableQuestGenerator(
         {
             var itemWhitelist = _databaseService.GetTemplates().RepeatableQuests.Data.Completion.ItemsWhitelist;
 
-            // Filter and concatenate the arrays according to current player level
+            // Filter and concatenate items according to current player level
             var itemIdsWhitelisted = itemWhitelist
                 .Where(p => p.MinPlayerLevel <= pmcLevel)
                 .SelectMany(x => x.ItemIds)
@@ -593,8 +596,8 @@ public class RepeatableQuestGenerator(
             itemSelection = itemSelection.Where(x =>
                     {
                         // Whitelist can contain item tpls and item base type ids
-                        return itemIdsWhitelisted.Any(v => _itemHelper.IsOfBaseclass(x.Id, v)) ||
-                               itemIdsWhitelisted.Contains(x.Id);
+                        return itemIdsWhitelisted.Any(v => _itemHelper.IsOfBaseclass(x, v)) ||
+                               itemIdsWhitelisted.Contains(x);
                     }
                 )
                 .ToList();
@@ -607,7 +610,7 @@ public class RepeatableQuestGenerator(
         {
             var itemBlacklist = _databaseService.GetTemplates().RepeatableQuests.Data.Completion.ItemsBlacklist;
 
-            // we filter and concatenate the arrays according to current player level
+            // Filter and concatenate the arrays according to current player level
             var itemIdsBlacklisted = itemBlacklist
                 .Where(p => p.MinPlayerLevel <= pmcLevel)
                 .SelectMany(x => x.ItemIds)
@@ -615,13 +618,14 @@ public class RepeatableQuestGenerator(
 
             itemSelection = itemSelection.Where(x =>
                     {
-                        return itemIdsBlacklisted.All(v => !_itemHelper.IsOfBaseclass(x.Id, v)) ||
-                               !itemIdsBlacklisted.Contains(x.Id);
+                        return itemIdsBlacklisted.All(v => !_itemHelper.IsOfBaseclass(x, v)) ||
+                               !itemIdsBlacklisted.Contains(x);
                     }
                 )
                 .ToList();
         }
 
+        // Filtering too harsh
         if (!itemSelection.Any())
         {
             _logger.Error(
@@ -633,10 +637,7 @@ public class RepeatableQuestGenerator(
             return null;
         }
 
-        // Draw items to ask player to retrieve
-        var isAmmo = 0;
-
-        // Store the indexes of items we are asking player to provide
+        // Store the indexes of items we are asking player to supply
         var distinctItemsToRetrieveCount = _randomUtil.GetInt(1, completionConfig.UniqueItemCount.Value);
         var chosenRequirementItemsTpls = new List<string>();
         var usedItemIndexes = new HashSet<int>();
@@ -674,32 +675,18 @@ public class RepeatableQuestGenerator(
                 return null;
             }
 
+            // Store index of item we've already chosen for later checking
             usedItemIndexes.Add(chosenItemIndex);
 
-            var itemSelected = itemSelection[chosenItemIndex];
-            var itemUnitPrice = _itemHelper.GetItemPrice(itemSelected.Id).Value;
+            var tplChosen = itemSelection[chosenItemIndex];
+            var itemPrice = _itemHelper.GetItemPrice(tplChosen).Value;
             var minValue = completionConfig.MinimumRequestedAmount.Value;
             var maxValue = completionConfig.MaximumRequestedAmount.Value;
-            if (_itemHelper.IsOfBaseclass(itemSelected.Id, BaseClasses.AMMO))
-            {
-                // Prevent multiple ammo requirements from being picked
-                if (isAmmo > 0 && isAmmo < _maxRandomNumberAttempts)
-                {
-                    isAmmo++;
-                    i--;
-
-                    continue;
-                }
-
-                isAmmo++;
-                minValue = completionConfig.MinimumRequestedBulletAmount.Value;
-                maxValue = completionConfig.MaximumRequestedBulletAmount.Value;
-            }
 
             var value = minValue;
 
             // Get the value range within budget
-            var x = (int) Math.Floor(roublesBudget / itemUnitPrice);
+            var x = (int) Math.Floor(roublesBudget / itemPrice);
             maxValue = Math.Min(maxValue, x);
             if (maxValue > minValue)
                 // If it doesn't blow the budget we have for the request, draw a random amount of the selected
@@ -708,19 +695,21 @@ public class RepeatableQuestGenerator(
                 value = _randomUtil.RandInt(minValue, maxValue + 1);
             }
 
-            roublesBudget -= value * itemUnitPrice;
+            roublesBudget -= value * itemPrice;
 
-            // Push a CompletionCondition with the item and the amount of the item
-            chosenRequirementItemsTpls.Add(itemSelected.Id);
-            quest.Conditions.AvailableForFinish.Add(GenerateCompletionAvailableForFinish(itemSelected.Id, value, repeatableConfig.QuestConfig.Completion));
+            // Push a CompletionCondition with the item and the amount of the item into quest
+            chosenRequirementItemsTpls.Add(tplChosen);
+            quest.Conditions.AvailableForFinish.Add(GenerateCompletionAvailableForFinish(tplChosen, value, repeatableConfig.QuestConfig.Completion));
 
+            // Is there budget left for more items
             if (roublesBudget > 0)
             {
-                // Reduce the list possible items to fulfill the new budget constraint
-                itemSelection = itemSelection.Where(dbItem => _itemHelper.GetItemPrice(dbItem.Id) < roublesBudget)
+                // Reduce item pool to fit budget
+                itemSelection = itemSelection.Where(tpl => _itemHelper.GetItemPrice(tpl) < roublesBudget)
                     .ToList();
                 if (!itemSelection.Any())
                 {
+                    // Nothing fits new budget, exit
                     break;
                 }
             }
@@ -740,6 +729,44 @@ public class RepeatableQuestGenerator(
         );
 
         return quest;
+    }
+
+    /// <summary>
+    /// Generate a pool of item tpls the player should reasonably be able to retrieve
+    /// </summary>
+    /// <param name="completionConfig">Completion quest type config</param>
+    /// <param name="itemTplBlacklist">Item tpls to not add to pool</param>
+    /// <returns>Set of item tpls</returns>
+    protected HashSet<string> GetItemsToRetrievePool(Completion completionConfig, HashSet<string> itemTplBlacklist)
+    {
+        // Get seasonal items that should not be added to pool as seasonal event is not active
+        var seasonalItems = _seasonalEventService.GetInactiveSeasonalEventItems();
+
+        // Check for specific base classes which don't make sense as reward item
+        // also check if the price is greater than 0; there are some items whose price can not be found
+        return _databaseService.GetItems()
+            .Values.Where(itemTemplate =>
+                {
+                    // Base "Item" item has no parent, ignore it
+                    if (itemTemplate.Parent == string.Empty)
+                    {
+                        return false;
+                    }
+
+                    if (seasonalItems.Contains(itemTemplate.Id))
+                    {
+                        return false;
+                    }
+
+                    // Valid reward items share same logic as items to retrieve
+                    return _repeatableQuestRewardGenerator.IsValidRewardItem(
+                        itemTemplate.Id,
+                        itemTplBlacklist,
+                        completionConfig.RequiredItemTypeBlacklist
+                    );
+                }
+            ).Select(item => item.Id)
+            .ToHashSet();
     }
 
     /// <summary>

@@ -5,12 +5,18 @@ namespace UnitTests.Tests.Utils;
 [TestClass]
 public class MathUtilTests
 {
-    protected MathUtil _mathUtil = new();
+    private MathUtil _mathUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _mathUtil = DI.GetService<MathUtil>();
+    }
 
     [TestMethod]
     public void ListSumTest()
     {
-        var test = new List<double>
+        var test = new List<float>
         {
             1.1f,
             2.1f,

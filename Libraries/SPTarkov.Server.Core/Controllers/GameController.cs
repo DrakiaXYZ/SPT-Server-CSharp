@@ -1,5 +1,4 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Game;
@@ -22,6 +21,7 @@ namespace SPTarkov.Server.Core.Controllers;
 [Injectable]
 public class GameController(
     ISptLogger<GameController> _logger,
+    IReadOnlyList<SptMod> _loadedMods,
     ConfigServer _configServer,
     DatabaseService _databaseService,
     TimeUtil _timeUtil,
@@ -41,7 +41,6 @@ public class GameController(
     RaidTimeAdjustmentService _raidTimeAdjustmentService,
     ProfileActivityService _profileActivityService,
     CreateProfileService _createProfileService,
-    ApplicationContext _applicationContext,
     ICloner _cloner
 )
 {
@@ -60,8 +59,7 @@ public class GameController(
     /// <param name="startTimeStampMs"></param>
     public void GameStart(string url, string? sessionId, long startTimeStampMs)
     {
-        // Store client start time in app context
-        _applicationContext.AddValue(ContextVariableType.CLIENT_START_TIMESTAMP, $"{sessionId}_{startTimeStampMs}");
+        _profileActivityService.AddActiveProfile(sessionId, startTimeStampMs);
 
         if (sessionId is null)
         {
@@ -472,13 +470,12 @@ public class GameController(
     protected void SaveActiveModsToProfile(SptProfile fullProfile)
     {
         fullProfile.SptData!.Mods ??= [];
-        var mods = _applicationContext?.GetLatestValue(ContextVariableType.LOADED_MOD_ASSEMBLIES).GetValue<List<SptMod>>();
 
-        foreach (var mod in mods)
+        foreach (var mod in _loadedMods)
         {
             if (
                 fullProfile.SptData.Mods.Any(m =>
-                    m.Author == mod.PackageJson.Author && m.Version == mod.PackageJson.Version && m.Name == mod.PackageJson.Name
+                    m.Author == mod.ModMetadata.Author && m.Version == mod.ModMetadata.Version && m.Name == mod.ModMetadata.Name
                 )
             )
             {
@@ -489,10 +486,10 @@ public class GameController(
             fullProfile.SptData.Mods.Add(
                 new ModDetails
                 {
-                    Author = mod.PackageJson.Author,
-                    Version = mod.PackageJson.Version,
-                    Name = mod.PackageJson.Name,
-                    Url = mod.PackageJson.Url,
+                    Author = mod.ModMetadata.Author,
+                    Version = mod.ModMetadata.Version,
+                    Name = mod.ModMetadata.Name,
+                    Url = mod.ModMetadata.Url,
                     DateAdded = _timeUtil.GetTimeStamp()
                 }
             );

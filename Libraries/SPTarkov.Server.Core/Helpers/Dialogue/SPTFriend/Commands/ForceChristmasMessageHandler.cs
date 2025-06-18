@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
@@ -21,7 +21,7 @@ public class ForceChristmasMessageHandler(
 
     public bool CanHandle(string message)
     {
-        return message.ToLower() == "hohoho";
+        return string.Equals(message, "hohoho", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Process(string sessionId, UserDialogInfo sptFriendUser, PmcData? sender, object? extraInfo = null)

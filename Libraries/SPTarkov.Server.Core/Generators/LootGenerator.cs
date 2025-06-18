@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -171,35 +171,58 @@ public class LootGenerator(
 
     /// <summary>
     ///     Generate An array of items
-    ///     TODO - handle weapon presets/ammo packs
+    ///     TODO - handle ammo packs
     /// </summary>
-    /// <param name="forcedLootDict">Dictionary of item tpls with minmax values</param>
+    /// <param name="forcedLootToAdd">Dictionary of item tpls with minmax values</param>
     /// <returns>Array of Item</returns>
-    public List<List<Item>> CreateForcedLoot(Dictionary<string, MinMax<int>> forcedLootDict)
+    public List<List<Item>> CreateForcedLoot(Dictionary<string, MinMax<int>> forcedLootToAdd)
     {
         var result = new List<List<Item>>();
 
-        var forcedItems = forcedLootDict;
-
-        foreach (var forcedItemKvP in forcedItems)
+        var defaultPresets = _presetHelper.GetDefaultPresetsByTplKey();
+        foreach (var (itemTpl, details) in forcedLootToAdd)
         {
-            var details = forcedLootDict[forcedItemKvP.Key];
+            // How many of this item we want
             var randomisedItemCount = _randomUtil.GetInt(details.Min, details.Max);
 
-            // Add forced loot item to result
+            // Check if item being added has a preset and use that instead
+            if (defaultPresets.ContainsKey(itemTpl))
+            {
+                // Use default preset data
+                if (defaultPresets.TryGetValue(itemTpl, out var preset))
+                {
+                    // Add the chosen preset as many times as randomisedItemCount states
+                    for (var i = 0; i < randomisedItemCount; i++)
+                    {
+                        // Clone preset and alter Ids to be unique
+                        var presetWithUniqueIds = _itemHelper.ReplaceIDs(_cloner.Clone(preset.Items));
+
+                        // Add to results
+                        result.Add(presetWithUniqueIds);
+                    }
+                }
+
+                continue;
+
+            }
+
+            // Non-preset item to be added
             var newLootItem = new Item
             {
                 Id = _hashUtil.Generate(),
-                Template = forcedItemKvP.Key,
+                Template = itemTpl,
                 Upd = new Upd
                 {
                     StackObjectsCount = randomisedItemCount,
                     SpawnedInSession = true
                 }
             };
-
             var splitResults = _itemHelper.SplitStack(newLootItem);
-            result.Add(splitResults);
+            foreach (var splitItem in splitResults)
+            {
+                // Add as separate lists
+                result.Add([splitItem]);
+            }
         }
 
         return result;
@@ -232,6 +255,7 @@ public class LootGenerator(
             // Get all items that match the blacklisted types and fold into item blacklist
             var itemTypeBlacklist = _itemFilterService.GetItemRewardBaseTypeBlacklist();
             var itemsMatchingTypeBlacklist = itemsDb
+                .Where(templateItem => !string.IsNullOrEmpty(templateItem.Parent)) // Ignore items without parents
                 .Where(templateItem => _itemHelper.IsOfBaseclasses(templateItem.Parent, itemTypeBlacklist))
                 .Select(templateItem => templateItem.Id);
 
@@ -398,21 +422,22 @@ public class LootGenerator(
         HashSet<string> itemBlacklist,
         List<List<Item>> result)
     {
-        // Choose random preset and get details from item db using encyclopedia value (encyclopedia === tplId)
-        var chosenPreset = _randomUtil.GetArrayValue(presetPool);
-        if (chosenPreset is null)
+        if (presetPool.Count == 0)
         {
-            _logger.Warning("Unable to find random preset in given presets, skipping");
+            _logger.Warning(_localisationService.GetText("loot-preset_pool_is_empty"));
 
             return false;
         }
 
+        // Choose random preset and get details from item db using encyclopedia value (encyclopedia === tplId)
+        var chosenPreset = _randomUtil.GetArrayValue(presetPool);
+
         // No `_encyclopedia` property, not possible to reliably get root item tpl
-        if (chosenPreset.Encyclopedia is null)
+        if (chosenPreset?.Encyclopedia is null)
         {
             if (_logger.IsLogEnabled(LogLevel.Debug))
             {
-                _logger.Debug($"Preset with id: {chosenPreset?.Id} lacks encyclopedia property, skipping");
+                _logger.Warning(_localisationService.GetText("loot-chosen_preset_missing_encyclopedia_value", chosenPreset?.Id));
             }
 
             return false;
@@ -431,13 +456,13 @@ public class LootGenerator(
         }
 
         // Skip preset if root item is blacklisted
-        if (itemBlacklist.Contains(chosenPreset.Items[0].Template))
+        if (itemBlacklist.Contains(chosenPreset.Items.FirstOrDefault().Template))
         {
             return false;
         }
 
         // Some custom mod items lack a parent property
-        if (itemDbDetails.Value.Parent is null)
+        if (itemDbDetails.Value?.Parent is null)
         {
             _logger.Error(_localisationService.GetText("loot-item_missing_parentid", itemDbDetails.Value?.Name));
 

@@ -1,4 +1,4 @@
-﻿using SPTarkov.Common.Annotations;
+﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -18,13 +18,12 @@ public class RagfairAssortGenerator(
     PresetHelper presetHelper,
     SeasonalEventService seasonalEventService,
     ConfigServer configServer,
-    ICloner _cloner
+    ICloner cloner
 )
 {
-    protected List<List<Item>> generatedAssortItems = [];
-    protected RagfairConfig ragfairConfig = configServer.GetConfig<RagfairConfig>();
+    protected readonly RagfairConfig RagfairConfig = configServer.GetConfig<RagfairConfig>();
 
-    protected List<string> ragfairItemInvalidBaseTypes =
+    protected readonly List<string> RagfairItemInvalidBaseTypes =
     [
         BaseClasses.LOOT_CONTAINER, // Safe, barrel cache etc
         BaseClasses.STASH, // Player inventory stash
@@ -42,21 +41,7 @@ public class RagfairAssortGenerator(
     /// <returns> List with children lists of items </returns>
     public List<List<Item>> GetAssortItems()
     {
-        if (!AssortsAreGenerated())
-        {
-            generatedAssortItems = GenerateRagfairAssortItems();
-        }
-
-        return generatedAssortItems;
-    }
-
-    /// <summary>
-    ///     Check if internal generatedAssortItems list has objects
-    /// </summary>
-    /// <returns> True if array has objects </returns>
-    protected bool AssortsAreGenerated()
-    {
-        return generatedAssortItems.Count > 0;
+        return GenerateRagfairAssortItems();
     }
 
     /// <summary>
@@ -79,7 +64,7 @@ public class RagfairAssortGenerator(
         foreach (var preset in presets)
         {
             // Update Ids and clone
-            var presetAndMods = itemHelper.ReplaceIDs(_cloner.Clone(preset.Items));
+            var presetAndMods = itemHelper.ReplaceIDs(cloner.Clone(preset.Items));
             itemHelper.RemapRootItemId(presetAndMods);
 
             // Add presets base item tpl to the processed list so its skipped later on when processing items
@@ -99,14 +84,14 @@ public class RagfairAssortGenerator(
 
         foreach (var item in dbItemsClone)
         {
-            if (!itemHelper.IsValidItem(item.Id, ragfairItemInvalidBaseTypes))
+            if (!itemHelper.IsValidItem(item.Id, RagfairItemInvalidBaseTypes))
             {
                 continue;
             }
 
             // Skip seasonal items when not in-season
             if (
-                ragfairConfig.Dynamic.RemoveSeasonalItemsWhenNotInEvent &&
+                RagfairConfig.Dynamic.RemoveSeasonalItemsWhenNotInEvent &&
                 !seasonalEventActive &&
                 seasonalItemTplBlacklist.Contains(item.Id)
             )
@@ -123,7 +108,7 @@ public class RagfairAssortGenerator(
             var ragfairAssort = CreateRagfairAssortRootItem(
                 item.Id,
                 item.Id
-            ); // tplid and id must be the same so hideout recipe rewards work
+            ); // tpl and id must be the same so hideout recipe rewards work
 
             results.Add([ragfairAssort]);
         }
@@ -138,7 +123,7 @@ public class RagfairAssortGenerator(
     /// <returns> List of Preset </returns>
     protected List<Preset> GetPresetsToAdd()
     {
-        return ragfairConfig.Dynamic.ShowDefaultPresetsOnly
+        return RagfairConfig.Dynamic.ShowDefaultPresetsOnly
             ? presetHelper.GetDefaultPresets().Values.ToList()
             : presetHelper.GetAllPresets();
     }

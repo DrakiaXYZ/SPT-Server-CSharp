@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Presets;
@@ -27,10 +27,10 @@ public class PresetHelper(
         _lookup = input;
     }
 
-    /**
-     * Get default weapon and equipment presets
-     * @returns Dictionary
-     */
+    /// <summary>
+    /// Get weapon and armor default presets, keyed to preset id NOT item tpl
+    /// </summary>
+    /// <returns></returns>
     public Dictionary<string, Preset> GetDefaultPresets()
     {
         var weapons = GetDefaultWeaponPresets();
@@ -39,10 +39,26 @@ public class PresetHelper(
         return weapons.Union(equipment).ToDictionary();
     }
 
-    /**
-     * Get default weapon presets
-     * @returns Dictionary
-     */
+    /// <summary>
+    /// Get weapon and armor default presets, keyed to root items tpl
+    /// </summary>
+    /// <returns>dictionary of presets keyed by the root items tpl</returns>
+    public Dictionary<string, Preset> GetDefaultPresetsByTplKey()
+    {
+        // Weapons and equipment keyed by their preset id
+        var weapons = GetDefaultWeaponPresets().Values;
+        var equipment = GetDefaultEquipmentPresets().Values;
+
+        return weapons
+            .Concat(equipment)
+            .Where(preset => preset.Items.Count > 0) // Some safety to prevent nullref
+            .ToDictionary(preset => preset.Items.FirstOrDefault().Template);
+    }
+
+    /// <summary>
+    /// Get default weapon presets
+    /// </summary>
+    /// <returns></returns>
     public Dictionary<string, Preset> GetDefaultWeaponPresets()
     {
         if (_defaultWeaponPresets is null)
@@ -58,10 +74,10 @@ public class PresetHelper(
         return _defaultWeaponPresets;
     }
 
-    /**
-     * Get default equipment presets
-     * @returns Dictionary
-     */
+    /// <summary>
+    /// Get default equipment presets
+    /// </summary>
+    /// <returns>Dictionary</returns>
     public Dictionary<string, Preset> GetDefaultEquipmentPresets()
     {
         if (_defaultEquipmentPresets == null)
@@ -77,6 +93,11 @@ public class PresetHelper(
         return _defaultEquipmentPresets;
     }
 
+    /// <summary>
+    /// Is the provided id a preset id
+    /// </summary>
+    /// <param name="id">Value to check</param>
+    /// <returns>True = preset exists for this id</returns>
     public bool IsPreset(string id)
     {
         if (string.IsNullOrEmpty(id))
@@ -98,6 +119,11 @@ public class PresetHelper(
         return IsPreset(id) && _itemHelper.IsOfBaseclass(GetPreset(id).Encyclopedia, baseClass);
     }
 
+    /// <summary>
+    /// Does the provided tpl have a preset
+    /// </summary>
+    /// <param name="templateId">Tpl id to check</param>
+    /// <returns>True if preset exists for tpl</returns>
     public bool HasPreset(string templateId)
     {
         return _lookup.ContainsKey(templateId);
@@ -108,6 +134,10 @@ public class PresetHelper(
         return _cloner.Clone(_databaseService.GetGlobals().ItemPresets[id]);
     }
 
+    /// <summary>
+    /// Get all presets from globals db
+    /// </summary>
+    /// <returns>List</returns>
     public List<Preset> GetAllPresets()
     {
         return _cloner.Clone(_databaseService.GetGlobals().ItemPresets.Values.ToList());
@@ -186,12 +216,12 @@ public class PresetHelper(
 
         return rootItem.Template;
     }
-
-    /**
-     * Return the price of the preset for the given item tpl, or for the tpl itself if no preset exists
-     * @param tpl The item template to get the price of
-     * @returns The price of the given item preset, or base item if no preset exists
-     */
+    
+    /// <summary>
+    /// Return the price of the preset for the given item tpl, or for the tpl itself if no preset exists
+    /// </summary>
+    /// <param name="tpl">The item template to get the price of</param>
+    /// <returns>The price of the given item preset, or base item if no preset exists</returns>
     public double GetDefaultPresetOrItemPrice(string tpl)
     {
         // Get default preset if it exists

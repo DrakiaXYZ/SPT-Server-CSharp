@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -198,7 +198,7 @@ public class EventOutputHolder
         foreach (var production in productions)
         {
             if (production.Value is null)
-                // Could be cancelled production, skip item to save processing
+            // Could be cancelled production, skip item to save processing
             {
                 continue;
             }

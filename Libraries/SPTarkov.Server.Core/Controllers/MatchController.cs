@@ -1,5 +1,5 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -16,8 +16,9 @@ public class MatchController(
     SaveServer _saveServer,
     MatchLocationService _matchLocationService,
     ConfigServer _configServer,
-    ApplicationContext _applicationContext,
     LocationLifecycleService _locationLifecycleService,
+    ProfileActivityService _profileActivityService,
+    WeatherHelper _weatherHelper,
     ICloner _cloner
 )
 {
@@ -98,8 +99,11 @@ public class MatchController(
     /// <param name="sessionId">Session/Player id</param>
     public void ConfigureOfflineRaid(GetRaidConfigurationRequestData request, string sessionId)
     {
+        // set IsNightRaid to use it later for bot inventory generation
+        request.IsNightRaid = _weatherHelper.IsNightTime(request.TimeVariant, request.Location);
+
         // Store request data for access during bot generation
-        _applicationContext.AddValue(ContextVariableType.RAID_CONFIGURATION, request);
+        _profileActivityService.GetProfileActivityRaidData(sessionId).RaidConfiguration = request;
 
         // TODO: add code to strip PMC of equipment now they've started the raid
 

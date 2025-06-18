@@ -2,9 +2,8 @@
 using System.Security.Authentication;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Primitives;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -15,11 +14,11 @@ namespace SPTarkov.Server.Core.Servers;
 
 [Injectable(InjectionType.Singleton)]
 public class HttpServer(
+    WebApplicationBuilder _builder,
     ISptLogger<HttpServer> _logger,
     LocalisationService _localisationService,
     ConfigServer _configServer,
     CertificateHelper _certificateHelper,
-    ApplicationContext _applicationContext,
     WebSocketServer _webSocketServer,
     ProfileActivityService _profileActivityService,
     IEnumerable<IHttpListener> _httpListeners
@@ -27,20 +26,21 @@ public class HttpServer(
 {
     private readonly HttpConfig _httpConfig = _configServer.GetConfig<HttpConfig>();
     private bool _started;
+    private WebApplication? _webApplication;
 
     /// <summary>
     ///     Handle server loading event
     /// </summary>
     /// <param name="builder"> Server builder </param>
     /// <exception cref="Exception"> Throws Exception when WebApplicationBuiler or WebApplication are null </exception>
-    public void Load(WebApplicationBuilder? builder)
+    public void Load()
     {
-        if (builder is null)
+        if (_builder is null)
         {
             throw new Exception("WebApplicationBuilder is null in HttpServer.Load()");
         }
 
-        builder.WebHost.ConfigureKestrel(options =>
+        _builder.WebHost.ConfigureKestrel(options =>
         {
             options.Listen(IPAddress.Parse(_httpConfig.Ip), _httpConfig.Port, listenOptions =>
             {
@@ -53,29 +53,35 @@ public class HttpServer(
             });
         });
 
-        var app = builder.Build();
+        _webApplication = _builder.Build();
 
-        if (app is null)
+        if (_webApplication is null)
         {
             throw new Exception("WebApplication is null in HttpServer.Load()");
         }
 
         // Enable web socket
-        app.UseWebSockets(new WebSocketOptions
+        _webApplication.UseWebSockets(new WebSocketOptions
         {
             // Every minute a heartbeat is sent to keep the connection alive.
             KeepAliveInterval = TimeSpan.FromSeconds(60)
         });
 
-        app?.Use((HttpContext req, RequestDelegate _) =>
+        _webApplication.Use(async (HttpContext req, RequestDelegate _) =>
             {
-                return Task.Factory.StartNew(async () => await HandleFallback(req));
+                await HandleFallback(req);
             }
         );
+    }
 
-        _started = true;
+    public async Task StartAsync()
+    {
+        if (_webApplication != null && !_started)
+        {
+            _started = true;
+            await _webApplication.RunAsync();
+        }
 
-        _applicationContext.AddValue(ContextVariableType.WEB_APPLICATION, app);
     }
 
     private async Task HandleFallback(HttpContext context)
@@ -103,11 +109,16 @@ public class HttpServer(
 
         try
         {
-            _httpListeners.SingleOrDefault(l => l.CanHandle(sessionId, context.Request))?.Handle(sessionId, context.Request, context.Response);
+            var listener = _httpListeners.FirstOrDefault(l => l.CanHandle(sessionId, context.Request));
+
+            if (listener != null)
+            {
+                await listener.Handle(sessionId, context.Request, context.Response);
+            }
         }
         catch (Exception ex)
         {
-            _logger.Debug("Error handling request: " + context.Request.Path);
+            _logger.Critical("Error handling request: " + context.Request.Path);
             _logger.Critical(ex.Message);
             _logger.Critical(ex.StackTrace);
 #if DEBUG

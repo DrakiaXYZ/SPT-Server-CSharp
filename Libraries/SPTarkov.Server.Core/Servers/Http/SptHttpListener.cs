@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Text;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Utils;
@@ -13,57 +13,38 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 namespace SPTarkov.Server.Core.Servers.Http;
 
 [Injectable]
-public class SptHttpListener : IHttpListener
+public class SptHttpListener(
+    HttpRouter _httpRouter,
+    IEnumerable<ISerializer> _serializers,
+    ISptLogger<SptHttpListener> _logger,
+    ISptLogger<RequestLogger> _requestsLogger,
+    JsonUtil _jsonUtil,
+    HttpResponseUtil _httpResponseUtil,
+    LocalisationService _localisationService
+    ) : IHttpListener
 {
-    // we want to reserve on the list 512KB capacity before it needs to expand, should be enough for most requests
-    private const int InitialCapacityForListBuffer = 1024 * 512;
-
     // We want to read 1KB at a time, for most request this is already big enough
     private const int BodyReadBufferSize = 1024 * 1;
 
     private static readonly ImmutableHashSet<string> SupportedMethods = ["GET", "PUT", "POST"];
-    protected readonly HttpResponseUtil _httpResponseUtil;
-    protected readonly JsonUtil _jsonUtil;
-    protected readonly LocalisationService _localisationService;
-    protected readonly ISptLogger<SptHttpListener> _logger;
-    protected readonly ISptLogger<RequestLogger> _requestLogger;
 
 
-    protected readonly HttpRouter _router;
-    protected readonly IEnumerable<ISerializer> _serializers;
-
-    public SptHttpListener(
-        HttpRouter httpRouter,
-        IEnumerable<ISerializer> serializers,
-        ISptLogger<SptHttpListener> logger,
-        ISptLogger<RequestLogger> requestsLogger,
-        JsonUtil jsonUtil,
-        HttpResponseUtil httpHttpResponseUtil,
-        LocalisationService localisationService
-    )
-    {
-        _router = httpRouter;
-        _serializers = serializers;
-        _logger = logger;
-        _requestLogger = requestsLogger;
-        _httpResponseUtil = httpHttpResponseUtil;
-        _localisationService = localisationService;
-        _jsonUtil = jsonUtil;
-    }
+    protected readonly HttpRouter _router = _httpRouter;
+    protected readonly IEnumerable<ISerializer> _serializers = _serializers;
 
     public bool CanHandle(string _, HttpRequest req)
     {
         return SupportedMethods.Contains(req.Method);
     }
 
-    public void Handle(string sessionId, HttpRequest req, HttpResponse resp)
+    public async Task Handle(string sessionId, HttpRequest req, HttpResponse resp)
     {
         switch (req.Method)
         {
             case "GET":
                 {
-                    var response = GetResponse(sessionId, req, null);
-                    SendResponse(sessionId, req, resp, null, response);
+                    var response = await GetResponse(sessionId, req, null);
+                    await SendResponse(sessionId, req, resp, null, response);
                     break;
                 }
             // these are handled almost identically.
@@ -75,49 +56,50 @@ public class SptHttpListener : IHttpListener
                     // debug = 1 are as well. This should be fixed.
                     // let compressed = req.headers["content-encoding"] === "deflate";
                     var requestIsCompressed = !req.Headers.TryGetValue("requestcompressed", out var compressHeader) ||
-                                              compressHeader != "0";
+                      compressHeader != "0";
                     var requestCompressed = req.Method == "PUT" || requestIsCompressed;
 
-                    // reserve some capacity to avoid having the list to resize
-                    var totalRead = new List<byte>(InitialCapacityForListBuffer);
-                    // read 1KB at a time
-                    var memory = new Memory<byte>(new byte[BodyReadBufferSize]);
-                    var readTask = req.Body.ReadAsync(memory).AsTask();
-                    readTask.Wait();
-                    var readBytes = 0;
-                    while (readTask.Result != 0)
+                    var body = string.Empty;
+                    using MemoryStream bufferStream = new();
+
+                    var buffer = new byte[BodyReadBufferSize];
+                    int bytesRead;
+
+                    while ((bytesRead = await req.Body.ReadAsync(buffer)) > 0)
                     {
-                        readBytes += readTask.Result;
-                        totalRead.AddRange(memory[..readTask.Result].ToArray());
-                        memory = new Memory<byte>(new byte[BodyReadBufferSize]);
-                        readTask = req.Body.ReadAsync(memory).AsTask();
-                        readTask.Wait();
+                        await bufferStream.WriteAsync(buffer.AsMemory(0, bytesRead));
                     }
 
-                    string value;
+                    bufferStream.Position = 0;
+
                     if (requestCompressed)
                     {
-                        using var uncompressedDataStream = new MemoryStream();
-                        using var compressedDataStream = new MemoryStream(totalRead[..readBytes].ToArray());
-                        using var deflateStream = new ZLibStream(compressedDataStream, CompressionMode.Decompress, true);
-                        deflateStream.CopyTo(uncompressedDataStream);
-                        value = Encoding.UTF8.GetString(uncompressedDataStream.ToArray());
+                        await using var deflateStream = new ZLibStream(bufferStream, CompressionMode.Decompress);
+                        await using var decompressedStream = new MemoryStream();
+                        await deflateStream.CopyToAsync(decompressedStream);
+                        decompressedStream.Position = 0;
+
+                        using var reader = new StreamReader(decompressedStream, Encoding.UTF8);
+                        body = await reader.ReadToEndAsync();
                     }
                     else
                     {
-                        value = Encoding.UTF8.GetString(totalRead[..readBytes].ToArray());
+                        // No decompression needed, decode directly from the bufferStream's buffer
+                        bufferStream.Position = 0;
+                        using var reader = new StreamReader(bufferStream, Encoding.UTF8);
+                        body = await reader.ReadToEndAsync();
                     }
 
                     if (!requestIsCompressed)
                     {
                         if (_logger.IsLogEnabled(LogLevel.Debug))
                         {
-                            _logger.Debug(value);
+                            _logger.Debug(body);
                         }
                     }
 
-                    var response = GetResponse(sessionId, req, value);
-                    SendResponse(sessionId, req, resp, value, response);
+                    var response = await GetResponse(sessionId, req, body);
+                    await SendResponse(sessionId, req, resp, body, response);
                     break;
                 }
 
@@ -137,7 +119,7 @@ public class SptHttpListener : IHttpListener
     /// <param name="resp"> Outgoing response </param>
     /// <param name="body"> Buffer </param>
     /// <param name="output"> Server generated response data</param>
-    public void SendResponse(
+    public async Task SendResponse(
         string sessionID,
         HttpRequest req,
         HttpResponse resp,
@@ -155,7 +137,7 @@ public class SptHttpListener : IHttpListener
         if (IsDebugRequest(req))
         {
             // Send only raw response without transformation
-            SendJson(resp, output, sessionID);
+            await SendJson(resp, output, sessionID);
             if (_logger.IsLogEnabled(LogLevel.Debug))
             {
                 _logger.Debug($"Response: {output}");
@@ -169,12 +151,12 @@ public class SptHttpListener : IHttpListener
         var serialiser = _serializers.FirstOrDefault(x => x.CanHandle(output));
         if (serialiser != null)
         {
-            serialiser.Serialize(sessionID, req, resp, bodyInfo);
+            await serialiser.Serialize(sessionID, req, resp, bodyInfo);
         }
         else
-            // No serializer can handle the request (majority of requests dont), zlib the output and send response back
+        // No serializer can handle the request (majority of requests dont), zlib the output and send response back
         {
-            SendZlibJson(resp, output, sessionID);
+            await SendZlibJson(resp, output, sessionID);
         }
 
         LogRequest(req, output);
@@ -200,65 +182,64 @@ public class SptHttpListener : IHttpListener
         if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
         {
             var log = new Response(req.Method, output);
-            _requestLogger.Info($"RESPONSE={_jsonUtil.Serialize(log)}");
+            _requestsLogger.Info($"RESPONSE={_jsonUtil.Serialize(log)}");
         }
     }
 
-    public string GetResponse(string sessionID, HttpRequest req, string? body)
+    public async ValueTask<string> GetResponse(string sessionID, HttpRequest req, string? body)
     {
-        var output = _router.GetResponse(req, sessionID, body, out var deserializedObject);
+        var output = await _router.GetResponse(req, sessionID, body);
         /* route doesn't exist or response is not properly set up */
         if (string.IsNullOrEmpty(output))
         {
             _logger.Error(_localisationService.GetText("unhandled_response", req.Path.ToString()));
-            _logger.Info(_jsonUtil.Serialize(deserializedObject));
             output = _httpResponseUtil.GetBody<object?>(null, BackendErrorCodes.HTTPNotFound, $"UNHANDLED RESPONSE: {req.Path.ToString()}");
         }
 
         if (ProgramStatics.ENTRY_TYPE() != EntryType.RELEASE)
         {
             // Parse quest info into object
-            var log = new Request(req.Method, new RequestData(req.Path, req.Headers, deserializedObject));
-            _requestLogger.Info($"REQUEST={_jsonUtil.Serialize(log)}");
+            var log = new Request(req.Method, new RequestData(req.Path, req.Headers));
+            _requestsLogger.Info($"REQUEST={_jsonUtil.Serialize(log)}");
         }
 
         return output;
     }
 
-    public void SendJson(HttpResponse resp, string? output, string sessionID)
+    public async Task SendJson(HttpResponse resp, string? output, string sessionID)
     {
         resp.StatusCode = 200;
         resp.ContentType = "application/json";
         resp.Headers.Append("Set-Cookie", $"PHPSESSID={sessionID}");
         if (!string.IsNullOrEmpty(output))
         {
-            resp.Body.WriteAsync(Encoding.UTF8.GetBytes(output)).AsTask().Wait();
+            await resp.Body.WriteAsync(Encoding.UTF8.GetBytes(output));
         }
 
-        resp.StartAsync().Wait();
-        resp.CompleteAsync().Wait();
+        await resp.StartAsync();
+        await resp.CompleteAsync();
     }
 
-    public void SendZlibJson(HttpResponse resp, string? output, string sessionID)
+    public async Task SendZlibJson(HttpResponse resp, string? output, string sessionID)
     {
         using (var ms = new MemoryStream())
         {
             using (var deflateStream = new ZLibStream(ms, CompressionLevel.SmallestSize))
             {
-                deflateStream.WriteAsync(Encoding.UTF8.GetBytes(output)).AsTask().Wait();
+                await deflateStream.WriteAsync(Encoding.UTF8.GetBytes(output));
             }
 
             var bytes = ms.ToArray();
-            resp.Body.WriteAsync(bytes, 0, bytes.Length).Wait();
+            await resp.Body.WriteAsync(bytes);
         }
 
-        resp.StartAsync().Wait();
-        resp.CompleteAsync().Wait();
+        await resp.StartAsync();
+        await resp.CompleteAsync();
     }
 
     private record Response(string Method, string jsonData);
 
     private record Request(string Method, object output);
 
-    private record RequestData(string Url, object Headers, object Data);
+    private record RequestData(string Url, object Headers);
 }

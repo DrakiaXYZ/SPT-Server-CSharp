@@ -1,10 +1,11 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Launcher;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Spt.Launcher;
 using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Callbacks;
@@ -21,9 +22,9 @@ public class ProfileCallbacks(
     ///     Handle client/game/profile/create
     /// </summary>
     /// <returns></returns>
-    public string CreateProfile(string url, ProfileCreateRequestData info, string sessionID)
+    public async ValueTask<string> CreateProfile(string url, ProfileCreateRequestData info, string sessionID)
     {
-        var id = _profileController.CreateProfile(info, sessionID);
+        var id = await _profileController.CreateProfile(info, sessionID);
         return _httpResponse.GetBody(
             new CreateProfileResponse
             {
@@ -37,9 +38,9 @@ public class ProfileCallbacks(
     ///     Get the complete player profile (scav + pmc character)
     /// </summary>
     /// <returns></returns>
-    public string GetProfileData(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetProfileData(string url, EmptyRequestData _, string sessionID)
     {
-        return _httpResponse.GetBody(_profileController.GetCompleteProfile(sessionID));
+        return new ValueTask<string>(_httpResponse.GetBody(_profileController.GetCompleteProfile(sessionID)));
     }
 
     /// <summary>
@@ -48,67 +49,65 @@ public class ProfileCallbacks(
     ///     Occurs post-raid and when profile first created immediately after character details are confirmed by player
     /// </summary>
     /// <returns></returns>
-    public string RegenerateScav(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> RegenerateScav(string url, EmptyRequestData _, string sessionID)
     {
-        return _httpResponse.GetBody(
+        return new ValueTask<string>(_httpResponse.GetBody(
             new List<PmcData>
             {
                 _profileController.GeneratePlayerScav(sessionID)
             }
-        );
+        ));
     }
 
     /// <summary>
     ///     Handle client/game/profile/voice/change event
     /// </summary>
     /// <returns></returns>
-    public string ChangeVoice(string url, ProfileChangeVoiceRequestData info, string sessionID)
+    public ValueTask<string> ChangeVoice(string url, ProfileChangeVoiceRequestData info, string sessionID)
     {
         _profileController.ChangeVoice(info, sessionID);
-        return _httpResponse.NullResponse();
+        return new ValueTask<string>(_httpResponse.NullResponse());
     }
 
     /// <summary>
     ///     Handle client/game/profile/nickname/change event
     ///     Client allows player to adjust their profile name
     /// </summary>
-    /// <returns></returns>
-    public string ChangeNickname(string url, ProfileChangeNicknameRequestData info, string sessionID)
+    /// <returns>Client response as string</returns>
+    public ValueTask<string> ChangeNickname(string url, ProfileChangeNicknameRequestData info, string sessionId)
     {
-        var output = _profileController.ChangeNickname(info, sessionID);
+        var output = _profileController.ChangeNickname(info, sessionId);
 
         return output switch
         {
-            "taken" => _httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotUnique, "The nickname is already in use"),
-            "tooshort" => _httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotValid, "The nickname is too short"),
-            _ => _httpResponse.GetBody<object>(
+            NicknameValidationResult.Taken => new ValueTask<string>(_httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotUnique, $"{BackendErrorCodes.NicknameNotUnique} - ")),
+            NicknameValidationResult.Short => new ValueTask<string>(_httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotValid, $"{BackendErrorCodes.NicknameNotValid} - ")),
+            _ => new ValueTask<string>(_httpResponse.GetBody<object>(
                 new
                 {
                     status = 0,
-                    nicknamechangedate = _timeUtil.GetTimeStamp()
+                    NicknameChangeDate = _timeUtil.GetTimeStamp()
                 }
-            )
+            ))
         };
     }
 
     /// <summary>
     ///     Handle client/game/profile/nickname/validate
     /// </summary>
-    /// <returns></returns>
-    public string ValidateNickname(string url, ValidateNicknameRequestData info, string sessionID)
+    /// <returns>Client response as string</returns>
+    public ValueTask<string> ValidateNickname(string url, ValidateNicknameRequestData info, string sessionId)
     {
-        var output = _profileController.ValidateNickname(info, sessionID);
-
-        return output switch
+        return _profileController.ValidateNickname(info, sessionId) switch
         {
-            "taken" => _httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotUnique, "The nickname is already in use"),
-            "tooshort" => _httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotValid, "The nickname is too short"),
-            _ => _httpResponse.GetBody(
+            NicknameValidationResult.Taken => new ValueTask<string>(_httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotUnique, $"{BackendErrorCodes.NicknameNotUnique} - ")),
+            NicknameValidationResult.Short => new ValueTask<string>(_httpResponse.GetBody<object?>(null, BackendErrorCodes.NicknameNotValid, $"{BackendErrorCodes.NicknameNotValid} - ")),
+            _ => new ValueTask<string>(_httpResponse.GetBody(
                 new
                 {
                     status = "ok"
                 }
-            )
+            ))
         };
     }
 
@@ -116,15 +115,16 @@ public class ProfileCallbacks(
     ///     Handle client/game/profile/nickname/reserved
     /// </summary>
     /// <returns></returns>
-    public string GetReservedNickname(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetReservedNickname(string url, EmptyRequestData _, string sessionId)
     {
-        var fullProfile = _profileHelper.GetFullProfile(sessionID);
+        var fullProfile = _profileHelper.GetFullProfile(sessionId);
         if (fullProfile?.ProfileInfo?.Username is not null)
         {
-            return _httpResponse.GetBody(fullProfile?.ProfileInfo?.Username);
+            // Send players name back to them
+            return new ValueTask<string>(_httpResponse.GetBody(fullProfile?.ProfileInfo?.Username));
         }
 
-        return _httpResponse.GetBody("SPTarkov");
+        return new ValueTask<string>(_httpResponse.GetBody("SPTarkov"));
     }
 
     /// <summary>
@@ -132,9 +132,9 @@ public class ProfileCallbacks(
     ///     Called when creating a character when choosing a character face/voice
     /// </summary>
     /// <returns></returns>
-    public string GetProfileStatus(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetProfileStatus(string url, EmptyRequestData _, string sessionId)
     {
-        return _httpResponse.GetBody(_profileController.GetProfileStatus(sessionID));
+        return new ValueTask<string>(_httpResponse.GetBody(_profileController.GetProfileStatus(sessionId)));
     }
 
     /// <summary>
@@ -142,44 +142,44 @@ public class ProfileCallbacks(
     ///     Called when viewing another players profile
     /// </summary>
     /// <returns></returns>
-    public string GetOtherProfile(string url, GetOtherProfileRequest request, string sessionID)
+    public ValueTask<string> GetOtherProfile(string url, GetOtherProfileRequest request, string sessionID)
     {
-        return _httpResponse.GetBody(_profileController.GetOtherProfile(sessionID, request));
+        return new ValueTask<string>(_httpResponse.GetBody(_profileController.GetOtherProfile(sessionID, request)));
     }
 
     /// <summary>
     ///     Handle client/profile/settings
     /// </summary>
     /// <returns></returns>
-    public string GetProfileSettings(string url, GetProfileSettingsRequest info, string sessionID)
+    public ValueTask<string> GetProfileSettings(string url, GetProfileSettingsRequest info, string sessionID)
     {
-        return _httpResponse.GetBody(_profileController.SetChosenProfileIcon(sessionID, info));
+        return new ValueTask<string>(_httpResponse.GetBody(_profileController.SetChosenProfileIcon(sessionID, info)));
     }
 
     /// <summary>
     ///     Handle client/game/profile/search
     /// </summary>
     /// <returns></returns>
-    public string SearchProfiles(string url, SearchProfilesRequestData info, string sessionID)
+    public ValueTask<string> SearchProfiles(string url, SearchProfilesRequestData info, string sessionID)
     {
-        return _httpResponse.GetBody(_profileController.SearchProfiles(info, sessionID));
+        return new ValueTask<string>(_httpResponse.GetBody(_profileController.SearchProfiles(info, sessionID)));
     }
 
     /// <summary>
     ///     Handle launcher/profile/info
     /// </summary>
     /// <returns></returns>
-    public string GetMiniProfile(string url, GetMiniProfileRequestData info, string sessionID)
+    public ValueTask<string> GetMiniProfile(string url, GetMiniProfileRequestData info, string sessionID)
     {
-        return _httpResponse.NoBody(_profileController.GetMiniProfile(sessionID));
+        return new ValueTask<string>(_httpResponse.NoBody(_profileController.GetMiniProfile(sessionID)));
     }
 
     /// <summary>
     ///     Handle /launcher/profiles
     /// </summary>
     /// <returns></returns>
-    public string GetAllMiniProfiles(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> GetAllMiniProfiles(string url, EmptyRequestData _, string sessionID)
     {
-        return _httpResponse.NoBody(_profileController.GetMiniProfiles());
+        return new ValueTask<string>(_httpResponse.NoBody(_profileController.GetMiniProfiles()));
     }
 }

@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services.Image;
 using SPTarkov.Server.Core.Utils;
@@ -31,7 +31,7 @@ public class ImageRouter
         _imageRouterService.AddRoute(key.ToLower(), valueToAdd);
     }
 
-    public void SendImage(string sessionId, HttpRequest req, HttpResponse resp, object body)
+    public async Task SendImage(string sessionId, HttpRequest req, HttpResponse resp, object body)
     {
         // remove file extension
         var url = _fileUtil.StripExtension(req.Path, true);
@@ -40,15 +40,15 @@ public class ImageRouter
         var urlKeyLower = url.ToLower();
         if (_imageRouterService.ExistsByKey(urlKeyLower))
         {
-            _httpFileUtil.SendFile(resp, _imageRouterService.GetByKey(urlKeyLower));
+            await _httpFileUtil.SendFile(resp, _imageRouterService.GetByKey(urlKeyLower));
             return;
         }
 
         _logger.Warning($"IMAGE: {url} not found");
     }
 
-    public string GetImage()
+    public ValueTask<string> GetImage()
     {
-        return "IMAGE";
+        return new ValueTask<string>("IMAGE");
     }
 }

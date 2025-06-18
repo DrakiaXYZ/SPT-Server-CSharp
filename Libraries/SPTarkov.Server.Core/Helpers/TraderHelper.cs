@@ -1,5 +1,4 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -25,6 +24,7 @@ public class TraderHelper(
     PlayerService _playerService,
     LocalisationService _localisationService,
     FenceService _fenceService,
+    TraderStore _traderStore,
     TimeUtil _timeUtil,
     RandomUtil _randomUtil,
     ConfigServer _configServer
@@ -33,6 +33,12 @@ public class TraderHelper(
     protected List<string> _gameVersions = [GameEditions.EDGE_OF_DARKNESS, GameEditions.UNHEARD];
     protected Dictionary<string, double> _highestTraderPriceItems = new();
     protected TraderConfig _traderConfig = _configServer.GetConfig<TraderConfig>();
+
+    public TraderBase? GetTraderByNickName(string traderName)
+    {
+        return _databaseService.GetTraders().Select(dict => dict.Value.Base)
+            .FirstOrDefault(t => t?.Nickname != null && string.Equals(t.Nickname, traderName, StringComparison.CurrentCultureIgnoreCase));
+    }
 
 
     /// <summary>
@@ -129,7 +135,7 @@ public class TraderHelper(
     /// <param name="traderID">trader id to reset</param>
     public void ResetTrader(string sessionID, string traderID)
     {
-        var profiles = _databaseService.GetProfiles();
+        var profiles = _databaseService.GetProfileTemplates();
         var trader = _databaseService.GetTrader(traderID);
 
         var fullProfile = _profileHelper.GetFullProfile(sessionID);
@@ -138,34 +144,33 @@ public class TraderHelper(
             throw new Exception(_localisationService.GetText("trader-unable_to_find_profile_by_id", sessionID));
         }
 
+        // Get matching profile 'type' e.g. 'standard'
         var pmcData = fullProfile.CharacterData.PmcData;
-        var rawProfileTemplate = profiles.GetByJsonProp<ProfileSides>(fullProfile.ProfileInfo.Edition)
-            .GetByJsonProp<TemplateSide>(pmcData.Info.Side.ToLower())
-            .Trader;
+        var matchingSide = _profileHelper.GetProfileTemplateForSide(fullProfile.ProfileInfo.Edition, pmcData.Info.Side);
+
+        // Profiles trader settings
+        var profileTemplateTraderData = matchingSide.Trader;
 
         var newTraderData = new TraderInfo
         {
             Disabled = false,
-            LoyaltyLevel = rawProfileTemplate.InitialLoyaltyLevel.GetValueOrDefault(traderID, 1),
-            SalesSum = rawProfileTemplate.InitialSalesSum,
-            Standing = GetStartingStanding(traderID, rawProfileTemplate),
+            LoyaltyLevel = profileTemplateTraderData.InitialLoyaltyLevel.GetValueOrDefault(traderID, 1),
+            SalesSum = profileTemplateTraderData.InitialSalesSum,
+            Standing = GetStartingStanding(traderID, profileTemplateTraderData),
             NextResupply = trader.Base.NextResupply,
             Unlocked = trader.Base.UnlockedByDefault
         };
 
-        if (!pmcData.TradersInfo.TryAdd(traderID, newTraderData))
-        {
-            pmcData.TradersInfo[traderID] = newTraderData;
-        }
-
+        // Add trader to profile if it doesn't already
+        pmcData.TradersInfo.TryAdd(traderID, newTraderData);
 
         // Check if trader should be locked by default
-        if (rawProfileTemplate.LockedByDefaultOverride?.Contains(traderID) ?? false)
+        if (profileTemplateTraderData.LockedByDefaultOverride?.Contains(traderID) ?? false)
         {
             pmcData.TradersInfo[traderID].Unlocked = true;
         }
 
-        if (rawProfileTemplate.PurchaseAllClothingByDefaultForTrader?.Contains(traderID) ?? false)
+        if (profileTemplateTraderData.PurchaseAllClothingByDefaultForTrader?.Contains(traderID) ?? false)
         {
             // Get traders clothing
             var clothing = _databaseService.GetTrader(traderID).Suits;
@@ -179,20 +184,22 @@ public class TraderHelper(
             }
         }
 
-        if ((rawProfileTemplate.FleaBlockedDays ?? 0) > 0)
+        // Template has flea block
+        if ((profileTemplateTraderData.FleaBlockedDays ?? 0) > 0)
         {
-            var newBanDateTime = _timeUtil.GetTimeStampFromNowDays(rawProfileTemplate.FleaBlockedDays ?? 0);
-            var existingBan = pmcData.Info.Bans.FirstOrDefault(ban => ban.BanType == BanType.RAGFAIR);
+            var newBanDateTime = _timeUtil.GetTimeStampFromNowDays(profileTemplateTraderData.FleaBlockedDays ?? 0);
+            var existingBan = pmcData.Info.Bans?.FirstOrDefault(ban => ban.BanType == BanType.RagFair);
             if (existingBan is not null)
             {
                 existingBan.DateTime = newBanDateTime;
             }
             else
             {
+                pmcData.Info.Bans ??= [];
                 pmcData.Info.Bans.Add(
                     new Ban
                     {
-                        BanType = BanType.RAGFAIR,
+                        BanType = BanType.RagFair,
                         DateTime = newBanDateTime
                     }
                 );
@@ -201,7 +208,7 @@ public class TraderHelper(
 
         if (traderID == Traders.JAEGER)
         {
-            pmcData.TradersInfo[traderID].Unlocked = rawProfileTemplate.JaegerUnlocked;
+            pmcData.TradersInfo[traderID].Unlocked = profileTemplateTraderData.JaegerUnlocked;
         }
     }
 
@@ -520,16 +527,16 @@ public class TraderHelper(
         }
 
         // Init dict and fill
-        foreach (var traderName in Traders.TradersDictionary)
+        foreach (var trader in _traderStore.GetAllTraders())
         {
             // Skip some traders
-            if (traderName.Value == Traders.FENCE)
+            if (trader.Id == Traders.FENCE)
             {
                 continue;
             }
 
             // Get assorts for trader, skip trader if no assorts found
-            var traderAssorts = _databaseService.GetTrader(traderName.Value).Assort;
+            var traderAssorts = _databaseService.GetTrader(trader.Id).Assort;
             if (traderAssorts is null)
             {
                 continue;
@@ -566,10 +573,10 @@ public class TraderHelper(
     {
         // Find largest trader price for item
         var highestPrice = 1d; // Default price
-        foreach (var trader in Traders.TradersDictionary)
+        foreach (var trader in _traderStore.GetAllTraders())
         {
             // Get trader and check buy category allows tpl
-            var traderBase = _databaseService.GetTrader(trader.Value).Base;
+            var traderBase = _databaseService.GetTrader(trader.Id).Base;
 
             // Skip traders that don't sell this category of item
             if (traderBase is null || !_itemHelper.IsOfBaseclasses(tpl, traderBase.ItemsBuy.Category))
@@ -596,62 +603,12 @@ public class TraderHelper(
     }
 
     /// <summary>
-    ///     Get a trader enum key by its value
-    /// </summary>
-    /// <param name="traderId">Traders id</param>
-    /// <returns>Traders key</returns>
-    public TradersEnum? GetTraderById(string traderId)
-    {
-        var kvp = Traders.TradersDictionary.Where(x => x.Value == traderId);
-
-        if (!kvp.Any())
-        {
-            _logger.Error(_localisationService.GetText("trader-unable_to_find_trader_in_enum", traderId));
-
-            return null;
-        }
-
-        return kvp.FirstOrDefault().Key;
-    }
-
-    /// <summary>
-    ///     Validates that the provided traderEnumValue exists in the Traders enum. If the value is valid, it returns the
-    ///     same enum value, effectively serving as a trader ID; otherwise, it logs an error and returns an empty string.
-    ///     This method provides a runtime check to prevent undefined behavior when using the enum as a dictionary key.
-    ///     For example, instead of this:
-    ///     const traderId = Traders[Traders.PRAPOR];
-    ///     You can use safely use this:
-    ///     const traderId = this.traderHelper.getValidTraderIdByEnumValue(Traders.PRAPOR);
-    /// </summary>
-    /// <param name="traderEnumValue">The trader enum value to validate</param>
-    /// <returns>The validated trader enum value as a string, or an empty string if invalid</returns>
-    /// TODO: might not be needed
-    public string GetValidTraderIdByEnumValue(string traderEnumValue)
-    {
-        var traderId = _databaseService.GetTraders();
-        var id = traderId.FirstOrDefault(x =>
-            x.Value.Base.Id == traderEnumValue || string.Equals(x.Value.Base.Nickname, traderEnumValue, StringComparison.OrdinalIgnoreCase)).Key;
-
-        return id;
-    }
-
-    /// <summary>
-    ///     Does the 'Traders' enum has a value that matches the passed in parameter
-    /// </summary>
-    /// <param name="key">Value to check for</param>
-    /// <returns>True, values exists in Traders enum as a value</returns>
-    public bool TraderEnumHasKey(string key)
-    {
-        return Traders.TradersDictionary.Any(x => x.Value == key);
-    }
-
-    /// <summary>
     ///     Accepts a trader id
     /// </summary>
     /// <param name="traderId">Trader id</param>
-    /// <returns>True if Traders enum has the param as a value</returns>
-    public bool TraderEnumHasValue(string traderId)
+    /// <returns>True if a Trader exists with given ID</returns>
+    public bool TraderExists(string traderId)
     {
-        return Traders.TradersDictionary.ContainsValue(traderId);
+        return _traderStore.GetTraderById(traderId) != null;
     }
 }

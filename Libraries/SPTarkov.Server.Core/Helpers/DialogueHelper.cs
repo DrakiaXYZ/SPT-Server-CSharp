@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Utils;
@@ -28,7 +28,8 @@ public class DialogueHelper(
     public MessagePreview GetMessagePreview(Models.Eft.Profile.Dialogue? dialogue)
     {
         // The last message of the dialogue should be shown on the preview.
-        var message = dialogue.Messages.Last();
+        var message = dialogue.Messages.LastOrDefault();
+
         MessagePreview result = new()
         {
             DateTime = message?.DateTime,

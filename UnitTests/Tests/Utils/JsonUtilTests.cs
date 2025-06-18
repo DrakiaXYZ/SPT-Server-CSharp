@@ -6,7 +6,13 @@ namespace UnitTests.Tests.Utils;
 [TestClass]
 public class JsonUtilTests
 {
-    protected JsonUtil _jsonUtil = new();
+    private JsonUtil _jsonUtil;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        _jsonUtil = DI.GetService<JsonUtil>();
+    }
 
     [TestMethod]
     public void SerializeAndDeserialize_WithDictionaryOfETFEnum_ExpectCorrectParsing()

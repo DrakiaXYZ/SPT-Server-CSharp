@@ -1,5 +1,8 @@
-﻿namespace SPTarkov.Server.Core.Models.Enums;
+﻿using SPTarkov.Server.Core.Utils.Json.Converters;
 
+namespace SPTarkov.Server.Core.Models.Enums;
+
+[EftListEnumConverter]
 public enum DamageType
 {
     Undefined = 1,

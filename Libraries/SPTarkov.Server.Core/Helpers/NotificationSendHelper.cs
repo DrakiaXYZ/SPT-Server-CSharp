@@ -1,21 +1,25 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Eft.Ws;
 using SPTarkov.Server.Core.Models.Enums;
+using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Servers.Ws;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
+using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Helpers;
 
 [Injectable]
 public class NotificationSendHelper(
-    IEnumerable<IWebSocketConnectionHandler> _sptWebSocketConnectionHandler,
+    ISptLogger<NotificationSendHelper> _logger,
+    SptWebSocketConnectionHandler _sptWebSocketConnectionHandler,
     HashUtil _hashUtil,
     SaveServer _saveServer,
     NotificationService _notificationService,
-    TimeUtil _timeUtil
+    TimeUtil _timeUtil,
+    JsonUtil _jsonUtil
 )
 {
     /// <summary>
@@ -25,16 +29,24 @@ public class NotificationSendHelper(
     /// <param name="notificationMessage"></param>
     public void SendMessage(string sessionID, WsNotificationEvent notificationMessage)
     {
-        var sptWebSocketConnectionHandler = _sptWebSocketConnectionHandler
-            .OfType<SptWebSocketConnectionHandler>()
-            .FirstOrDefault(wsh => wsh.GetHookUrl() == "/notifierServer/getwebsocket/");
-
-        if (sptWebSocketConnectionHandler.IsWebSocketConnected(sessionID))
+        if (_logger.IsLogEnabled(LogLevel.Debug))
         {
-            sptWebSocketConnectionHandler.SendMessage(sessionID, notificationMessage);
+            _logger.Debug($"Send message for {sessionID} started, message: {_jsonUtil.Serialize(notificationMessage)}");
+        }
+        if (_sptWebSocketConnectionHandler.IsWebSocketConnected(sessionID))
+        {
+            if (_logger.IsLogEnabled(LogLevel.Debug))
+            {
+                _logger.Debug($"Send message for {sessionID} websocket available, message being sent");
+            }
+            _sptWebSocketConnectionHandler.SendMessage(sessionID, notificationMessage);
         }
         else
         {
+            if (_logger.IsLogEnabled(LogLevel.Debug))
+            {
+                _logger.Debug($"Send message for {sessionID} websocket not available, queuing into profile");
+            }
             _notificationService.Add(sessionID, notificationMessage);
         }
     }

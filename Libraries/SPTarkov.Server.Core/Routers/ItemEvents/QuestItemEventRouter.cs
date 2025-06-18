@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Callbacks;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Models.Enums;
 
 namespace SPTarkov.Server.Core.Routers.ItemEvents;
 
-[Injectable(InjectableTypeOverride = typeof(ItemEventRouterDefinition))]
+[Injectable]
 public class QuestItemEventRouter : ItemEventRouterDefinition
 {
     protected QuestCallbacks _questCallbacks;
@@ -33,19 +33,19 @@ public class QuestItemEventRouter : ItemEventRouterDefinition
         };
     }
 
-    public override ItemEventRouterResponse HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
+    public override ValueTask<ItemEventRouterResponse> HandleItemEvent(string url, PmcData pmcData, BaseInteractionRequestData body, string sessionID,
         ItemEventRouterResponse output)
     {
         switch (url)
         {
             case ItemEventActions.QUEST_ACCEPT:
-                return _questCallbacks.AcceptQuest(pmcData, body as AcceptQuestRequestData, sessionID);
+                return new ValueTask<ItemEventRouterResponse>(_questCallbacks.AcceptQuest(pmcData, body as AcceptQuestRequestData, sessionID));
             case ItemEventActions.QUEST_COMPLETE:
-                return _questCallbacks.CompleteQuest(pmcData, body as CompleteQuestRequestData, sessionID);
+                return new ValueTask<ItemEventRouterResponse>(_questCallbacks.CompleteQuest(pmcData, body as CompleteQuestRequestData, sessionID));
             case ItemEventActions.QUEST_HANDOVER:
-                return _questCallbacks.HandoverQuest(pmcData, body as HandoverQuestRequestData, sessionID);
+                return new ValueTask<ItemEventRouterResponse>(_questCallbacks.HandoverQuest(pmcData, body as HandoverQuestRequestData, sessionID));
             case ItemEventActions.REPEATABLE_QUEST_CHANGE:
-                return _questCallbacks.ChangeRepeatableQuest(pmcData, body as RepeatableQuestChangeRequest, sessionID);
+                return new ValueTask<ItemEventRouterResponse>(_questCallbacks.ChangeRepeatableQuest(pmcData, body as RepeatableQuestChangeRequest, sessionID));
             default:
                 throw new Exception($"QuestItemEventRouter being used when it cant handle route {url}");
         }

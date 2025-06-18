@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -29,7 +29,7 @@ public class MailSendService(
 )
 {
     private const string _systemSenderId = "59e7125688a45068a6249071";
-    protected HashSet<MessageType> _messageTypes = [MessageType.NPC_TRADER, MessageType.FLEAMARKET_MESSAGE];
+    protected HashSet<MessageType> _messageTypes = [MessageType.NpcTraderMessage, MessageType.FleamarketMessage];
     protected HashSet<string> _slotNames = ["hideout", "main"];
 
     /// <summary>
@@ -74,7 +74,7 @@ public class MailSendService(
         {
             RecipientId = sessionId,
             Sender = messageType,
-            DialogType = MessageType.NPC_TRADER,
+            DialogType = MessageType.NpcTraderMessage,
             Trader = trader,
             MessageText = message,
             Items = []
@@ -142,10 +142,10 @@ public class MailSendService(
         {
             RecipientId = sessionId,
             Sender = messageType,
-            DialogType = MessageType.NPC_TRADER,
+            DialogType = MessageType.NpcTraderMessage,
             Trader = trader,
             TemplateId = messageLocaleId,
-            Items = new List<Item>()
+            Items = []
         };
 
         // add items to message
@@ -153,14 +153,9 @@ public class MailSendService(
         if (items?.Count > 0)
         {
             details.Items.AddRange(items);
-            if (maxStorageTimeSeconds is not null && maxStorageTimeSeconds > 0)
-            {
-                details.ItemsMaxStorageLifetimeSeconds = maxStorageTimeSeconds;
-            }
-            else
-            {
-                details.ItemsMaxStorageLifetimeSeconds = 172800;
-            }
+            details.ItemsMaxStorageLifetimeSeconds = maxStorageTimeSeconds > 0
+                ? maxStorageTimeSeconds
+                : 172800;
         }
 
         if (systemData is not null)
@@ -194,7 +189,7 @@ public class MailSendService(
         SendMessageDetails details = new()
         {
             RecipientId = sessionId,
-            Sender = MessageType.SYSTEM_MESSAGE,
+            Sender = MessageType.SystemMessage,
             MessageText = message,
             Items = new List<Item>()
         };
@@ -235,7 +230,7 @@ public class MailSendService(
         SendMessageDetails details = new()
         {
             RecipientId = sessionId,
-            Sender = MessageType.SYSTEM_MESSAGE,
+            Sender = MessageType.SystemMessage,
             TemplateId = messageLocaleId,
             Items = new List<Item>()
         };
@@ -274,7 +269,7 @@ public class MailSendService(
         SendMessageDetails details = new()
         {
             RecipientId = sessionId,
-            Sender = MessageType.USER_MESSAGE,
+            Sender = MessageType.UserMessage,
             SenderDetails = senderDetails,
             MessageText = message,
             Items = new List<Item>()
@@ -329,7 +324,7 @@ public class MailSendService(
 
         // TODO: clean up old code here
         // Offer Sold notifications are now separate from the main notification
-        if (_messageTypes.Contains(senderDialog.Type ?? MessageType.SYSTEM_MESSAGE) &&
+        if (_messageTypes.Contains(senderDialog.Type ?? MessageType.SystemMessage) &&
             messageDetails?.RagfairDetails is not null
            )
         {
@@ -338,7 +333,7 @@ public class MailSendService(
                 messageDetails.RagfairDetails
             );
             _notificationSendHelper.SendMessage(messageDetails.RecipientId, offerSoldMessage);
-            message.MessageType = MessageType.MESSAGE_WITH_ITEMS; // Should prevent getting the same notification popup twice
+            message.MessageType = MessageType.MessageWithItems; // Should prevent getting the same notification popup twice
         }
 
         // Send message off to player so they get it in client
@@ -369,7 +364,7 @@ public class MailSendService(
                 DateTime = _timeUtil.GetTimeStamp(),
                 HasRewards = false,
                 UserId = playerProfile.CharacterData.PmcData.Id,
-                MessageType = MessageType.USER_MESSAGE,
+                MessageType = MessageType.UserMessage,
                 RewardCollected = false,
                 Text = message
             }
@@ -388,7 +383,7 @@ public class MailSendService(
         {
             Id = _hashUtil.Generate(),
             UserId = dialogId,
-            MessageType = messageDetails.DialogType,
+            MessageType = messageDetails.Sender,
             DateTime = _timeUtil.GetTimeStamp(),
             Text = messageDetails.TemplateId is not null ? "" : messageDetails.MessageText,
             TemplateId = messageDetails.TemplateId,
@@ -651,12 +646,12 @@ public class MailSendService(
     /// <returns> Gets an id of the individual sending it </returns>
     private string? GetMessageSenderIdByType(SendMessageDetails messageDetails)
     {
-        if (messageDetails.Sender == MessageType.SYSTEM_MESSAGE)
+        if (messageDetails.Sender == MessageType.SystemMessage)
         {
             return _systemSenderId;
         }
 
-        if (messageDetails.Sender == MessageType.NPC_TRADER || messageDetails.DialogType == MessageType.NPC_TRADER)
+        if (messageDetails.Sender == MessageType.NpcTraderMessage || messageDetails.DialogType == MessageType.NpcTraderMessage)
         {
             if (messageDetails.Trader == null && _logger.IsLogEnabled(LogLevel.Debug))
             {
@@ -666,7 +661,7 @@ public class MailSendService(
             return messageDetails.Trader;
         }
 
-        if (messageDetails.Sender == MessageType.USER_MESSAGE)
+        if (messageDetails.Sender == MessageType.UserMessage)
         {
             return messageDetails.SenderDetails?.Id;
         }

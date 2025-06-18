@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
-using SPTarkov.Common.Annotations;
-using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -40,12 +39,11 @@ public class CreateProfileService(
     MailSendService _mailSendService
 )
 {
-    public string CreateProfile(string sessionId, ProfileCreateRequestData request)
+    public async ValueTask<string> CreateProfile(string sessionId, ProfileCreateRequestData request)
     {
         var account = _cloner.Clone(_saveServer.GetProfile(sessionId));
-        var profileTemplateClone = _cloner.Clone(
-            _databaseService.GetProfiles()?.GetByJsonProp<ProfileSides>(account.ProfileInfo.Edition)?.GetByJsonProp<TemplateSide>(request.Side.ToLower())
-        );
+        var profileTemplateClone = _cloner.Clone(_profileHelper.GetProfileTemplateForSide(account.ProfileInfo.Edition, request.Side));
+
         var pmcData = profileTemplateClone.Character;
 
         // Delete existing profile
@@ -119,6 +117,7 @@ public class CreateProfileService(
             VitalityData = new Vitality(),
             InraidData = new Inraid(),
             InsuranceList = [],
+            BtrDeliveryList = [],
             TraderPurchases = new Dictionary<string, Dictionary<string, TraderPurchaseData>?>(),
             FriendProfileIds = [],
             CustomisationUnlocks = []
@@ -135,7 +134,7 @@ public class CreateProfileService(
             var achievementsDb = _databaseService.GetTemplates().Achievements;
             var achievementRewardItemsToSend = new List<Item>();
 
-            foreach (var (achievementId, achievement) in profileDetails.CharacterData.PmcData.Achievements)
+            foreach (var (achievementId, _) in profileDetails.CharacterData.PmcData.Achievements)
             {
                 var rewards = achievementsDb.FirstOrDefault(achievementDb => achievementDb.Id == achievementId)?.Rewards;
 
@@ -207,12 +206,12 @@ public class CreateProfileService(
         _saveServer.GetProfile(sessionId).CharacterData.ScavData = _playerScavGenerator.Generate(sessionId);
 
         // Store minimal profile and reload it
-        _saveServer.SaveProfile(sessionId);
-        _saveServer.LoadProfile(sessionId);
+        await _saveServer.SaveProfileAsync(sessionId);
+        await _saveServer.LoadProfileAsync(sessionId);
 
         // Completed account creation
         _saveServer.GetProfile(sessionId).ProfileInfo.IsWiped = false;
-        _saveServer.SaveProfile(sessionId);
+        await _saveServer.SaveProfileAsync(sessionId);
 
         return pmcData.Id;
     }
@@ -524,7 +523,7 @@ public class CreateProfileService(
             _mailSendService.SendLocalisedNpcMessageToPlayer(
                 sessionID,
                 questFromDb.TraderId,
-                MessageType.QUEST_START,
+                MessageType.QuestStart,
                 messageId,
                 itemRewards,
                 _timeUtil.GetHoursAsSeconds(100)

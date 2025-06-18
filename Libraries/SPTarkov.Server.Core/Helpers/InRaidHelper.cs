@@ -1,5 +1,5 @@
-﻿using SPTarkov.Common.Annotations;
-using SPTarkov.Common.Extensions;
+﻿using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -77,7 +77,7 @@ public class InRaidHelper(
         // Do after above filtering code to reduce work done
         if (!isSurvived && !isTransfer && !_inRaidConfig.AlwaysKeepFoundInRaidOnRaidEnd)
         {
-            RemoveFiRStatusFromCertainItems(postRaidProfile.Inventory.Items);
+            RemoveFiRStatusFromItems(postRaidProfile.Inventory.Items);
         }
 
         // Add items from client profile into server profile
@@ -94,7 +94,7 @@ public class InRaidHelper(
     ///     Remove FiR status from items.
     /// </summary>
     /// <param name="items">Items to process</param>
-    protected void RemoveFiRStatusFromCertainItems(List<Item> items)
+    protected void RemoveFiRStatusFromItems(List<Item> items)
     {
         var dbItems = _databaseService.GetItems();
 
@@ -124,24 +124,20 @@ public class InRaidHelper(
     /// </summary>
     /// <param name="itemsToAdd">Items we want to add</param>
     /// <param name="serverInventoryItems">Location to add items to</param>
-    protected void AddItemsToInventory(List<Item> itemsToAdd, List<Item> serverInventoryItems)
+    protected void AddItemsToInventory(IEnumerable<Item> itemsToAdd, List<Item> serverInventoryItems)
     {
         foreach (var itemToAdd in itemsToAdd)
         {
             // Try to find index of item to determine if we should add or replace
-            var existingItemIndex = serverInventoryItems.FindIndex(inventoryItem => inventoryItem.Id == itemToAdd.Id
-            );
-            if (existingItemIndex == -1)
+            var existingItemIndex = serverInventoryItems.FindIndex(inventoryItem => inventoryItem.Id == itemToAdd.Id);
+            if (existingItemIndex != -1)
             {
-                // Not found, add
-                serverInventoryItems.Add(itemToAdd);
-            }
-            else
-            {
-                // Replace item with one from client
+                // Replace existing item
                 serverInventoryItems.RemoveAt(existingItemIndex);
-                serverInventoryItems.Add(itemToAdd);
             }
+
+            // Add new item
+            serverInventoryItems.Add(itemToAdd);
         }
     }
 
@@ -190,12 +186,9 @@ public class InRaidHelper(
             }
         }
 
-        foreach (var item in itemsInsideContainer)
+        foreach (var item in itemsInsideContainer.Where(item => item.Upd?.SpawnedInSession ?? false))
         {
-            if (item.Upd.SpawnedInSession ?? false)
-            {
-                item.Upd.SpawnedInSession = false;
-            }
+            item.Upd.SpawnedInSession = false;
         }
     }
 

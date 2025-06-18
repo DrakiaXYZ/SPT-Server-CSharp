@@ -1,8 +1,9 @@
-﻿using SPTarkov.Common.Annotations;
+﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Logging;
+using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
@@ -14,25 +15,25 @@ public class ClientLogCallbacks(
     HttpResponseUtil _httpResponseUtil,
     ClientLogController _clientLogController,
     ConfigServer _configServer,
-    LocalisationService _localisationService
-    // ModLoadOrder _modLoadOrder // TODO: needs implementing
+    LocalisationService _localisationService,
+    IReadOnlyList<SptMod> _loadedMods
 )
 {
     /// <summary>
     ///     Handle /singleplayer/log
     /// </summary>
     /// <returns></returns>
-    public string ClientLog(string url, ClientLogRequest request, string sessionID)
+    public ValueTask<string> ClientLog(string url, ClientLogRequest request, string sessionID)
     {
         _clientLogController.ClientLog(request);
-        return _httpResponseUtil.NullResponse();
+        return new ValueTask<string>(_httpResponseUtil.NullResponse());
     }
 
     /// <summary>
     ///     Handle /singleplayer/release
     /// </summary>
     /// <returns></returns>
-    public string ReleaseNotes()
+    public ValueTask<string> ReleaseNotes()
     {
         var data = _configServer.GetConfig<CoreConfig>().Release;
 
@@ -48,20 +49,20 @@ public class ClientLogCallbacks(
         data.IllegalPluginsLoadedText = _localisationService.GetText("release-illegal-plugins-loaded");
         data.IllegalPluginsExceptionText = _localisationService.GetText("release-illegal-plugins-exception");
         data.ReleaseSummaryText = _localisationService.GetText("release-summary");
-        data.IsBeta = ProgramStatics.ENTRY_TYPE() == EntryType.BLEEDING_EDGE || ProgramStatics.ENTRY_TYPE() == EntryType.BLEEDING_EDGE_MODS;
+        data.IsBeta = ProgramStatics.ENTRY_TYPE() is EntryType.BLEEDING_EDGE or EntryType.BLEEDING_EDGE_MODS;
         data.IsModdable = ProgramStatics.MODS();
-        data.IsModded = false; // TODO
+        data.IsModded = _loadedMods.Count > 0;
 
-        return _httpResponseUtil.NoBody(data);
+        return new ValueTask<string>(_httpResponseUtil.NoBody(data));
     }
 
     /// <summary>
     ///     Handle /singleplayer/enableBSGlogging
     /// </summary>
     /// <returns></returns>
-    public string BsgLogging()
+    public ValueTask<string> BsgLogging()
     {
         var data = _configServer.GetConfig<CoreConfig>().BsgLogging;
-        return _httpResponseUtil.NoBody(data);
+        return new ValueTask<string>(_httpResponseUtil.NoBody(data));
     }
 }

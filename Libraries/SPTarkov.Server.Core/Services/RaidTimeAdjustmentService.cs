@@ -1,5 +1,4 @@
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Context;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Game;
@@ -18,7 +17,7 @@ public class RaidTimeAdjustmentService(
     DatabaseService _databaseService,
     RandomUtil _randomUtil,
     WeightedRandomHelper _weightedRandomHelper,
-    ApplicationContext _applicationContext,
+    ProfileActivityService _profileActivityService,
     ConfigServer _configServer
 )
 {
@@ -151,7 +150,7 @@ public class RaidTimeAdjustmentService(
         };
 
         // Pmc raid, send default
-        if (request.Side.ToLower() == "pmc")
+        if (string.Equals(request.Side, "pmc", StringComparison.OrdinalIgnoreCase))
         {
             return result;
         }
@@ -206,7 +205,7 @@ public class RaidTimeAdjustmentService(
         }
 
         // Store state to use in loot generation
-        _applicationContext.AddValue(ContextVariableType.RAID_ADJUSTMENTS, result);
+        _profileActivityService.GetProfileActivityRaidData(sessionId).RaidAdjustments = result;
 
         return result;
     }

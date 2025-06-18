@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.Server.Core.Utils;
 
@@ -11,6 +11,12 @@ public class MathUtil
     /// <param name="values">List of floats to sum</param>
     /// <returns>sum of all values</returns>
     public double ListSum(List<double> values)
+    {
+        // Sum the list starting with an initial value of 0
+        return values.Sum();
+    }
+
+    public float ListSum(List<float> values)
     {
         // Sum the list starting with an initial value of 0
         return values.Sum();

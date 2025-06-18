@@ -10,10 +10,12 @@ namespace SPTarkov.Server.Core.Helpers.Dialogue;
 public abstract class AbstractDialogChatBot(
     ISptLogger<AbstractDialogChatBot> _logger,
     MailSendService _mailSendService,
+    LocalisationService localisationService,
     IEnumerable<IChatCommand> chatCommands
 ) : IDialogueChatBot
 {
-    protected List<IChatCommand> _chatCommands = chatCommands.ToList();
+    protected IDictionary<string, IChatCommand> _chatCommands =
+        chatCommands.ToDictionary(command => command.GetCommandPrefix());
 
     public abstract UserDialogInfo GetChatBot();
 
@@ -21,20 +23,21 @@ public abstract class AbstractDialogChatBot(
     {
         if ((request.Text ?? "").Length == 0)
         {
-            _logger.Error("Command came in as empty text! Invalid data!");
+            _logger.Error(localisationService.GetText("chatbot-command_was_empty"));
 
             return request.DialogId;
         }
 
         var splitCommand = request.Text.Split(" ");
 
-        var commandos = _chatCommands.Where(c => c.GetCommandPrefix() == splitCommand.FirstOrDefault());
-        if (commandos.FirstOrDefault()?.GetCommands().Contains(splitCommand[1]) ?? false)
+        if (splitCommand.Length > 1 &&
+            _chatCommands.TryGetValue(splitCommand[0], out var commando) &&
+            commando.GetCommands().Contains(splitCommand[1]))
         {
-            return commandos.FirstOrDefault().Handle(splitCommand[1], GetChatBot(), sessionId, request);
+            return commando.Handle(splitCommand[1], GetChatBot(), sessionId, request);
         }
 
-        if (splitCommand.FirstOrDefault()?.ToLower() == "help")
+        if (string.Equals(splitCommand.FirstOrDefault(), "help", StringComparison.OrdinalIgnoreCase))
         {
             return SendPlayerHelpMessage(sessionId, request);
         }
@@ -63,7 +66,7 @@ public abstract class AbstractDialogChatBot(
         TimeoutCallback.RunInTimespan(
             () =>
             {
-                foreach (var chatCommand in _chatCommands)
+                foreach (var chatCommand in _chatCommands.Values)
                 {
                     _mailSendService.SendUserMessageToPlayer(
                         sessionId,
@@ -99,14 +102,11 @@ public abstract class AbstractDialogChatBot(
 
     public void RegisterChatCommand(IChatCommand chatCommand)
     {
-        if (_chatCommands.Any(cc => cc.GetCommandPrefix() == chatCommand.GetCommandPrefix()))
+        var prefix = chatCommand.GetCommandPrefix();
+        if (!_chatCommands.TryAdd(prefix, chatCommand))
         {
-            throw new Exception(
-                $"The command \"{chatCommand.GetCommandPrefix()}\" attempting to be registered already exists."
-            );
+            throw new Exception($"The command \"{prefix}\" attempting to be registered already exists.");
         }
-
-        _chatCommands.Add(chatCommand);
     }
 
     protected abstract string GetUnrecognizedCommandMessage();

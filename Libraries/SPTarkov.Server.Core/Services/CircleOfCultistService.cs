@@ -1,5 +1,5 @@
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
@@ -37,6 +37,7 @@ public class CircleOfCultistService(
     DatabaseService _databaseService,
     ItemFilterService _itemFilterService,
     SeasonalEventService _seasonalEventService,
+    LocalisationService localisationService,
     ConfigServer _configServer
 )
 {
@@ -60,10 +61,10 @@ public class CircleOfCultistService(
     {
         var output = _eventOutputHolder.GetOutput(sessionId);
 
-        var cultistCircleStashId = pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(((int)HideoutAreas.CIRCLE_OF_CULTISTS).ToString());
+        var cultistCircleStashId = pmcData.Inventory?.HideoutAreaStashes?.GetValueOrDefault(((int)HideoutAreas.CircleOfCultists).ToString());
         if (cultistCircleStashId is null)
         {
-            _logger.Error("Could not find cultist circle stash ID inside inventory! No rewards generated");
+            _logger.Error(localisationService.GetText("cultistcircle-unable_to_find_stash_id"));
 
             return output;
         }
@@ -254,12 +255,13 @@ public class CircleOfCultistService(
         // No matching threshold, make one
         if (matchingThreshold is null)
         {
-            // None found, use a defalt
-            _logger.Warning("Unable to find a matching cultist circle threshold, using fallback of 12 hours");
+            // None found, use a default
+            _logger.Warning(
+                localisationService.GetText("cultistcircle-no_matching_threshhold_found", new { rewardAmountRoubles  = rewardAmountRoubles }));
 
             // Use first threshold value (cheapest) from parameter array, otherwise use 12 hours
             var firstThreshold = thresholds.FirstOrDefault();
-            var craftTime = firstThreshold?.CraftTimeSeconds is not null && firstThreshold.CraftTimeSeconds > 0
+            var craftTime = firstThreshold?.CraftTimeSeconds > 0
                 ? firstThreshold.CraftTimeSeconds
                 : _timeUtil.GetHoursAsSeconds(12);
 
@@ -510,10 +512,9 @@ public class CircleOfCultistService(
     )
     {
         // Get sacrificed tpls
-        var sacrificedItemTpls = sacrificedItems.Select(item => item.Template).ToList();
-        sacrificedItemTpls.Sort();
+        IEnumerable<string> sacrificedItemTpls = sacrificedItems.Select(item => item.Template).Where(item => item != null);
         // Create md5 key of the items player sacrificed so we can compare against the direct reward cache
-        var sacrificedItemsKey = _hashUtil.GenerateMd5ForData(string.Concat(sacrificedItemTpls, ","));
+        string sacrificedItemsKey = CreateSacrificeCacheKey(sacrificedItemTpls);
 
         var matchingDirectReward = directRewardsCache.GetValueOrDefault(sacrificedItemsKey);
         if (matchingDirectReward is null)
@@ -548,7 +549,7 @@ public class CircleOfCultistService(
         // Key is sacrificed items separated by commas, a dash, then the rewards separated by commas
         var key = $"{{{required}-{reward}}}";
 
-        return _hashUtil.GenerateMd5ForData(key);
+        return _hashUtil.GenerateHashForData(HashingAlgorithm.MD5, key);
     }
 
     /// <summary>
@@ -764,9 +765,9 @@ public class CircleOfCultistService(
             var areaType = profileArea.Type;
 
             // Get next stage of area
-            var dbArea = dbAreas.FirstOrDefault(area => area.Type == areaType);
-            var nextStageDbData = dbArea?.Stages[(currentStageLevel + 1).ToString()];
-            if (nextStageDbData is not null)
+            var dbArea = dbAreas?.FirstOrDefault(area => area.Type == areaType);
+            var nextTargetStageLevel = (currentStageLevel + 1).ToString() ?? "";
+            if (dbArea?.Stages?.TryGetValue(nextTargetStageLevel, out var nextStageDbData) ?? false)
             {
                 // Next stage exists, gather up requirements and add to pool
                 var itemRequirements = GetItemRequirements(nextStageDbData.Requirements);
@@ -801,7 +802,7 @@ public class CircleOfCultistService(
     {
         return areas.Where(area =>
                 {
-                    if (area.Type == HideoutAreas.CHRISTMAS_TREE && !_seasonalEventService.ChristmasEventEnabled())
+                    if (area.Type == HideoutAreas.ChristmasIllumination && !_seasonalEventService.ChristmasEventEnabled())
                         // Christmas tree area and not Christmas, skip
                     {
                         return false;
@@ -883,6 +884,12 @@ public class CircleOfCultistService(
         return requirements.Where(requirement => requirement.Type == "Item").ToList();
     }
 
+    protected string CreateSacrificeCacheKey(IEnumerable<string> requiredItems)
+    {
+        var concat = string.Join(",", requiredItems.OrderBy(item => item));
+        return _hashUtil.GenerateHashForData(HashingAlgorithm.MD5, concat);
+    }
+
     /// <summary>
     ///     Create a map of the possible direct rewards, keyed by the items needed to be sacrificed
     /// </summary>
@@ -893,10 +900,7 @@ public class CircleOfCultistService(
         var result = new Dictionary<string, DirectRewardSettings>();
         foreach (var rewardSettings in directRewards)
         {
-            rewardSettings.RequiredItems.Sort();
-            var concat = string.Concat(rewardSettings.RequiredItems, ",");
-
-            var key = _hashUtil.GenerateMd5ForData(concat);
+            string key = CreateSacrificeCacheKey(rewardSettings.RequiredItems);
             result[key] = rewardSettings;
         }
 

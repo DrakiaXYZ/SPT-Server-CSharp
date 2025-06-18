@@ -1,76 +1,42 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using SPTarkov.Common.Annotations;
-using SPTarkov.Server.Core.Models;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Eft.Ws;
-using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Models.Logging;
-using SPTarkov.Server.Core.Models.Spt.Dialog;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Utils.Json.Converters;
-using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Utils;
 
 [Injectable(InjectionType.Singleton)]
 public class JsonUtil
 {
-    private static JsonSerializerOptions jsonSerializerOptionsNoIndent = new()
+    private static JsonSerializerOptions? jsonSerializerOptionsIndented;
+    private static JsonSerializerOptions jsonSerializerOptionsNoIndent;
+
+    public JsonUtil(
+        IEnumerable<IJsonConverterRegistrator> registrators
+        )
     {
-        WriteIndented = false,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        Converters =
+        jsonSerializerOptionsNoIndent = new JsonSerializerOptions()
         {
-            new BaseSptLoggerReferenceConverter(),
-            new ListOrTConverterFactory(),
-            new DictionaryOrListConverter(),
-            new EftEnumConverter<SptAirdropTypeEnum>(),
-            new EftEnumConverter<GiftSenderType>(),
-            new EftEnumConverter<SeasonalEventType>(),
-            new EftEnumConverter<ProfileChangeEventType>(),
-            new EftEnumConverter<QuestStatusEnum>(),
-            new EftEnumConverter<RewardType>(),
-            new EftEnumConverter<SideType>(),
-            new EftEnumConverter<BonusSkillType>(),
-            new EftEnumConverter<NotificationEventType>(),
-            new EftEnumConverter<QuestTypeEnum>(),
-            new EftEnumConverter<RewardType>(),
-            new EftEnumConverter<ExitStatus>(),
-            new EftEnumConverter<MemberCategory>(),
-            new EftEnumConverter<PinLockState>(),
-            new EftEnumConverter<PlayerSideMask>(),
-            new EftEnumConverter<DamageEffectType>(),
-            new EftEnumConverter<RepairStrategyType>(),
-            new EftEnumConverter<ThrowWeapType>(),
-            new EftEnumConverter<EventType>(),
-            new EftEnumConverter<TraderServiceType>(),
-            new EftEnumConverter<CurrencyType>(),
-            new EftEnumConverter<RadioStationType>(),
-            new EftEnumConverter<ArmorMaterial>(),
-            new EftEnumConverter<RequirementState>(),
-            new EftEnumConverter<ExfiltrationType>(),
-            new EftEnumConverter<EquipmentSlots>(),
-            new EftEnumConverter<BuffType>(),
-            new EftEnumConverter<BodyPartColliderType>(),
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
 
-            new EftEnumConverter<LogLevel>(),
-            new EftEnumConverter<LogTextColor>(),
-            new EftEnumConverter<LogBackgroundColor>(),
-
-            new EftListEnumConverter<EquipmentSlots>(),
-            new EftListEnumConverter<PlayerSide>(),
-            new EftListEnumConverter<DamageType>(),
-            new BaseInteractionRequestDataConverter()
+        foreach (var registrator in registrators)
+        {
+            foreach (var converter in registrator.GetJsonConverters())
+            {
+                jsonSerializerOptionsNoIndent.Converters.Add(converter);
+            }
         }
-    };
 
-    protected static JsonSerializerOptions jsonSerializerOptionsIndented = new(jsonSerializerOptionsNoIndent)
-    {
-        WriteIndented = true
-    };
+        jsonSerializerOptionsIndented = new JsonSerializerOptions(jsonSerializerOptionsNoIndent)
+        {
+            WriteIndented = true
+        };
+    }
 
     /// <summary>
     ///     Convert JSON into an object
@@ -113,6 +79,23 @@ public class JsonUtil
     }
 
     /// <summary>
+    ///     Convert JSON into an object from a file asynchronously
+    /// </summary>
+    /// <param name="file">The JSON File to read</param>
+    /// <returns>T</returns>
+    public async Task<T?> DeserializeFromFileAsync<T>(string file)
+    {
+        if (!File.Exists(file))
+        {
+            return default;
+        }
+
+        await using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+
+        return await JsonSerializer.DeserializeAsync<T>(fs, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
     ///     Convert JSON into an object from a file
     /// </summary>
     /// <param name="file">The JSON File to read</param>
@@ -132,6 +115,24 @@ public class JsonUtil
     }
 
     /// <summary>
+    ///     Convert JSON into an object from a file asynchronously
+    /// </summary>
+    /// <param name="file">The JSON File to read</param>
+    /// <param name="type">The type of the object to deserialize to</param>
+    /// <returns>object</returns>
+    public async Task<object?> DeserializeFromFileAsync(string file, Type type)
+    {
+        if (!File.Exists(file))
+        {
+            return default;
+        }
+
+        await using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+
+        return await JsonSerializer.DeserializeAsync(fs, type, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
     ///     Convert JSON into an object from a FileStream
     /// </summary>
     /// <param name="fs">The file stream to deserialize</param>
@@ -140,6 +141,27 @@ public class JsonUtil
     public object? DeserializeFromFileStream(FileStream fs, Type type)
     {
         return JsonSerializer.Deserialize(fs, type, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
+    ///     Convert JSON into an object from a FileStream asynchronously
+    /// </summary>
+    /// <param name="fs">The file stream to deserialize</param>
+    /// <param name="type">The type of the object to deserialize to</param>
+    /// <returns></returns>
+    public async Task<object?> DeserializeFromFileStreamAsync(FileStream fs, Type type)
+    {
+        return await JsonSerializer.DeserializeAsync(fs, type, jsonSerializerOptionsNoIndent);
+    }
+
+    /// <summary>
+    ///     Convert JSON into an object from a MemoryStream asynchronously
+    /// </summary>
+    /// <param name="fs">The memory stream to deserialize</param>
+    /// <returns>T</returns>
+    public async Task<T?> DeserializeFromMemoryStreamAsync<T>(MemoryStream ms)
+    {
+        return await JsonSerializer.DeserializeAsync<T>(ms, jsonSerializerOptionsNoIndent);
     }
 
     /// <summary>
@@ -164,45 +186,5 @@ public class JsonUtil
     public string? Serialize(object? obj, Type type, bool indented = false)
     {
         return obj == null ? null : JsonSerializer.Serialize(obj, type, indented ? jsonSerializerOptionsIndented : jsonSerializerOptionsNoIndent);
-    }
-
-    protected static void AddConverter(JsonSerializerOptions options, JsonConverter newConverter)
-    {
-        if (options.Converters.All(c => c.GetType() != newConverter.GetType()))
-        {
-            // Doesn't exist, add
-            options.Converters.Add(newConverter);
-        }
-    }
-
-    /// <summary>
-    ///     Register a Json converter to serializer options
-    /// </summary>
-    /// <param name="converter">The converter to add</param>
-    public void RegisterJsonConverter(JsonConverter converter)
-    {
-        // This might actually be a terrible thing to do, but it is what it is for now
-
-        if (!jsonSerializerOptionsNoIndent.IsReadOnly)
-        {
-            AddConverter(jsonSerializerOptionsNoIndent, converter);
-        }
-        else
-        {
-            var noIndentConverter = new JsonSerializerOptions(jsonSerializerOptionsNoIndent);
-            AddConverter(noIndentConverter, converter);
-            jsonSerializerOptionsNoIndent = noIndentConverter;
-        }
-
-        if (!jsonSerializerOptionsIndented.IsReadOnly)
-        {
-            AddConverter(jsonSerializerOptionsIndented, converter);
-        }
-        else
-        {
-            var indentedConverter = new JsonSerializerOptions(jsonSerializerOptionsIndented);
-            AddConverter(indentedConverter, converter);
-            jsonSerializerOptionsIndented = indentedConverter;
-        }
     }
 }

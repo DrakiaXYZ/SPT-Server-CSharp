@@ -1,4 +1,5 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Logging;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
@@ -61,8 +62,8 @@ public class WatermarkLocale
     }
 }
 
-[Injectable]
-public class Watermark
+[Injectable(TypePriority = OnLoadOrder.Watermark)]
+public class Watermark : IOnLoad
 {
     protected ConfigServer _configServer;
     protected LocalisationService _localisationService;
@@ -87,7 +88,7 @@ public class Watermark
         sptConfig = _configServer.GetConfig<CoreConfig>();
     }
 
-    public virtual void Initialize()
+    public virtual Task OnLoad()
     {
         var description = _watermarkLocale.GetDescription();
         var warning = _watermarkLocale.GetWarning();
@@ -121,6 +122,8 @@ public class Watermark
 
         SetTitle();
         Draw();
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -149,10 +152,8 @@ public class Watermark
     /// <returns>label text</returns>
     public string GetInGameVersionLabel()
     {
-        var sptVersion = /*ProgramStatics.SPT_VERSION ||*/ sptConfig.SptVersion;
-        var versionTag = /*ProgramStatics.DEBUG ? */
-            $"{sptVersion} - BLEEDINGEDGE { /*ProgramStatics.COMMIT?.slice(0, 6) ?? */""}";
-        //: `{sptVersion} - {ProgramStatics.COMMIT?.slice(0, 6) ?? ""}`;
+        var sptVersion = ProgramStatics.SPT_VERSION();
+        var versionTag = ProgramStatics.DEBUG() ? $"{sptVersion} - BLEEDINGEDGE {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}" : $"{sptVersion} - {ProgramStatics.COMMIT()?.Substring(0, 6) ?? ""}";
 
         return $"{sptConfig.ProjectName} {versionTag}";
     }

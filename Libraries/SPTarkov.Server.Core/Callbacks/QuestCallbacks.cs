@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.ItemEvent;
@@ -37,7 +37,7 @@ public class QuestCallbacks(
     {
         if (info.Type == "repeatable")
         {
-            return _questController.AcceptRepeatableQuest(pmcData, info, sessionID);
+            return _repeatableQuestController.AcceptRepeatableQuest(pmcData, info, sessionID);
         }
 
         return _questController.AcceptQuest(pmcData, info, sessionID);
@@ -74,9 +74,9 @@ public class QuestCallbacks(
     /// <param name="info"></param>
     /// <param name="sessionID">Session/player id</param>
     /// <returns></returns>
-    public string ListQuests(string url, ListQuestsRequestData info, string sessionID)
+    public ValueTask<string> ListQuests(string url, ListQuestsRequestData info, string sessionID)
     {
-        return _httpResponseUtil.GetBody(_questController.GetClientQuests(sessionID));
+        return new ValueTask<string>(_httpResponseUtil.GetBody(_questController.GetClientQuests(sessionID)));
     }
 
     /// <summary>
@@ -86,8 +86,8 @@ public class QuestCallbacks(
     /// <param name="info"></param>
     /// <param name="sessionID">Session/player id</param>
     /// <returns></returns>
-    public string ActivityPeriods(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> ActivityPeriods(string url, EmptyRequestData _, string sessionID)
     {
-        return _httpResponseUtil.GetBody(_repeatableQuestController.GetClientRepeatableQuests(sessionID));
+        return new ValueTask<string>(_httpResponseUtil.GetBody(_repeatableQuestController.GetClientRepeatableQuests(sessionID)));
     }
 }

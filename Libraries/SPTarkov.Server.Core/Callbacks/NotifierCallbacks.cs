@@ -1,4 +1,4 @@
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Controllers;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -9,7 +9,7 @@ using SPTarkov.Server.Core.Utils;
 
 namespace SPTarkov.Server.Core.Callbacks;
 
-[Injectable(InjectableTypeOverride = typeof(NotifierCallbacks))]
+[Injectable]
 public class NotifierCallbacks(
     HttpResponseUtil _httpResponseUtil,
     NotifierController _notifierController,
@@ -44,39 +44,39 @@ public class NotifierCallbacks(
     ///     Handle push/notifier/getwebsocket
     /// </summary>
     /// <returns></returns>
-    public string GetNotifier(string url, IRequestData info, string sessionID)
+    public ValueTask<string> GetNotifier(string url, IRequestData info, string sessionID)
     {
-        return _httpResponseUtil.EmptyArrayResponse();
+        return new ValueTask<string>(_httpResponseUtil.EmptyArrayResponse());
     }
 
     /// <summary>
     ///     Handle client/notifier/channel/create
     /// </summary>
     /// <returns></returns>
-    public string CreateNotifierChannel(string url, EmptyRequestData _, string sessionID)
+    public ValueTask<string> CreateNotifierChannel(string url, EmptyRequestData _, string sessionID)
     {
-        return _httpResponseUtil.GetBody(_notifierController.GetChannel(sessionID));
+        return new ValueTask<string>(_httpResponseUtil.GetBody(_notifierController.GetChannel(sessionID)));
     }
 
     /// <summary>
     ///     Handle client/game/profile/select
     /// </summary>
     /// <returns></returns>
-    public string SelectProfile(string url, UIDRequestData info, string sessionID)
+    public ValueTask<string> SelectProfile(string url, UIDRequestData info, string sessionID)
     {
-        return _httpResponseUtil.GetBody(
+        return new ValueTask<string>(_httpResponseUtil.GetBody(
             new SelectProfileResponse
             {
                 Status = "ok"
             }
-        );
+        ));
     }
 
     /// <summary>
     /// </summary>
     /// <returns></returns>
-    public string Notify(string url, object info, string sessionID)
+    public ValueTask<string> Notify(string url, object info, string sessionID)
     {
-        return "NOTIFY";
+        return new ValueTask<string>("NOTIFY");
     }
 }

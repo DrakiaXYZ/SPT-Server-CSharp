@@ -21,7 +21,15 @@ public class ReflectionsCloner(ISptLogger<ReflectionsCloner> logger) : ICloner
 
     public T? Clone<T>(T? obj)
     {
-        return (T?) Clone(obj, typeof(T)).Result;
+        try
+        {
+            return (T?) Clone(obj, typeof(T)).Result;
+        }
+        catch (Exception e)
+        {
+            logger.Error("Cloning error:", e);
+            return default;
+        }
     }
 
     public async Task<object?> Clone(object? obj, Type objectType)

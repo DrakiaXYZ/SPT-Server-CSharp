@@ -1,31 +1,44 @@
 using System.Collections.Concurrent;
-using SPTarkov.Common.Annotations;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
-using SPTarkov.Server.Core.Models.Eft.Ragfair;
 
 namespace SPTarkov.Server.Core.Services;
 
 [Injectable(InjectionType.Singleton)]
 public class RagfairRequiredItemsService(
-    RagfairOfferService _ragfairOfferService,
-    PaymentHelper _paymentHelper)
+    RagfairOfferService ragfairOfferService,
+    PaymentHelper paymentHelper)
 {
-    protected ConcurrentDictionary<string, List<RagfairOffer>> _requiredItemsCache = new();
+    /// <summary>
+    /// Key = tpl
+    /// </summary>
+    protected readonly ConcurrentDictionary<string, HashSet<string>> _requiredItemsCache = new();
 
-    public List<RagfairOffer>? GetRequiredItemsById(string searchId)
+    /// <summary>
+    /// Get the offerId of offers that require the supplied tpl
+    /// </summary>
+    /// <param name="tpl">Tpl to find offers ids for</param>
+    /// <returns></returns>
+    public HashSet<string> GetRequiredOffersById(string tpl)
     {
-        _requiredItemsCache.TryGetValue(searchId, out var list);
+        if (_requiredItemsCache.TryGetValue(tpl, out var offerIds))
+        {
+            return offerIds;
+        }
 
-        return list;
+        return [];
     }
 
+    /// <summary>
+    /// Create a cache of requirements to purchase item
+    /// </summary>
     public void BuildRequiredItemTable()
     {
         _requiredItemsCache.Clear();
-        foreach (var offer in _ragfairOfferService.GetOffers())
+        foreach (var offer in ragfairOfferService.GetOffers())
         foreach (var requirement in offer.Requirements)
         {
-            if (_paymentHelper.IsMoneyTpl(requirement.Template))
+            if (paymentHelper.IsMoneyTpl(requirement.Template))
                 // This would just be too noisy
             {
                 continue;
@@ -35,7 +48,7 @@ public class RagfairRequiredItemsService(
             _requiredItemsCache.TryAdd(requirement.Template, []);
 
             // Add matching offer
-            _requiredItemsCache.GetValueOrDefault(requirement.Template)?.Add(offer);
+            _requiredItemsCache.GetValueOrDefault(requirement.Template)?.Add(offer.Id);
         }
     }
 }

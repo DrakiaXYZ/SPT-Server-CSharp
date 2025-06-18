@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using SPTarkov.Common.Annotations;
 using SPTarkov.Common.Extensions;
+using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Spt.Bots;
@@ -15,6 +15,9 @@ using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Services;
 
+/// <summary>
+/// Provides access to the servers database, these are in-memory representations of the .JSON files stored inside `Libraries\SPTarkov.Server.Assets\Assets\database`
+/// </summary>
 [Injectable(InjectionType.Singleton)]
 public class DatabaseService(
     ISptLogger<DatabaseService> _logger,
@@ -23,7 +26,7 @@ public class DatabaseService(
     HashUtil _hashUtil
 )
 {
-    protected bool isDataValid = true;
+    private bool _isDataValid = true;
 
     /// <returns> assets/database/ </returns>
     public DatabaseTables GetTables()
@@ -90,7 +93,7 @@ public class DatabaseService(
         if (_databaseServer.GetTables().Locations == null)
         {
             throw new Exception(
-                _localisationService.GetText("database-data_at_path_missing", "assets/database/locales")
+                _localisationService.GetText("database-data_at_path_missing", "assets/database/locations")
             );
         }
 
@@ -98,17 +101,19 @@ public class DatabaseService(
     }
 
     /// <summary>
-    ///     Get specific location by its ID
+    ///     Get specific location by its ID, automatically ToLowers id
     /// </summary>
     /// <param name="locationId"> Desired location ID </param>
     /// <returns> assets/database/locations/ </returns>
-    public Location GetLocation(string locationId)
+    public Location? GetLocation(string locationId)
     {
         var locations = GetLocations();
         var desiredLocation = locations.GetByJsonProp<Location>(locationId.ToLower());
         if (desiredLocation == null)
         {
-            throw new Exception(_localisationService.GetText("database-no_location_found_with_id", locationId));
+            _logger.Error(_localisationService.GetText("database-no_location_found_with_id", locationId));
+
+            return null;
         }
 
         return desiredLocation;
@@ -257,7 +262,7 @@ public class DatabaseService(
     }
 
     /// <returns> assets/database/templates/profiles.json </returns>
-    public ProfileTemplates GetProfiles()
+    public Dictionary<string, ProfileSides> GetProfileTemplates()
     {
         if (_databaseServer.GetTables().Templates?.Profiles == null)
         {
@@ -294,12 +299,14 @@ public class DatabaseService(
     /// </summary>
     /// <param name="traderId"> Desired trader ID </param>
     /// <returns> assets/database/traders/ </returns>
-    public Trader GetTrader(string traderId)
+    public Trader? GetTrader(string traderId)
     {
         var traders = GetTraders();
         if (!traders.TryGetValue(traderId, out var desiredTrader))
         {
-            throw new Exception(_localisationService.GetText("database-no_trader_found_with_id", traderId));
+            _logger.Error(_localisationService.GetText("database-no_trader_found_with_id", traderId));
+
+            return null;
         }
 
         return desiredTrader;
@@ -323,13 +330,13 @@ public class DatabaseService(
     {
         var start = Stopwatch.StartNew();
 
-        isDataValid =
+        _isDataValid =
             ValidateTable(GetQuests(), "quest") &&
             ValidateTable(GetTraders(), "trader") &&
             ValidateTable(GetItems(), "item") &&
             ValidateTable(GetCustomization(), "customization");
 
-        if (!isDataValid)
+        if (!_isDataValid)
         {
             _logger.Error(_localisationService.GetText("database-invalid_data"));
         }
@@ -367,6 +374,6 @@ public class DatabaseService(
     /// <returns> True if the database contains valid data, false otherwise </returns>
     public bool IsDatabaseValid()
     {
-        return isDataValid;
+        return _isDataValid;
     }
 }
