@@ -14,6 +14,8 @@ public class LocaleService(
 )
 {
     protected readonly LocaleConfig _localeConfig = _configServer.GetConfig<LocaleConfig>();
+    private string _chosenServerLocale = string.Empty;
+    private string _chosenClientLocale = string.Empty;
 
     /// <summary>
     ///     Get the eft globals db file based on the configured locale in config/locale.json, if not found, fall back to 'en'
@@ -68,9 +70,14 @@ public class LocaleService(
     /// <returns> Locale e.g en/ge/cz/cn </returns>
     public string GetDesiredGameLocale()
     {
-        return string.Equals(_localeConfig.GameLocale, "system", StringComparison.OrdinalIgnoreCase)
-            ? GetPlatformForClientLocale()
-            : _localeConfig.GameLocale.ToLower(); // Use custom locale value
+        if (string.IsNullOrEmpty(_chosenClientLocale))
+        {
+            _chosenClientLocale = string.Equals(_localeConfig.GameLocale, "system", StringComparison.OrdinalIgnoreCase)
+                ? GetPlatformForClientLocale()
+                : _localeConfig.GameLocale.ToLower(); // Use custom locale value
+        }
+
+        return _chosenClientLocale;
     }
 
     /// <summary>
@@ -80,13 +87,18 @@ public class LocaleService(
     /// <returns> Locale e.g en/ge/cz/cn </returns>
     public string GetDesiredServerLocale()
     {
-        return string.Equals(
-            _localeConfig.ServerLocale,
-            "system",
-            StringComparison.OrdinalIgnoreCase
-        )
-            ? GetPlatformForServerLocale()
-            : _localeConfig.ServerLocale.ToLower(); // Use custom locale value
+        if (!string.IsNullOrEmpty(_chosenServerLocale))
+        {
+            _chosenServerLocale = string.Equals(
+                _localeConfig.ServerLocale,
+                "system",
+                StringComparison.OrdinalIgnoreCase
+            )
+                ? GetPlatformForServerLocale()
+                : _localeConfig.ServerLocale.ToLower(); // Use custom locale value
+        }
+
+        return _chosenServerLocale;
     }
 
     /// <summary>
