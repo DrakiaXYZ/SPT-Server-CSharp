@@ -72,7 +72,11 @@ public class LocaleService(
     {
         if (string.IsNullOrEmpty(_chosenClientLocale))
         {
-            _chosenClientLocale = string.Equals(_localeConfig.GameLocale, "system", StringComparison.OrdinalIgnoreCase)
+            _chosenClientLocale = string.Equals(
+                _localeConfig.GameLocale,
+                "system",
+                StringComparison.OrdinalIgnoreCase
+            )
                 ? GetPlatformForClientLocale()
                 : _localeConfig.GameLocale.ToLower(); // Use custom locale value
         }
