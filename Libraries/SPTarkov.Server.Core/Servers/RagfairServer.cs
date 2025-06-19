@@ -6,6 +6,7 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
+using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace SPTarkov.Server.Core.Servers;
 
@@ -19,7 +20,8 @@ public class RagfairServer(
     LocalisationService _localisationService,
     RagfairOfferGenerator _ragfairOfferGenerator,
     RagfairOfferHolder _ragfairOfferHolder,
-    ConfigServer _configServer
+    ConfigServer _configServer,
+    ICloner cloner
 )
 {
     protected readonly RagfairConfig _ragfairConfig = _configServer.GetConfig<RagfairConfig>();
@@ -54,8 +56,8 @@ public class RagfairServer(
         _ragfairOfferHolder.FlagExpiredOffersAfterDate(timeUtil.GetTimeStamp());
         if (_ragfairOfferService.EnoughExpiredOffersExistToProcess())
         {
-            // Must occur BEFORE "RemoveExpiredOffers"
-            var expiredAssortsWithChildren = _ragfairOfferHolder.GetExpiredOfferItems();
+            // Must occur BEFORE "RemoveExpiredOffers" + clone items as they'll be purged by `RemoveExpiredOffers()`
+            var expiredOfferItemsClone = cloner.Clone(_ragfairOfferHolder.GetExpiredOfferItems());
 
             _ragfairOfferService.RemoveExpiredOffers();
 
@@ -63,7 +65,7 @@ public class RagfairServer(
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized, true, true);
 
             // Replace the expired offers with new ones
-            _ragfairOfferGenerator.GenerateDynamicOffers(expiredAssortsWithChildren);
+            _ragfairOfferGenerator.GenerateDynamicOffers(expiredOfferItemsClone);
         }
 
         _ragfairRequiredItemsService.BuildRequiredItemTable();
