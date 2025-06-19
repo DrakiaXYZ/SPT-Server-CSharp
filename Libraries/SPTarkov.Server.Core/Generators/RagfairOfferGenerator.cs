@@ -433,7 +433,7 @@ public class RagfairOfferGenerator(
     {
         var rootItem = assortItemWithChildren.FirstOrDefault();
         var itemToSellDetails = itemHelper.GetItem(rootItem.Template);
-        
+
         // Only perform checks on newly generated items, skip expired items being refreshed
         if (!(isExpiredOffer || ragfairServerHelper.IsItemValidRagfairItem(itemToSellDetails)))
         {
@@ -545,10 +545,10 @@ public class RagfairOfferGenerator(
             rootItem.Template,
             isPreset
         );
-        
+
         // Reset stack count to 1 from whatever it was prior
         rootItem.Upd.StackObjectsCount = 1;
-        
+
         if (!isExpiredOffer && itemHelper.ArmorItemCanHoldMods(rootItem.Template))
         {
             // Run randomised chance to remove removable plates from new offers(not expired)
@@ -623,11 +623,8 @@ public class RagfairOfferGenerator(
     {
         var armorConfig = ragfairConfig.Dynamic.Armor;
 
-        var shouldRemovePlates = randomUtil.GetChance100(
-            armorConfig.RemoveRemovablePlateChance
-        );
-        if (!shouldRemovePlates || !itemHelper.ArmorItemHasRemovablePlateSlots(rootItem.Template)
-        )
+        var shouldRemovePlates = randomUtil.GetChance100(armorConfig.RemoveRemovablePlateChance);
+        if (!shouldRemovePlates || !itemHelper.ArmorItemHasRemovablePlateSlots(rootItem.Template))
         {
             return;
         }
