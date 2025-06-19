@@ -753,9 +753,7 @@ public class QuestHelper(
 
         if (_logger.IsLogEnabled(LogLevel.Debug))
         {
-            _logger.Debug(
-                $"GetSellToTraderQuests found: {result.Count} quests"
-            );
+            _logger.Debug($"GetSellToTraderQuests found: {result.Count} quests");
         }
 
         return result;
