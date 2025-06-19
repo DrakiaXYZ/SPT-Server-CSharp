@@ -145,7 +145,7 @@ public class RagfairServerHelper(
         );
     }
 
-    public int CalculateDynamicStackCount(string tplId, bool isWeaponPreset)
+    public int CalculateDynamicStackCount(string tplId, bool isPreset)
     {
         var config = ragfairConfig.Dynamic;
 
@@ -163,7 +163,7 @@ public class RagfairServerHelper(
 
         // Item Types to return one of
         if (
-            isWeaponPreset
+            isPreset
             || itemHelper.IsOfBaseclasses(
                 itemDetails.Value.Id,
                 ragfairConfig.Dynamic.ShowAsSingleStack

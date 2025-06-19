@@ -431,9 +431,9 @@ public class RagfairOfferGenerator(
         Dynamic config
     )
     {
-        var itemToSellDetails = itemHelper.GetItem(assortItemWithChildren[0].Template);
-        var isPreset = presetHelper.IsPreset(assortItemWithChildren[0].Upd.SptPresetId);
-
+        var rootItem = assortItemWithChildren.FirstOrDefault();
+        var itemToSellDetails = itemHelper.GetItem(rootItem.Template);
+        
         // Only perform checks on newly generated items, skip expired items being refreshed
         if (!(isExpiredOffer || ragfairServerHelper.IsItemValidRagfairItem(itemToSellDetails)))
         {
@@ -441,7 +441,8 @@ public class RagfairOfferGenerator(
         }
 
         // Armor presets can hold plates above the allowed flea level, remove if necessary
-        if (isPreset && ragfairConfig.Dynamic.Blacklist.EnableBsgList)
+        var isPreset = presetHelper.IsPreset(rootItem.Upd.SptPresetId);
+        if (!isExpiredOffer && isPreset && ragfairConfig.Dynamic.Blacklist.EnableBsgList)
         {
             RemoveBannedPlatesFromPreset(
                 assortItemWithChildren,
@@ -469,7 +470,8 @@ public class RagfairOfferGenerator(
                 hashUtil.Generate(),
                 clonedAssort,
                 isPreset,
-                itemToSellDetails.Value
+                itemToSellDetails.Value,
+                isExpiredOffer
             );
         }
     }
@@ -524,62 +526,44 @@ public class RagfairOfferGenerator(
     ///     Create one flea offer for a specific item
     /// </summary>
     /// <param name="sellerId"> ID of seller</param>
-    /// <param name="itemWithChildren"> Item to create offer for </param>
+    /// <param name="itemWithChildren"> Item to create offer for</param>
     /// <param name="isPreset"> Is item a weapon preset</param>
     /// <param name="itemToSellDetails"> Raw DB item details </param>
+    /// <param name="isExpiredOffer">Offer being created is to replace an expired, existing offer</param>
     protected void CreateSingleOfferForItem(
         string sellerId,
         List<Item> itemWithChildren,
         bool isPreset,
-        TemplateItem itemToSellDetails
+        TemplateItem itemToSellDetails,
+        bool isExpiredOffer
     )
     {
+        var rootItem = itemWithChildren.FirstOrDefault();
+
         // Get randomised amount to list on flea
         var desiredStackSize = ragfairServerHelper.CalculateDynamicStackCount(
-            itemWithChildren[0].Template,
+            rootItem.Template,
             isPreset
         );
-
+        
         // Reset stack count to 1 from whatever it was prior
-        itemWithChildren[0].Upd.StackObjectsCount = 1;
+        rootItem.Upd.StackObjectsCount = 1;
+        
+        if (!isExpiredOffer && itemHelper.ArmorItemCanHoldMods(rootItem.Template))
+        {
+            // Run randomised chance to remove removable plates from new offers(not expired)
+            RemoveArmorPlates(itemWithChildren, rootItem);
+        }
 
         var isBarterOffer = randomUtil.GetChance100(ragfairConfig.Dynamic.Barter.ChancePercent);
         var isPackOffer =
-            randomUtil.GetChance100(ragfairConfig.Dynamic.Pack.ChancePercent)
-            && !isBarterOffer
+            !isBarterOffer
+            && randomUtil.GetChance100(ragfairConfig.Dynamic.Pack.ChancePercent)
             && itemWithChildren.Count == 1
             && itemHelper.IsOfBaseclasses(
-                itemWithChildren[0].Template,
+                rootItem.Template,
                 ragfairConfig.Dynamic.Pack.ItemTypeWhitelist
             );
-
-        // Remove removable plates if % check passes
-        if (itemHelper.ArmorItemCanHoldMods(itemWithChildren[0].Template))
-        {
-            var armorConfig = ragfairConfig.Dynamic.Armor;
-
-            var shouldRemovePlates = randomUtil.GetChance100(
-                armorConfig.RemoveRemovablePlateChance
-            );
-            if (
-                shouldRemovePlates
-                && itemHelper.ArmorItemHasRemovablePlateSlots(itemWithChildren[0].Template)
-            )
-            {
-                var offerItemPlatesToRemove = itemWithChildren.Where(item =>
-                    armorConfig.PlateSlotIdToRemovePool.Contains(item.SlotId?.ToLower())
-                );
-
-                // Latest first, to ensure we don't move later items off by 1 each time we remove an item below it
-                var indexesToRemove = offerItemPlatesToRemove
-                    .Select(plateItem => itemWithChildren.IndexOf(plateItem))
-                    .ToHashSet();
-                foreach (var index in indexesToRemove.OrderByDescending(x => x))
-                {
-                    itemWithChildren.RemoveAt(index);
-                }
-            }
-        }
 
         List<BarterScheme> barterScheme;
         if (isPackOffer)
@@ -604,15 +588,16 @@ public class RagfairOfferGenerator(
             barterScheme = CreateBarterBarterScheme(itemWithChildren, ragfairConfig.Dynamic.Barter);
             if (ragfairConfig.Dynamic.Barter.MakeSingleStackOnly)
             {
-                var rootItem = itemWithChildren.FirstOrDefault();
-                if (rootItem?.Upd != null)
+                var rootBarterItem = itemWithChildren.FirstOrDefault();
+                if (rootBarterItem?.Upd != null)
                 {
-                    rootItem.Upd.StackObjectsCount = 1;
+                    rootBarterItem.Upd.StackObjectsCount = 1;
                 }
             }
         }
         else
         {
+            // Not barter or pack offer
             // Apply randomised properties
             RandomiseOfferItemUpdProperties(sellerId, itemWithChildren, itemToSellDetails);
             barterScheme = CreateCurrencyBarterScheme(itemWithChildren, isPackOffer);
@@ -627,6 +612,38 @@ public class RagfairOfferGenerator(
             desiredStackSize,
             isPackOffer // sellAsOnePiece - pack offer
         );
+    }
+
+    /// <summary>
+    /// Run % check to remove removable armor plates from item
+    /// </summary>
+    /// <param name="itemWithChildren">Armor item</param>
+    /// <param name="rootItem">Root armor item</param>
+    protected void RemoveArmorPlates(List<Item> itemWithChildren, Item rootItem)
+    {
+        var armorConfig = ragfairConfig.Dynamic.Armor;
+
+        var shouldRemovePlates = randomUtil.GetChance100(
+            armorConfig.RemoveRemovablePlateChance
+        );
+        if (!shouldRemovePlates || !itemHelper.ArmorItemHasRemovablePlateSlots(rootItem.Template)
+        )
+        {
+            return;
+        }
+
+        var offerItemPlatesToRemove = itemWithChildren.Where(item =>
+            armorConfig.PlateSlotIdToRemovePool.Contains(item.SlotId?.ToLower())
+        );
+
+        // Latest first, to ensure we don't move later items off by 1 each time we remove an item below it
+        var indexesToRemove = offerItemPlatesToRemove
+            .Select(plateItem => itemWithChildren.IndexOf(plateItem))
+            .ToHashSet();
+        foreach (var index in indexesToRemove.OrderByDescending(x => x))
+        {
+            itemWithChildren.RemoveAt(index);
+        }
     }
 
     /// <summary>
