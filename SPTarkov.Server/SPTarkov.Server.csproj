@@ -14,6 +14,8 @@
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
     <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    <AssemblyName>SPT.Server</AssemblyName>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
     <AssemblyName>SPTarkov.Server</AssemblyName>
@@ -29,10 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.5" />
-    <PackageReference
-      Include="Microsoft.Extensions.DependencyInjection.Abstractions"
-      Version="9.0.5"
-    />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.5" />
   </ItemGroup>
@@ -41,6 +40,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <ExcludeFromSingleFile>True</ExcludeFromSingleFile>
     </Content>
+    <Content Include="icon.ico" />
     <None Update="sptLogger.json" Condition="'$(Configuration)' == 'RELEASE'">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
