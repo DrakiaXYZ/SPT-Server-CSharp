@@ -202,7 +202,7 @@ public record QuestCondition
 
     [JsonPropertyName("visibilityConditions")]
     public List<VisibilityCondition>? VisibilityConditions { get; set; }
-        
+
     /// <summary>
     /// This is set as nullable in the client
     /// </summary>

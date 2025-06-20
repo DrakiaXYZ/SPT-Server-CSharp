@@ -20,7 +20,7 @@ public record Achievement
     /// Unused in the client
     /// </summary>
     [JsonPropertyName("assetPath")]
-    public string? AssetPath { get; set; }  
+    public string? AssetPath { get; set; }
 
     [JsonPropertyName("rewards")]
     public required List<Reward> Rewards { get; set; }
