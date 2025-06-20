@@ -105,6 +105,8 @@ public class MathUtilTests
         new double[] { 0, 10, 20, 30 },
         10.040816326530612d
     )]
+    [DataRow(1d, new double[] { 1, 10, 500, 510 }, new double[] { 2, 10, 20, 30 }, 2d)]
+    [DataRow(11d, new double[] { 1, 10 }, new double[] { 2, 10 }, 10d)]
     public void InterpTest(double input, double[] x, double[] y, double expected)
     {
         var actual = _mathUtil.Interp1(input, x.ToList(), y.ToList());
