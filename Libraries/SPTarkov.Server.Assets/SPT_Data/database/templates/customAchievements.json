@@ -672,42 +672,55 @@
   {
     "assetPath": "",
     "conditions": {
-      "availableForFinish": [
-        {
-          "completeInSeconds": 0,
-          "conditionType": "CounterCreator",
-          "counter": {
-            "conditions": [
-              {
-                "id": "6527f3011dd276a0de4cbec2",
-                "resetOnSessionEnd": false,
-                "savageRole": [],
-                "target": "Savage",
-                "value": 1,
-                "weapon": [],
-                "weaponCaliber": [],
-                "weaponModsExclusive": [],
-                "weaponModsInclusive": []
-              }
-            ],
-            "id": "6527f2f297f3f0094887163e"
-          },
-          "doNotResetIfCounterCompleted": false,
-          "dynamicLocale": false,
-          "globalQuestCounterId": "",
-          "id": "6527f2f2c4d6004e4edbba06",
-          "index": 0,
-          "isNecessary": false,
-          "isResetOnConditionFailed": false,
-          "oneSessionOnly": false,
-          "parentId": "",
-          "type": "Completion",
-          "value": 1,
-          "visibilityConditions": []
-        }
-      ],
-      "fail": []
-    },
+		"availableForFinish": [{
+				"id": "6527f2f2c4d6004e4edbba06",
+				"index": 0,
+				"dynamicLocale": false,
+				"visibilityConditions": [],
+				"globalQuestCounterId": "",
+				"parentId": "",
+				"value": 1,
+				"type": "Completion",
+				"oneSessionOnly": false,
+				"completeInSeconds": 0,
+				"doNotResetIfCounterCompleted": false,
+				"isResetOnConditionFailed": false,
+				"isNecessary": false,
+				"counter": {
+					"id": "6527f2f297f3f0094887163e",
+					"conditions": [{
+							"id": "6527f3011dd276a0de4cbec2",
+							"dynamicLocale": false,
+							"target": "Savage",
+							"compareMethod": ">=",
+							"value": 1,
+							"weapon": [],
+							"distance": {
+								"value": 0,
+								"compareMethod": ">="
+							},
+							"weaponModsInclusive": [],
+							"weaponModsExclusive": [],
+							"enemyEquipmentInclusive": [],
+							"enemyEquipmentExclusive": [],
+							"weaponCaliber": [],
+							"savageRole": [],
+							"bodyPart": [],
+							"daytime": {
+								"from": 0,
+								"to": 0
+							},
+							"enemyHealthEffects": [],
+							"resetOnSessionEnd": false,
+							"conditionType": "Kills"
+						}
+					]
+				},
+				"conditionType": "CounterCreator"
+			}
+		],
+		"fail": []
+	},
     "hidden": true,
     "id": "6527ee4a647c29201011defe",
     "imageUrl": "/files/achievement/Standard_43.png",
