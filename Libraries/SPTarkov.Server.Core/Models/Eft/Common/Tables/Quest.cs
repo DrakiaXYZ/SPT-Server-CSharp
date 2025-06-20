@@ -285,7 +285,7 @@ public record QuestCondition
     public bool? IsEncoded { get; set; }
 
     [JsonPropertyName("conditionType")]
-    public string? ConditionType { get; set; }
+    public required string ConditionType { get; set; }
 
     [JsonPropertyName("areaType")]
     public HideoutAreas? AreaType { get; set; }
@@ -415,7 +415,7 @@ public record QuestConditionCounterCondition
     public DaytimeCounter? Daytime { get; set; }
 
     [JsonPropertyName("conditionType")]
-    public string? ConditionType { get; set; }
+    public required string ConditionType { get; set; }
 
     [JsonPropertyName("enemyHealthEffects")]
     public List<EnemyHealthEffect>? EnemyHealthEffects { get; set; }
@@ -505,7 +505,7 @@ public record VisibilityCondition
     public bool? OneSessionOnly { get; set; }
 
     [JsonPropertyName("conditionType")]
-    public string? ConditionType { get; set; }
+    public required string ConditionType { get; set; }
 }
 
 public record QuestRewards
