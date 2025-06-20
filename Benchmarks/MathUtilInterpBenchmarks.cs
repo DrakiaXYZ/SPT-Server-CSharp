@@ -14,7 +14,6 @@ namespace Benchmarks
         private new List<double> x = [1, 10, 20, 30, 40, 50, 60];
         private new List<double> y = [11000, 20000, 32000, 45000, 58000, 70000, 82000];
 
-
         [GlobalSetup]
         public void Setup()
         {
@@ -26,6 +25,5 @@ namespace Benchmarks
         {
             _mathUtil.Interp1(input, x, y);
         }
-
     }
 }
