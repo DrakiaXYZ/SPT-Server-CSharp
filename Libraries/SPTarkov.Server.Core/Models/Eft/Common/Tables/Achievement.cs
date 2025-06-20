@@ -7,50 +7,47 @@ public record Achievement
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
+    [JsonPropertyName("index")]
+    public required int Index { get; set; }
+
     [JsonPropertyName("id")]
-    public string? Id { get; set; }
+    public required string Id { get; set; }
 
     [JsonPropertyName("imageUrl")]
-    public string? ImageUrl { get; set; }
+    public required string ImageUrl { get; set; }
 
+    /// <summary>
+    /// Unused in the client
+    /// </summary>
     [JsonPropertyName("assetPath")]
-    public string? AssetPath { get; set; }
+    public string? AssetPath { get; set; }  
 
     [JsonPropertyName("rewards")]
-    public List<Reward>? Rewards { get; set; }
+    public required List<Reward> Rewards { get; set; }
 
     [JsonPropertyName("conditions")]
-    public AchievementQuestConditionTypes? Conditions { get; set; }
+    public required AchievementQuestConditionTypes Conditions { get; set; }
 
-    [JsonPropertyName("instantComplete")]
-    public bool? InstantComplete { get; set; }
-
-    [JsonPropertyName("showNotificationsInGame")]
-    public bool? ShowNotificationsInGame { get; set; }
-
+    /// <summary>
+    /// Unused in the client
+    /// </summary>
     [JsonPropertyName("showProgress")]
     public bool? ShowProgress { get; set; }
 
-    [JsonPropertyName("prefab")]
-    public string? Prefab { get; set; }
-
     [JsonPropertyName("rarity")]
-    public string? Rarity { get; set; }
+    public required string Rarity { get; set; }
 
     [JsonPropertyName("hidden")]
-    public bool? Hidden { get; set; }
+    public required bool Hidden { get; set; }
 
     [JsonPropertyName("showConditions")]
-    public bool? ShowConditions { get; set; }
+    public required bool ShowConditions { get; set; }
 
     [JsonPropertyName("progressBarEnabled")]
-    public bool? ProgressBarEnabled { get; set; }
+    public required bool ProgressBarEnabled { get; set; }
 
     [JsonPropertyName("side")]
-    public string? Side { get; set; }
-
-    [JsonPropertyName("index")]
-    public int? Index { get; set; }
+    public required string Side { get; set; }
 }
 
 public record AchievementQuestConditionTypes
