@@ -540,7 +540,7 @@ public class RepeatableQuestController(
             // Add repeatable quests of this loops sub-type (daily/weekly)
             for (var i = 0; i < GetQuestCount(repeatableConfig, fullProfile); i++)
             {
-                var quest = new RepeatableQuest();
+                RepeatableQuest? quest = null;
                 var lifeline = 0;
                 while (quest?.Id == null && questTypePool.Types.Count > 0)
                 {

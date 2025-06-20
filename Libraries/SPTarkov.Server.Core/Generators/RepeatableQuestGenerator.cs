@@ -895,7 +895,6 @@ public class RepeatableQuestGenerator(
             ParentId = "",
             DynamicLocale = true,
             VisibilityConditions = [],
-            GlobalQuestCounterId = "",
             Target = new ListOrT<string>([itemTpl], null),
             Value = value,
             MinDurability = minDurability,

@@ -1209,7 +1209,7 @@ public class LocationLifecycleService
                 continue;
             }
 
-            if (dbQuest.Restartable is not null)
+            if (dbQuest.Restartable)
             {
                 failedQuest.Status = QuestStatusEnum.Fail;
             }

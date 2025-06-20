@@ -1380,7 +1380,7 @@ public class QuestHelper(
 
                 // Prereq does not have its status requirement fulfilled
                 // Some bsg status ids are strings, MUST convert to number before doing includes check
-                if (!conditionToFulfil.Status.Contains(prerequisiteQuest.Status.Value))
+                if (!conditionToFulfil.Status.Contains(prerequisiteQuest.Status))
                 {
                     haveCompletedPreviousQuest = false;
                     break;
@@ -1391,7 +1391,7 @@ public class QuestHelper(
                 {
                     // Compare current time to unlock time for previous quest
                     prerequisiteQuest.StatusTimers.TryGetValue(
-                        prerequisiteQuest.Status.Value,
+                        prerequisiteQuest.Status,
                         out var previousQuestCompleteTime
                     );
                     var unlockTime = previousQuestCompleteTime + conditionToFulfil.AvailableAfter;
