@@ -10,7 +10,7 @@ namespace SPTarkov.Server.Core.Helpers;
 public class RepeatableQuestHelper(
     ISptLogger<RepeatableQuestHelper> _logger,
     ConfigServer _configServer
-    )
+)
 {
     protected QuestConfig _questConfig = _configServer.GetConfig<QuestConfig>();
 
@@ -44,7 +44,7 @@ public class RepeatableQuestHelper(
         {
             PlayerGroup.Pmc => templates.Pmc,
             PlayerGroup.Scav => templates.Scav,
-            _ => throw new ArgumentOutOfRangeException(nameof(playerGroup), playerGroup, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(playerGroup), playerGroup, null),
         };
     }
 }
