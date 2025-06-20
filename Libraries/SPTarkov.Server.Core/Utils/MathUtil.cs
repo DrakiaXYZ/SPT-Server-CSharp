@@ -98,15 +98,17 @@ public class MathUtil
     /// <param name="x">Support points in x (of same length as y)</param>
     /// <param name="y">Support points in y (of same length as x)</param>
     /// <returns>Interpolated value at xp, or null if xp is out of bounds</returns>
-    public double? Interp1(double xp, List<double> x, List<double> y)
+    public double? Interp1(double xp, IReadOnlyList<double> x, IReadOnlyList<double> y)
     {
         if (xp > x[^1]) // ^1 is the last index in C#
         {
+            // Value is above max provided value in x array, Clamp result to last value
             return y[^1];
         }
 
         if (xp < x[0])
         {
+            // Value is below min provided value in x array, Clamp result to first value
             return y[0];
         }
 
