@@ -22,7 +22,7 @@
     <ApplicationIcon>..\Libraries\SPTarkov.Server.Assets\SPT_Data\images\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
-    <AssemblyName>SPTarkov.Server.Linux</AssemblyName>
+    <AssemblyName>SPT.Server.Linux</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Libraries\SPTarkov.Reflection\SPTarkov.Reflection.csproj" />
