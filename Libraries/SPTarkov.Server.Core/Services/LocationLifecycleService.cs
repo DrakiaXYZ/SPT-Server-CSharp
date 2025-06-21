@@ -54,6 +54,7 @@ public class LocationLifecycleService
     protected TraderConfig _traderConfig;
     protected TraderHelper _traderHelper;
     protected BtrDeliveryService _btrDeliveryService;
+    private readonly CounterTrackerHelper _counterTrackerHelper;
 
     public LocationLifecycleService(
         ISptLogger<LocationLifecycleService> logger,
@@ -84,7 +85,8 @@ public class LocationLifecycleService
         QuestHelper questHelper,
         InsuranceService insuranceService,
         MatchBotDetailsCacheService matchBotDetailsCacheService,
-        BtrDeliveryService btrDeliveryService
+        BtrDeliveryService btrDeliveryService,
+        CounterTrackerHelper counterTrackerHelper
     )
     {
         _logger = logger;
@@ -116,6 +118,7 @@ public class LocationLifecycleService
         _insuranceService = insuranceService;
         _matchBotDetailsCacheService = matchBotDetailsCacheService;
         _btrDeliveryService = btrDeliveryService;
+        _counterTrackerHelper = counterTrackerHelper;
 
         _locationConfig = _configServer.GetConfig<LocationConfig>();
         _inRaidConfig = _configServer.GetConfig<InRaidConfig>();
@@ -390,13 +393,13 @@ public class LocationLifecycleService
             return locationBaseClone;
         }
 
-        // Add cusom pmcs to map every time its run
+        // Add custom pmcs to map every time its run
         _pmcWaveGenerator.ApplyWaveChangesToMap(locationBaseClone);
 
         // Adjust raid based on whether this is a scav run
         LocationConfig? locationConfigClone = null;
         var raidAdjustments = _profileActivityService
-            .GetProfileActivityRaidData(sessionId)
+            .GetProfileActivityRaidData(sessionId)?
             .RaidAdjustments;
         if (raidAdjustments is not null)
         {
@@ -405,6 +408,11 @@ public class LocationLifecycleService
         }
 
         var staticAmmoDist = _cloner.Clone(location.StaticAmmo);
+
+        var itemsWithSpawnCountLimits = _cloner.Clone(_locationConfig.LootMaxSpawnLimits.GetValueOrDefault(name.ToLower()));
+
+        // Store items with spawn count limits inside so they can be accessed later inside static/dynamic loot spawn methods
+        _counterTrackerHelper.AddDataToTrack(itemsWithSpawnCountLimits);
 
         // Create containers and add loot to them
         var staticLoot = _locationLootGenerator.GenerateStaticContainers(
@@ -418,7 +426,8 @@ public class LocationLifecycleService
         var dynamicSpawnPoints = _locationLootGenerator.GenerateDynamicLoot(
             dynamicLootDistClone,
             staticAmmoDist,
-            name.ToLower()
+            name.ToLower(),
+            itemsWithSpawnCountLimits
         );
 
         // Push chosen spawn points into returned object
@@ -445,6 +454,9 @@ public class LocationLifecycleService
 
             _profileActivityService.GetProfileActivityRaidData(sessionId).RaidAdjustments = null;
         }
+
+        // Clean up tracker
+        _counterTrackerHelper.Clear();
 
         return locationBaseClone;
     }
@@ -614,7 +626,7 @@ public class LocationLifecycleService
         // Check if new standing has leveled up trader
         _traderHelper.LevelUp(fenceId, pmcData);
         pmcData.TradersInfo[fenceId].LoyaltyLevel = Math.Max(
-            (int)pmcData.TradersInfo[fenceId].LoyaltyLevel,
+            (int) pmcData.TradersInfo[fenceId].LoyaltyLevel,
             1
         );
 
@@ -652,7 +664,7 @@ public class LocationLifecycleService
         // Check if new standing has leveled up trader
         _traderHelper.LevelUp(fenceId, pmcData);
         pmcData.TradersInfo[fenceId].LoyaltyLevel = Math.Max(
-            (int)pmcData.TradersInfo[fenceId].LoyaltyLevel,
+            (int) pmcData.TradersInfo[fenceId].LoyaltyLevel,
             1
         );
 
@@ -684,7 +696,7 @@ public class LocationLifecycleService
         fenceStanding += Math.Max(baseGain / extractCount, 0.01);
 
         // Ensure fence loyalty level is not above/below the range -7 to 15
-        var newFenceStanding = Math.Min(Math.Max((double)fenceStanding, -7), 15);
+        var newFenceStanding = Math.Min(Math.Max((double) fenceStanding, -7), 15);
         _logger.Debug(
             $"Old vs new fence standing: {pmcData.TradersInfo[fenceId].Standing}, {newFenceStanding}"
         );
@@ -988,7 +1000,7 @@ public class LocationLifecycleService
         // Clamp fence standing
         var currentFenceStanding = postRaidProfile.TradersInfo[fenceId].Standing;
         pmcProfile.TradersInfo[fenceId].Standing = Math.Min(
-            Math.Max((double)currentFenceStanding, -7),
+            Math.Max((double) currentFenceStanding, -7),
             15
         ); // Ensure it stays between -7 and 15
 
