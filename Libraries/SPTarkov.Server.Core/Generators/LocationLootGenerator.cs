@@ -350,7 +350,7 @@ public class LocationLootGenerator(
             containerDistribution.Add(new ProbabilityObject<string, double>(x, value, value));
         }
 
-        chosenContainerIds.AddRange(containerDistribution.Draw((int) containerData.ChosenCount));
+        chosenContainerIds.AddRange(containerDistribution.Draw((int)containerData.ChosenCount));
 
         return chosenContainerIds;
     }
@@ -703,7 +703,8 @@ public class LocationLootGenerator(
         LooseLoot dynamicLootDist,
         Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist,
         string locationName,
-        Dictionary<string, int> spawnLimitedLoot)
+        Dictionary<string, int> spawnLimitedLoot
+    )
     {
         List<SpawnpointTemplate> loot = [];
         List<Spawnpoint> dynamicForcedSpawnPoints = [];
@@ -730,7 +731,13 @@ public class LocationLootGenerator(
         );
 
         // Add forced loot to results
-        AddForcedLoot(loot, dynamicForcedSpawnPoints, locationName, staticAmmoDist, spawnLimitedLoot);
+        AddForcedLoot(
+            loot,
+            dynamicForcedSpawnPoints,
+            locationName,
+            staticAmmoDist,
+            spawnLimitedLoot
+        );
 
         // Draw from random distribution
         var desiredSpawnPointCount = Math.Round(
@@ -797,7 +804,7 @@ public class LocationLootGenerator(
         if (randomSpawnPointCount > 0 && spawnPointArray.Count > 0)
         // Add randomly chosen spawn points
         {
-            foreach (var si in spawnPointArray.Draw((int) randomSpawnPointCount, false))
+            foreach (var si in spawnPointArray.Draw((int)randomSpawnPointCount, false))
             {
                 chosenSpawnPoints.Add(spawnPointArray.Data(si));
             }
@@ -920,7 +927,11 @@ public class LocationLootGenerator(
             );
 
             // If count reaches max, skip adding item to loot
-            if (counterTrackerHelper.IncrementCount(createItemResult.Items.FirstOrDefault().Template))
+            if (
+                counterTrackerHelper.IncrementCount(
+                    createItemResult.Items.FirstOrDefault().Template
+                )
+            )
             {
                 continue;
             }
@@ -932,7 +943,6 @@ public class LocationLootGenerator(
             spawnPoint.Template.Items = createItemResult.Items;
 
             loot.Add(spawnPoint.Template);
-
         }
 
         return loot;
@@ -951,9 +961,9 @@ public class LocationLootGenerator(
         List<Spawnpoint> forcedSpawnPoints,
         string locationName,
         Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist,
-        Dictionary<string, int> spawnLimitedLoot)
+        Dictionary<string, int> spawnLimitedLoot
+    )
     {
-
         if (spawnLimitedLoot is not null)
         // Process loot items defined as requiring only 1 spawn position as they appear in multiple positions on the map
         {
