@@ -37,7 +37,6 @@ public class LocationLootGenerator(
     protected readonly SeasonalEventConfig _seasonalEventConfig =
         _configServer.GetConfig<SeasonalEventConfig>();
 
-
     /// <summary>
     /// Generate Loot for provided location ()
     /// </summary>
@@ -59,16 +58,15 @@ public class LocationLootGenerator(
         var staticAmmoDist = _cloner.Clone(locationDetails.StaticAmmo);
 
         // Pull location-specific spawn limits from db
-        var itemsWithSpawnCountLimitsClone = _cloner.Clone(_locationConfig.LootMaxSpawnLimits.GetValueOrDefault(locationId.ToLower()));
+        var itemsWithSpawnCountLimitsClone = _cloner.Clone(
+            _locationConfig.LootMaxSpawnLimits.GetValueOrDefault(locationId.ToLower())
+        );
 
         // Store items with spawn count limits inside so they can be accessed later inside static/dynamic loot spawn methods
         counterTrackerHelper.AddDataToTrack(itemsWithSpawnCountLimitsClone);
 
         // Create containers with loot
-        result.AddRange(GenerateStaticContainers(
-            locationId.ToLower(),
-            staticAmmoDist
-        ));
+        result.AddRange(GenerateStaticContainers(locationId.ToLower(), staticAmmoDist));
 
         // Add dynamic loot to output loot
         var dynamicSpawnPoints = GenerateDynamicLoot(
