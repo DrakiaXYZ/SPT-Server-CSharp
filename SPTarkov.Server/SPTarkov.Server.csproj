@@ -13,10 +13,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
+    <AssemblyName>SPT.Server</AssemblyName>
     <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
-    <AssemblyName>SPTarkov.Server</AssemblyName>
     <ApplicationIcon>..\Libraries\SPTarkov.Server.Assets\SPT_Data\images\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
