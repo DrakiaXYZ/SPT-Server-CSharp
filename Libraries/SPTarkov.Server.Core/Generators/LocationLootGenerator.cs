@@ -37,18 +37,75 @@ public class LocationLootGenerator(
     protected readonly SeasonalEventConfig _seasonalEventConfig =
         _configServer.GetConfig<SeasonalEventConfig>();
 
+
+    /// <summary>
+    /// Generate Loot for provided location ()
+    /// </summary>
+    /// <param name="locationId">Id of location (e.g. bigmap/factory4_day)</param>
+    /// <returns>Collection of spawn points with loot</returns>
+    public List<SpawnpointTemplate> GenerateLocationLoot(string locationId)
+    {
+        var result = new List<SpawnpointTemplate>();
+
+        // Get generation details for location from db
+        var locationDetails = _databaseService.GetLocation(locationId);
+        if (locationDetails is null)
+        {
+            _logger.Error($"Location: {locationId} not found in database, generated 0 loot items");
+            return result;
+        }
+
+        // Clone ammo data to ensure any changes don't affect the db values
+        var staticAmmoDist = _cloner.Clone(locationDetails.StaticAmmo);
+
+        // Pull location-specific spawn limits from db
+        var itemsWithSpawnCountLimitsClone = _cloner.Clone(_locationConfig.LootMaxSpawnLimits.GetValueOrDefault(locationId.ToLower()));
+
+        // Store items with spawn count limits inside so they can be accessed later inside static/dynamic loot spawn methods
+        counterTrackerHelper.AddDataToTrack(itemsWithSpawnCountLimitsClone);
+
+        // Create containers with loot
+        result.AddRange(GenerateStaticContainers(
+            locationId.ToLower(),
+            staticAmmoDist
+        ));
+
+        // Add dynamic loot to output loot
+        var dynamicSpawnPoints = GenerateDynamicLoot(
+            _cloner.Clone(locationDetails.LooseLoot.Value),
+            staticAmmoDist,
+            locationId.ToLower(),
+            itemsWithSpawnCountLimitsClone
+        );
+
+        // Merge dynamic spawns into result
+        result.AddRange(dynamicSpawnPoints);
+
+        _logger.Success(
+            _localisationService.GetText(
+                "location-dynamic_items_spawned_success",
+                dynamicSpawnPoints.Count
+            )
+        );
+        _logger.Success(_localisationService.GetText("location-generated_success", locationId));
+
+        // Clean up tracker
+        counterTrackerHelper.Clear();
+
+        return result;
+    }
+
     /// Create a list of container objects with randomised loot
-    /// <param name="locationBase">Map base to generate containers for</param>
+    /// <param name="locationId">Location to generate for</param>
     /// <param name="staticAmmoDist">Static ammo distribution</param>
     /// <returns>List of container objects</returns>
     public List<SpawnpointTemplate> GenerateStaticContainers(
-        LocationBase locationBase,
+        string locationId,
         Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist
     )
     {
         var staticLootItemCount = 0;
         var result = new List<SpawnpointTemplate>();
-        var locationId = locationBase.Id.ToLower();
 
         var mapData = _databaseService.GetLocation(locationId);
 
@@ -58,7 +115,7 @@ public class LocationLootGenerator(
             _logger.Error(
                 _localisationService.GetText(
                     "location-unable_to_find_static_weapon_for_map",
-                    locationBase.Name
+                    locationId
                 )
             );
         }
@@ -74,7 +131,7 @@ public class LocationLootGenerator(
             _logger.Error(
                 _localisationService.GetText(
                     "location-unable_to_find_static_container_for_map",
-                    locationBase.Name
+                    locationId
                 )
             );
         }
@@ -86,7 +143,7 @@ public class LocationLootGenerator(
             _logger.Error(
                 _localisationService.GetText(
                     "location-unable_to_find_forced_static_data_for_map",
-                    locationBase.Name
+                    locationId
                 )
             );
         }
@@ -145,7 +202,7 @@ public class LocationLootGenerator(
             if (_logger.IsLogEnabled(LogLevel.Debug))
             {
                 _logger.Debug(
-                    $"Container randomisation disabled, Adding {staticRandomisableContainersOnMap.Count} containers to {locationBase.Name}"
+                    $"Container randomisation disabled, Adding {staticRandomisableContainersOnMap.Count} containers to: {locationId}"
                 );
             }
 
