@@ -153,7 +153,7 @@ public class HideoutController(
 
             var timestamp = _timeUtil.GetTimeStamp();
 
-            profileHideoutArea.CompleteTime = (int) Math.Round(timestamp + ctime.Value);
+            profileHideoutArea.CompleteTime = (int)Math.Round(timestamp + ctime.Value);
             profileHideoutArea.Constructing = true;
         }
     }
@@ -301,7 +301,7 @@ public class HideoutController(
     {
         // Add key/value to `hideoutAreaStashes` dictionary - used to link hideout area to inventory stash by its id
         // Key is the enums value stored as a string, e.g. "27" for cultist circle
-        var keyForHideoutAreaStash = ((int) dbHideoutArea.Type).ToString();
+        var keyForHideoutAreaStash = ((int)dbHideoutArea.Type).ToString();
         if (!pmcData.Inventory.HideoutAreaStashes.ContainsKey(keyForHideoutAreaStash))
         {
             if (
@@ -350,7 +350,7 @@ public class HideoutController(
         }
 
         // Add key/value to `hideoutAreaStashes` dictionary - used to link hideout area to inventory stash by its id
-        var childAreaTypeKey = ((int) childDbArea.Type).ToString();
+        var childAreaTypeKey = ((int)childDbArea.Type).ToString();
         if (pmcData.Inventory.HideoutAreaStashes.GetValueOrDefault(childAreaTypeKey) is null)
         {
             pmcData.Inventory.HideoutAreaStashes[childAreaTypeKey] = childDbArea.Id;
@@ -749,7 +749,7 @@ public class HideoutController(
             // Tools don't have a count
             if (requirement.Type != "Tool")
             {
-                requirement.Count -= (int) itemToDelete.Count;
+                requirement.Count -= (int)itemToDelete.Count;
             }
         }
 
@@ -834,7 +834,7 @@ public class HideoutController(
 
         pmcData.Hideout.Production[request.RecipeId] = _hideoutHelper.InitProduction(
             request.RecipeId,
-            (int) (_profileHelper.IsDeveloperAccount(sessionID) ? 40 : modifiedScavCaseTime),
+            (int)(_profileHelper.IsDeveloperAccount(sessionID) ? 40 : modifiedScavCaseTime),
             false
         );
         pmcData.Hideout.Production[request.RecipeId].SptIsScavCase = true;
@@ -1062,7 +1062,7 @@ public class HideoutController(
             var multiplierCrafting = Math.Floor(
                 hoursCrafting.Value / _hideoutConfig.HoursForSkillCrafting
             );
-            craftingExpAmount += (int) (1 * multiplierCrafting);
+            craftingExpAmount += (int)(1 * multiplierCrafting);
             hoursCrafting -= _hideoutConfig.HoursForSkillCrafting * multiplierCrafting;
         }
 
@@ -1131,7 +1131,7 @@ public class HideoutController(
         {
             _profileHelper.AddSkillPointsToPlayer(pmcData, SkillTypes.Crafting, craftingExpAmount);
 
-            var intellectAmountToGive = 0.5 * Math.Round((double) (craftingExpAmount / 15));
+            var intellectAmountToGive = 0.5 * Math.Round((double)(craftingExpAmount / 15));
             if (intellectAmountToGive > 0)
             {
                 _profileHelper.AddSkillPointsToPlayer(
@@ -1558,7 +1558,7 @@ public class HideoutController(
             var improvementDetails = new HideoutImprovement
             {
                 Completed = false,
-                ImproveCompleteTimestamp = (long) (timestamp + improvement.ImprovementTime),
+                ImproveCompleteTimestamp = (long)(timestamp + improvement.ImprovementTime),
             };
             output.ProfileChanges[sessionId].Improvements[improvement.Id] = improvementDetails;
 
