@@ -298,7 +298,7 @@ public class RagfairController
         // Get specific assort purchase data and set current purchase buy value
         traderPurchases.TryGetValue(assortId, out var assortTraderPurchaseData);
 
-        offer.BuyRestrictionCurrent = (int?)assortTraderPurchaseData?.PurchaseCount ?? 0;
+        offer.BuyRestrictionCurrent = (int?) assortTraderPurchaseData?.PurchaseCount ?? 0;
         offer.BuyRestrictionMax = offerRootItem.Upd.BuyRestrictionMax;
     }
 
@@ -436,7 +436,7 @@ public class RagfairController
         var offers = _ragfairOfferService.GetOffersOfType(getPriceRequest.TemplateId);
 
         // Offers exist for item, get averages of what's listed
-        if (offers.Count > 0)
+        if (offers?.Count > 0)
         {
             // These get calculated while iterating through the list below
             var minMax = new MinMax<double>(int.MaxValue, 0);
@@ -665,19 +665,21 @@ public class RagfairController
 
         // When listing identical items on flea, condense separate items into one stack with a merged stack count
         // e.g. 2 ammo items each with stackObjectCount = 3, will result in 1 stack of 6
-        inventoryItems[0].Upd ??= new Upd();
-        inventoryItems[0].Upd.StackObjectsCount = stackCountTotal;
+        var firstInventoryItem = inventoryItems.FirstOrDefault();
+        firstInventoryItem.Upd ??= new Upd();
+        firstInventoryItem.Upd.StackObjectsCount = stackCountTotal;
+
+        // Average offer price for single item (or whole weapon)
+        // MUST occur prior to CreatePlayerOffer(), otherwise offer ends up in averages calculation
+        var averages = GetItemMinAvgMaxFleaPriceValues(
+            new GetMarketPriceRequestData { TemplateId = firstInventoryItem.Template }
+        );
 
         // Create flea object
         var offer = CreatePlayerOffer(sessionID, offerRequest.Requirements, inventoryItems, false);
 
         // This is the item that will be listed on flea, has merged stackObjectCount
         var rootOfferItem = offer.Items.First(x => x.Id == firstOfferItemId);
-
-        // Average offer price for single item (or whole weapon)
-        var averages = GetItemMinAvgMaxFleaPriceValues(
-            new GetMarketPriceRequestData { TemplateId = offer.Items[0].Template }
-        );
 
         // Check for and apply item price modifer if it exists in config
         var averageOfferPrice = averages.Avg;
@@ -708,7 +710,7 @@ public class RagfairController
         );
 
         // Create array of sell times for items listed
-        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int)stackCountTotal);
+        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int) stackCountTotal);
 
         // Subtract flea market fee from stash
         if (_ragfairConfig.Sell.Fees)
@@ -718,7 +720,7 @@ public class RagfairController
                 rootOfferItem,
                 pmcData,
                 playerListedPriceInRub,
-                (int)stackCountTotal,
+                (int) stackCountTotal,
                 offerRequest,
                 output
             );
@@ -763,7 +765,7 @@ public class RagfairController
 
         // multi-offers are all the same item,
         // Get first item and its children and use as template
-        var firstListingAndChildren = _itemHelper.FindAndReturnChildrenAsItems(
+        var firstInventoryItemAndChildren = _itemHelper.FindAndReturnChildrenAsItems(
             pmcData.Inventory.Items,
             offerRequest.Items[0]
         );
@@ -780,26 +782,29 @@ public class RagfairController
 
         // When listing identical items on flea, condense separate items into one stack with a merged stack count
         // e.g. 2 ammo items, stackObjectCount = 3 for each, will result in 1 stack of 6
-        var firstListingRootItem = firstListingAndChildren.FirstOrDefault();
-        firstListingRootItem.Upd ??= new Upd();
-        firstListingRootItem.Upd.StackObjectsCount = stackCountTotal;
+        var firstInventoryItem = firstInventoryItemAndChildren.FirstOrDefault();
+        firstInventoryItem.Upd ??= new Upd();
+        firstInventoryItem.Upd.StackObjectsCount = stackCountTotal;
+
+        // Single price for an item
+        // MUST occur prior to CreatePlayerOffer(), otherwise offer ends up in averages calculation
+        var averages = GetItemMinAvgMaxFleaPriceValues(
+            new GetMarketPriceRequestData { TemplateId = firstInventoryItem.Template }
+        );
+        var singleItemPrice = averages.Avg;
 
         // Create flea object
         var offer = CreatePlayerOffer(
             sessionID,
             offerRequest.Requirements,
-            firstListingAndChildren,
+            firstInventoryItemAndChildren,
             true
         );
 
         // This is the item that will be listed on flea, has merged stackObjectCount
         var newRootOfferItem = offer.Items[0]; // TODO: add logic like single/multi offers to find root item
 
-        // Single price for an item
-        var averages = GetItemMinAvgMaxFleaPriceValues(
-            new GetMarketPriceRequestData { TemplateId = firstListingRootItem.Template }
-        );
-        var singleItemPrice = averages.Avg;
+
 
         // Check for and apply item price modifer if it exists in config
         if (
@@ -831,7 +836,7 @@ public class RagfairController
         // Create array of sell times for items listed + sell all at once as it's a pack
         offer.SellResults = _ragfairSellHelper.RollForSale(
             sellChancePercent,
-            (int)stackCountTotal,
+            (int) stackCountTotal,
             true
         );
 
@@ -843,7 +848,7 @@ public class RagfairController
                 newRootOfferItem,
                 pmcData,
                 playerListedPriceInRub,
-                (int)stackCountTotal,
+                (int) stackCountTotal,
                 offerRequest,
                 output
             );
@@ -895,10 +900,19 @@ public class RagfairController
             _httpResponseUtil.AppendErrorToOutput(output, inventoryItemsToSell.ErrorMessage);
         }
 
+        var firstItemToSell = inventoryItemsToSell.Items.FirstOrDefault().FirstOrDefault();
+
         // Total count of items summed using their stack counts
         var stackCountTotal = _ragfairOfferHelper.GetTotalStackCountSize(
             inventoryItemsToSell.Items
         );
+
+        // Average offer price for single item (or whole weapon)
+        // MUST occur prior to CreatePlayerOffer(), otherwise offer ends up in averages calculation
+        var averages = GetItemMinAvgMaxFleaPriceValues(
+            new GetMarketPriceRequestData { TemplateId = firstItemToSell.Template }
+        );
+        var averageOfferPriceSingleItem = averages.Avg;
 
         // Checks are done, create offer
         var playerListedPriceInRub = CalculateRequirementsPriceInRub(offerRequest.Requirements);
@@ -913,12 +927,6 @@ public class RagfairController
 
         // Get average of items quality+children
         var qualityMultiplier = _itemHelper.GetItemQualityModifierForItems(offer.Items, true);
-
-        // Average offer price for single item (or whole weapon)
-        var averages = GetItemMinAvgMaxFleaPriceValues(
-            new GetMarketPriceRequestData { TemplateId = offerRootItem.Template }
-        );
-        var averageOfferPriceSingleItem = averages.Avg;
 
         // Check for and apply item price modifer if it exists in config
         if (
@@ -940,7 +948,7 @@ public class RagfairController
             playerListedPriceInRub,
             qualityMultiplier
         );
-        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int)stackCountTotal);
+        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int) stackCountTotal);
 
         // Subtract flea market fee from stash
         if (_ragfairConfig.Sell.Fees)
@@ -950,7 +958,7 @@ public class RagfairController
                 offerRootItem,
                 pmcData,
                 playerListedPriceInRub,
-                (int)stackCountTotal,
+                (int) stackCountTotal,
                 offerRequest,
                 output
             );
@@ -1075,7 +1083,7 @@ public class RagfairController
             formattedItems.ToList(),
             formattedRequirements.ToList(),
             loyalLevel,
-            (int?)items.FirstOrDefault()?.Upd?.StackObjectsCount ?? 1,
+            (int?) items.FirstOrDefault()?.Upd?.StackObjectsCount ?? 1,
             sellInOnePiece
         );
     }
@@ -1206,7 +1214,7 @@ public class RagfairController
         {
             // `expireSeconds` Default is 71 seconds
             var newEndTime = _ragfairConfig.Sell.ExpireSeconds + _timeUtil.GetTimeStamp();
-            playerOffer.EndTime = (long?)Math.Round((double)newEndTime);
+            playerOffer.EndTime = (long?) Math.Round((double) newEndTime);
         }
 
         _logger.Debug(
@@ -1281,7 +1289,7 @@ public class RagfairController
         }
 
         // Add extra time to offer
-        playerOffers[playerOfferIndex].EndTime += (long?)Math.Round((decimal)secondsToAdd);
+        playerOffers[playerOfferIndex].EndTime += (long?) Math.Round((decimal) secondsToAdd);
 
         return output;
     }
