@@ -1,3 +1,4 @@
+using System.Numerics;
 using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.Server.Core.Utils;
@@ -98,7 +99,7 @@ public class MathUtil
     /// <param name="x">Support points in x (of same length as y)</param>
     /// <param name="y">Support points in y (of same length as x)</param>
     /// <returns>Interpolated value at xp, or null if xp is out of bounds</returns>
-    public double? Interp1(double xp, IReadOnlyList<double> x, IReadOnlyList<double> y)
+    public T? Interp1<T>(T xp, IReadOnlyList<T> x, IReadOnlyList<T> y) where T : INumber<T>
     {
         if (xp > x[^1]) // ^1 is the last index in C#
         {
@@ -120,6 +121,6 @@ public class MathUtil
             }
         }
 
-        return null;
+        return default;
     }
 }
