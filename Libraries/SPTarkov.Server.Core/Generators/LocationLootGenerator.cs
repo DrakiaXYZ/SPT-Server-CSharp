@@ -408,7 +408,7 @@ public class LocationLootGenerator(
             containerDistribution.Add(new ProbabilityObject<string, double>(x, value, value));
         }
 
-        chosenContainerIds.AddRange(containerDistribution.Draw((int)containerData.ChosenCount));
+        chosenContainerIds.AddRange(containerDistribution.Draw((int) containerData.ChosenCount));
 
         return chosenContainerIds;
     }
@@ -788,8 +788,7 @@ public class LocationLootGenerator(
             dynamicLootDist.Spawnpoints.Where(point => point.Template.IsAlwaysSpawn ?? false)
         );
 
-        // Add forced loot to results
-        AddForcedLoot(
+        AddForcedDynamicLoot(
             loot,
             dynamicForcedSpawnPoints,
             locationName,
@@ -862,7 +861,7 @@ public class LocationLootGenerator(
         if (randomSpawnPointCount > 0 && spawnPointArray.Count > 0)
         // Add randomly chosen spawn points
         {
-            foreach (var si in spawnPointArray.Draw((int)randomSpawnPointCount, false))
+            foreach (var si in spawnPointArray.Draw((int) randomSpawnPointCount, false))
             {
                 chosenSpawnPoints.Add(spawnPointArray.Data(si));
             }
@@ -1007,14 +1006,14 @@ public class LocationLootGenerator(
     }
 
     /// <summary>
-    ///     Add forced spawn point loot into loot parameter list
+    ///     Add forced spawn point loot into loot parameter list, these are primarily quest items
     /// </summary>
     /// <param name="lootLocationTemplates">List to add forced loot spawn locations to</param>
     /// <param name="forcedSpawnPoints">Forced loot locations that must be added</param>
     /// <param name="locationName">Name of map currently having force loot created for</param>
     /// <param name="staticAmmoDist"></param>
     /// <param name="spawnLimitedLoot">Dictionary of itemTpls and their max spawn count</param>
-    protected void AddForcedLoot(
+    protected void AddForcedDynamicLoot(
         List<SpawnpointTemplate> lootLocationTemplates,
         List<Spawnpoint> forcedSpawnPoints,
         string locationName,
