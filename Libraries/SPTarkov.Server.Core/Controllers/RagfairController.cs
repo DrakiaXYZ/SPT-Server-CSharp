@@ -298,7 +298,7 @@ public class RagfairController
         // Get specific assort purchase data and set current purchase buy value
         traderPurchases.TryGetValue(assortId, out var assortTraderPurchaseData);
 
-        offer.BuyRestrictionCurrent = (int?) assortTraderPurchaseData?.PurchaseCount ?? 0;
+        offer.BuyRestrictionCurrent = (int?)assortTraderPurchaseData?.PurchaseCount ?? 0;
         offer.BuyRestrictionMax = offerRootItem.Upd.BuyRestrictionMax;
     }
 
@@ -710,7 +710,7 @@ public class RagfairController
         );
 
         // Create array of sell times for items listed
-        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int) stackCountTotal);
+        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int)stackCountTotal);
 
         // Subtract flea market fee from stash
         if (_ragfairConfig.Sell.Fees)
@@ -720,7 +720,7 @@ public class RagfairController
                 rootOfferItem,
                 pmcData,
                 playerListedPriceInRub,
-                (int) stackCountTotal,
+                (int)stackCountTotal,
                 offerRequest,
                 output
             );
@@ -804,8 +804,6 @@ public class RagfairController
         // This is the item that will be listed on flea, has merged stackObjectCount
         var newRootOfferItem = offer.Items[0]; // TODO: add logic like single/multi offers to find root item
 
-
-
         // Check for and apply item price modifer if it exists in config
         if (
             _ragfairConfig.Dynamic.ItemPriceMultiplier.TryGetValue(
@@ -836,7 +834,7 @@ public class RagfairController
         // Create array of sell times for items listed + sell all at once as it's a pack
         offer.SellResults = _ragfairSellHelper.RollForSale(
             sellChancePercent,
-            (int) stackCountTotal,
+            (int)stackCountTotal,
             true
         );
 
@@ -848,7 +846,7 @@ public class RagfairController
                 newRootOfferItem,
                 pmcData,
                 playerListedPriceInRub,
-                (int) stackCountTotal,
+                (int)stackCountTotal,
                 offerRequest,
                 output
             );
@@ -948,7 +946,7 @@ public class RagfairController
             playerListedPriceInRub,
             qualityMultiplier
         );
-        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int) stackCountTotal);
+        offer.SellResults = _ragfairSellHelper.RollForSale(sellChancePercent, (int)stackCountTotal);
 
         // Subtract flea market fee from stash
         if (_ragfairConfig.Sell.Fees)
@@ -958,7 +956,7 @@ public class RagfairController
                 offerRootItem,
                 pmcData,
                 playerListedPriceInRub,
-                (int) stackCountTotal,
+                (int)stackCountTotal,
                 offerRequest,
                 output
             );
@@ -1083,7 +1081,7 @@ public class RagfairController
             formattedItems.ToList(),
             formattedRequirements.ToList(),
             loyalLevel,
-            (int?) items.FirstOrDefault()?.Upd?.StackObjectsCount ?? 1,
+            (int?)items.FirstOrDefault()?.Upd?.StackObjectsCount ?? 1,
             sellInOnePiece
         );
     }
@@ -1214,7 +1212,7 @@ public class RagfairController
         {
             // `expireSeconds` Default is 71 seconds
             var newEndTime = _ragfairConfig.Sell.ExpireSeconds + _timeUtil.GetTimeStamp();
-            playerOffer.EndTime = (long?) Math.Round((double) newEndTime);
+            playerOffer.EndTime = (long?)Math.Round((double)newEndTime);
         }
 
         _logger.Debug(
@@ -1289,7 +1287,7 @@ public class RagfairController
         }
 
         // Add extra time to offer
-        playerOffers[playerOfferIndex].EndTime += (long?) Math.Round((decimal) secondsToAdd);
+        playerOffers[playerOfferIndex].EndTime += (long?)Math.Round((decimal)secondsToAdd);
 
         return output;
     }
