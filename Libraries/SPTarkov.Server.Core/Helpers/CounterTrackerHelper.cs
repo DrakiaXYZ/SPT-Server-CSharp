@@ -26,7 +26,7 @@ namespace SPTarkov.Server.Core.Helpers
         public bool IncrementCount(string key, int countToIncrementBy = 1)
         {
             // Not tracked, skip
-            if (!_maxCounts.ContainsKey(key))
+            if (!_maxCounts.Any() || !_maxCounts.ContainsKey(key))
             {
                 return false;
             }

@@ -63,7 +63,10 @@ public class LocationLootGenerator(
         );
 
         // Store items with spawn count limits inside so they can be accessed later inside static/dynamic loot spawn methods
-        counterTrackerHelper.AddDataToTrack(itemsWithSpawnCountLimitsClone);
+        if (itemsWithSpawnCountLimitsClone is not null)
+        {
+            counterTrackerHelper.AddDataToTrack(itemsWithSpawnCountLimitsClone);
+        }
 
         // Create containers with loot
         result.AddRange(GenerateStaticContainers(locationId.ToLower(), staticAmmoDist));
@@ -191,7 +194,7 @@ public class LocationLootGenerator(
             _logger.Debug($"Added {guaranteedContainers.Count} guaranteed containers");
         }
 
-        // Randomisation is turned off globally or just turned off for this map
+        // Randomisation is turned off for location / globally
         if (
             !_locationConfig.ContainerRandomisationSettings.Enabled
             || !_locationConfig.ContainerRandomisationSettings.Maps.ContainsKey(locationId)
@@ -405,7 +408,7 @@ public class LocationLootGenerator(
             containerDistribution.Add(new ProbabilityObject<string, double>(x, value, value));
         }
 
-        chosenContainerIds.AddRange(containerDistribution.Draw((int)containerData.ChosenCount));
+        chosenContainerIds.AddRange(containerDistribution.Draw((int) containerData.ChosenCount));
 
         return chosenContainerIds;
     }
@@ -752,13 +755,13 @@ public class LocationLootGenerator(
     /// <param name="dynamicLootDist"></param>
     /// <param name="staticAmmoDist"></param>
     /// <param name="locationName">Location to generate loot for</param>
-    /// <param name="spawnLimitedLoot"></param>
+    /// <param name="spawnLimitedLoot">Dictionary of itemTpls and their max spawn count</param>
     /// <returns>Array of spawn points with loot in them</returns>
     public List<SpawnpointTemplate> GenerateDynamicLoot(
         LooseLoot dynamicLootDist,
         Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist,
         string locationName,
-        Dictionary<string, int> spawnLimitedLoot
+        Dictionary<string, int>? spawnLimitedLoot
     )
     {
         List<SpawnpointTemplate> loot = [];
@@ -859,7 +862,7 @@ public class LocationLootGenerator(
         if (randomSpawnPointCount > 0 && spawnPointArray.Count > 0)
         // Add randomly chosen spawn points
         {
-            foreach (var si in spawnPointArray.Draw((int)randomSpawnPointCount, false))
+            foreach (var si in spawnPointArray.Draw((int) randomSpawnPointCount, false))
             {
                 chosenSpawnPoints.Add(spawnPointArray.Data(si));
             }
@@ -1010,13 +1013,13 @@ public class LocationLootGenerator(
     /// <param name="forcedSpawnPoints">Forced loot locations that must be added</param>
     /// <param name="locationName">Name of map currently having force loot created for</param>
     /// <param name="staticAmmoDist"></param>
-    /// <param name="spawnLimitedLoot"></param>
+    /// <param name="spawnLimitedLoot">Dictionary of itemTpls and their max spawn count</param>
     protected void AddForcedLoot(
         List<SpawnpointTemplate> lootLocationTemplates,
         List<Spawnpoint> forcedSpawnPoints,
         string locationName,
         Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist,
-        Dictionary<string, int> spawnLimitedLoot
+        Dictionary<string, int>? spawnLimitedLoot
     )
     {
         if (spawnLimitedLoot is not null)
@@ -1067,7 +1070,7 @@ public class LocationLootGenerator(
                     if (lootItem is null)
                     {
                         _logger.Warning(
-                            $"Item with spawn point id {spawnPointLocationId} could not be found, skipping"
+                            $"Item with spawn point id: {spawnPointLocationId} could not be found, skipping"
                         );
                         continue;
                     }
