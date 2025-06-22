@@ -613,7 +613,9 @@ public record EliminationConfig : BaseQuestConfig
     ///     If a weapon category requirement is chosen, pick from these categories
     /// </summary>
     [JsonPropertyName("weaponCategoryRequirements")]
-    public required List<ProbabilityObject<string, List<string>>> WeaponCategoryRequirements { get; set; }
+    public required List<
+        ProbabilityObject<string, List<string>>
+    > WeaponCategoryRequirements { get; set; }
 
     /// <summary>
     ///     If a weapon requirement is chosen, pick from these weapons
@@ -638,7 +640,6 @@ public record BossInfo
 {
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
-
 
     /// <summary>
     ///     Is this target a boss

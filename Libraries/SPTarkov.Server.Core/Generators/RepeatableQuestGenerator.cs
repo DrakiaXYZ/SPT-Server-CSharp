@@ -193,10 +193,7 @@ public class RepeatableQuestGenerator(
         var targetPool = questTypePool.Pool.Elimination;
         targetsConfig = targetsConfig.Filter(x => targetPool.Targets.ContainsKey(x.Key));
 
-        if (
-            targetsConfig.Count == 0
-            || targetsConfig.All(x => x.Data?.IsBoss ?? false)
-        )
+        if (targetsConfig.Count == 0 || targetsConfig.All(x => x.Data?.IsBoss ?? false))
         {
             // There are no more targets left for elimination; delete it as a possible quest type
             // also if only bosses are left we need to leave otherwise it's a guaranteed boss elimination
@@ -329,8 +326,7 @@ public class RepeatableQuestGenerator(
                 !eliminationConfig.DistLocationBlacklist.Contains(x.Id)
             );
             // if the boss spawns on nom-blacklisted locations and the current location is allowed we can generate a distance kill requirement
-            isDistanceRequirementAllowed =
-                isDistanceRequirementAllowed && allowedSpawns.Any();
+            isDistanceRequirementAllowed = isDistanceRequirementAllowed && allowedSpawns.Any();
         }
 
         if (
@@ -500,10 +496,7 @@ public class RepeatableQuestGenerator(
             );
         }
 
-        return _randomUtil.RandInt(
-            eliminationConfig.MinKills,
-            eliminationConfig.MaxKills + 1
-        );
+        return _randomUtil.RandInt(eliminationConfig.MinKills, eliminationConfig.MaxKills + 1);
     }
 
     protected double DifficultyWeighing(
@@ -706,10 +699,7 @@ public class RepeatableQuestGenerator(
         }
 
         // Store the indexes of items we are asking player to supply
-        var distinctItemsToRetrieveCount = _randomUtil.GetInt(
-            1,
-            completionConfig.UniqueItemCount
-        );
+        var distinctItemsToRetrieveCount = _randomUtil.GetInt(1, completionConfig.UniqueItemCount);
         var chosenRequirementItemsTpls = new List<string>();
         var usedItemIndexes = new HashSet<int>();
         for (var i = 0; i < distinctItemsToRetrieveCount; i++)

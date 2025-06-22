@@ -99,7 +99,8 @@ public class MathUtil
     /// <param name="x">Support points in x (of same length as y)</param>
     /// <param name="y">Support points in y (of same length as x)</param>
     /// <returns>Interpolated value at xp, or null if xp is out of bounds</returns>
-    public T? Interp1<T>(T xp, IReadOnlyList<T> x, IReadOnlyList<T> y) where T : INumber<T>
+    public T? Interp1<T>(T xp, IReadOnlyList<T> x, IReadOnlyList<T> y)
+        where T : INumber<T>
     {
         if (xp > x[^1]) // ^1 is the last index in C#
         {

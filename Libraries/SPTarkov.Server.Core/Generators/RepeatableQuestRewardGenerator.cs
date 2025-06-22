@@ -130,9 +130,9 @@ public class RepeatableQuestRewardGenerator(
         }
 
         if (
-            traderWhitelistDetails.RewardCanBeWeapon &&
-            _randomUtil.GetChance100(traderWhitelistDetails.WeaponRewardChancePercent)
-            )
+            traderWhitelistDetails.RewardCanBeWeapon
+            && _randomUtil.GetChance100(traderWhitelistDetails.WeaponRewardChancePercent)
+        )
         {
             var chosenWeapon = GetRandomWeaponPresetWithinBudget(
                 itemRewardBudget.Value,
