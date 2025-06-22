@@ -407,7 +407,7 @@ public class LocationLootGenerator(
             containerDistribution.Add(new ProbabilityObject<string, double>(x, value, value));
         }
 
-        chosenContainerIds.AddRange(containerDistribution.Draw((int) containerData.ChosenCount));
+        chosenContainerIds.AddRange(containerDistribution.Draw((int)containerData.ChosenCount));
 
         return chosenContainerIds;
     }
@@ -782,14 +782,12 @@ public class LocationLootGenerator(
         // Build the list of forced loot from both `SpawnpointsForced` and any point marked `IsAlwaysSpawn`
         dynamicForcedSpawnPoints.AddRange(dynamicLootDist.SpawnpointsForced);
         dynamicForcedSpawnPoints.AddRange(
-            dynamicLootDist.Spawnpoints.Where(point => point.Template.IsAlwaysSpawn.GetValueOrDefault())
+            dynamicLootDist.Spawnpoints.Where(point =>
+                point.Template.IsAlwaysSpawn.GetValueOrDefault()
+            )
         );
 
-        loot.AddRange(GetForcedDynamicLoot(
-            dynamicForcedSpawnPoints,
-            locationName,
-            staticAmmoDist
-        ));
+        loot.AddRange(GetForcedDynamicLoot(dynamicForcedSpawnPoints, locationName, staticAmmoDist));
 
         // Draw from random distribution
         var desiredSpawnPointCount = Math.Round(
@@ -856,7 +854,7 @@ public class LocationLootGenerator(
         if (randomSpawnPointCount > 0 && spawnPointArray.Count > 0)
         // Add randomly chosen spawn points
         {
-            foreach (var si in spawnPointArray.Draw((int) randomSpawnPointCount, false))
+            foreach (var si in spawnPointArray.Draw((int)randomSpawnPointCount, false))
             {
                 chosenSpawnPoints.Add(spawnPointArray.Data(si));
             }
