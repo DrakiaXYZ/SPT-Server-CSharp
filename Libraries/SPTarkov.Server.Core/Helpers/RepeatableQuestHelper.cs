@@ -13,7 +13,7 @@ namespace SPTarkov.Server.Core.Helpers;
 [Injectable]
 public class RepeatableQuestHelper(
     ISptLogger<RepeatableQuestHelper> logger,
-    DatabaseService  databaseService,
+    DatabaseService databaseService,
     HashUtil hashUtil,
     ICloner cloner,
     ConfigServer configServer
@@ -62,22 +62,23 @@ public class RepeatableQuestHelper(
     /// <param name="traderId">TraderId that should provide this quest</param>
     /// <returns>Cloned quest template</returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public RepeatableQuest? GetClonedQuestTemplateForType(
-        RepeatableQuestType type,
-        string traderId
-        )
+    public RepeatableQuest? GetClonedQuestTemplateForType(RepeatableQuestType type, string traderId)
     {
         var quest = type switch
         {
             RepeatableQuestType.Elimination => cloner.Clone(
-                databaseService.GetTemplates().RepeatableQuests?.Templates?.Elimination),
+                databaseService.GetTemplates().RepeatableQuests?.Templates?.Elimination
+            ),
             RepeatableQuestType.Completion => cloner.Clone(
-                databaseService.GetTemplates().RepeatableQuests?.Templates?.Completion),
+                databaseService.GetTemplates().RepeatableQuests?.Templates?.Completion
+            ),
             RepeatableQuestType.Exploration => cloner.Clone(
-                databaseService.GetTemplates().RepeatableQuests?.Templates?.Exploration),
+                databaseService.GetTemplates().RepeatableQuests?.Templates?.Exploration
+            ),
             RepeatableQuestType.Pickup => cloner.Clone(
-                databaseService.GetTemplates().RepeatableQuests?.Templates?.Pickup),
-            _ => null
+                databaseService.GetTemplates().RepeatableQuests?.Templates?.Pickup
+            ),
+            _ => null,
         };
 
         if (quest is null)

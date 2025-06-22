@@ -8,5 +8,5 @@ public enum RepeatableQuestType
     Elimination,
     Completion,
     Exploration,
-    Pickup
+    Pickup,
 }

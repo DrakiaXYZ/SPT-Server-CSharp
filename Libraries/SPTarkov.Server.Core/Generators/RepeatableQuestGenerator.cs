@@ -85,7 +85,9 @@ public class RepeatableQuestGenerator(
         if (traderId is null)
         {
             // TODO: Localize me!
-            _logger.Error("Could not draw traderId from whitelist during repeatable quest generation");
+            _logger.Error(
+                "Could not draw traderId from whitelist during repeatable quest generation"
+            );
             return null;
         }
 
