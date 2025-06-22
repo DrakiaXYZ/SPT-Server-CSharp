@@ -121,8 +121,7 @@ public class DatabaseService(
     /// <returns> assets/database/locations/ </returns>
     public Location? GetLocation(string locationId)
     {
-        var locations = GetLocations();
-        var desiredLocation = locations.GetByJsonProp<Location>(locationId.ToLower());
+        var desiredLocation = GetLocations()?.GetByJsonProp<Location>(locationId.ToLower());
         if (desiredLocation == null)
         {
             _logger.Error(
