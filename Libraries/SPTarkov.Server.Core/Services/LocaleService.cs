@@ -91,7 +91,7 @@ public class LocaleService(
     /// <returns> Locale e.g en/ge/cz/cn </returns>
     public string GetDesiredServerLocale()
     {
-        if (!string.IsNullOrEmpty(_chosenServerLocale))
+        if (string.IsNullOrEmpty(_chosenServerLocale))
         {
             _chosenServerLocale = string.Equals(
                 _localeConfig.ServerLocale,
