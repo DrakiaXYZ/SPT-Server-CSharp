@@ -75,8 +75,7 @@ public class LocationLootGenerator(
         var dynamicSpawnPoints = GenerateDynamicLoot(
             _cloner.Clone(locationDetails.LooseLoot.Value),
             staticAmmoDist,
-            locationId.ToLower(),
-            itemsWithSpawnCountLimitsClone
+            locationId.ToLower()
         );
 
         // Merge dynamic spawns into result
@@ -408,7 +407,7 @@ public class LocationLootGenerator(
             containerDistribution.Add(new ProbabilityObject<string, double>(x, value, value));
         }
 
-        chosenContainerIds.AddRange(containerDistribution.Draw((int)containerData.ChosenCount));
+        chosenContainerIds.AddRange(containerDistribution.Draw((int) containerData.ChosenCount));
 
         return chosenContainerIds;
     }
@@ -755,13 +754,11 @@ public class LocationLootGenerator(
     /// <param name="dynamicLootDist"></param>
     /// <param name="staticAmmoDist"></param>
     /// <param name="locationName">Location to generate loot for</param>
-    /// <param name="spawnLimitedLoot">Dictionary of itemTpls and their max spawn count</param>
     /// <returns>Array of spawn points with loot in them</returns>
     public List<SpawnpointTemplate> GenerateDynamicLoot(
         LooseLoot dynamicLootDist,
         Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist,
-        string locationName,
-        Dictionary<string, int>? spawnLimitedLoot
+        string locationName
     )
     {
         List<SpawnpointTemplate> loot = [];
@@ -782,19 +779,17 @@ public class LocationLootGenerator(
                 .ToList();
         }
 
-        // Build the list of forced loot from both `spawnpointsForced` and any point marked `IsAlwaysSpawn`
+        // Build the list of forced loot from both `SpawnpointsForced` and any point marked `IsAlwaysSpawn`
         dynamicForcedSpawnPoints.AddRange(dynamicLootDist.SpawnpointsForced);
         dynamicForcedSpawnPoints.AddRange(
-            dynamicLootDist.Spawnpoints.Where(point => point.Template.IsAlwaysSpawn ?? false)
+            dynamicLootDist.Spawnpoints.Where(point => point.Template.IsAlwaysSpawn.GetValueOrDefault())
         );
 
-        AddForcedDynamicLoot(
-            loot,
+        loot.AddRange(GetForcedDynamicLoot(
             dynamicForcedSpawnPoints,
             locationName,
-            staticAmmoDist,
-            spawnLimitedLoot
-        );
+            staticAmmoDist
+        ));
 
         // Draw from random distribution
         var desiredSpawnPointCount = Math.Round(
@@ -861,7 +856,7 @@ public class LocationLootGenerator(
         if (randomSpawnPointCount > 0 && spawnPointArray.Count > 0)
         // Add randomly chosen spawn points
         {
-            foreach (var si in spawnPointArray.Draw((int)randomSpawnPointCount, false))
+            foreach (var si in spawnPointArray.Draw((int) randomSpawnPointCount, false))
             {
                 chosenSpawnPoints.Add(spawnPointArray.Data(si));
             }
@@ -1006,132 +1001,56 @@ public class LocationLootGenerator(
     }
 
     /// <summary>
-    ///     Add forced spawn point loot into loot parameter list, these are primarily quest items
+    ///     Force items to be added to loot spawn points, primarily quest items
     /// </summary>
-    /// <param name="lootLocationTemplates">List to add forced loot spawn locations to</param>
     /// <param name="forcedSpawnPoints">Forced loot locations that must be added</param>
     /// <param name="locationName">Name of map currently having force loot created for</param>
     /// <param name="staticAmmoDist"></param>
-    /// <param name="spawnLimitedLoot">Dictionary of itemTpls and their max spawn count</param>
-    protected void AddForcedDynamicLoot(
-        List<SpawnpointTemplate> lootLocationTemplates,
+    /// <returns>Collection of spawn points with forced loot in them</returns>
+    protected List<SpawnpointTemplate> GetForcedDynamicLoot(
         List<Spawnpoint> forcedSpawnPoints,
         string locationName,
-        Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist,
-        Dictionary<string, int>? spawnLimitedLoot
+        Dictionary<string, List<StaticAmmoDetails>> staticAmmoDist
     )
     {
-        if (spawnLimitedLoot is not null)
-        // Process loot items defined as requiring only 1 spawn position as they appear in multiple positions on the map
-        {
-            foreach (var (itemTpl, itemSpawnCountMax) in spawnLimitedLoot)
-            {
-                // Get all spawn positions for item tpl in forced loot array
-                var items = forcedSpawnPoints.Where(forcedSpawnPoint =>
-                    forcedSpawnPoint.Template.Items.FirstOrDefault().Template == itemTpl
-                );
-                if (!items.Any())
-                {
-                    if (_logger.IsLogEnabled(LogLevel.Debug))
-                    {
-                        _logger.Debug(
-                            $"Unable to adjust loot item {itemTpl} as it does not exist inside {locationName} forced loot."
-                        );
-                    }
-
-                    continue;
-                }
-
-                // Create probability array of all spawn positions for this spawn id
-                var spawnPointArray = new ProbabilityObjectArray<string, Spawnpoint>(
-                    _mathUtil,
-                    _cloner
-                );
-                foreach (var si in items)
-                // Use locationId as template.Id is the same across all items
-                {
-                    spawnPointArray.Add(
-                        new ProbabilityObject<string, Spawnpoint>(
-                            si.LocationId,
-                            si.Probability ?? 0,
-                            si
-                        )
-                    );
-                }
-
-                // Choose count from config of spawn positions for spawn id and add to loot array
-                foreach (var spawnPointLocationId in spawnPointArray.Draw(itemSpawnCountMax, false))
-                {
-                    var itemToAdd = items.FirstOrDefault(item =>
-                        item.LocationId == spawnPointLocationId
-                    );
-                    var lootItem = itemToAdd?.Template;
-                    if (lootItem is null)
-                    {
-                        _logger.Warning(
-                            $"Item with spawn point id: {spawnPointLocationId} could not be found, skipping"
-                        );
-                        continue;
-                    }
-
-                    var createItemResult = CreateDynamicLootItem(
-                        lootItem.Items.FirstOrDefault().Id,
-                        lootItem.Items,
-                        staticAmmoDist
-                    );
-
-                    // If count reaches max, skip adding item to loot
-                    if (counterTrackerHelper.IncrementCount(itemTpl))
-                    {
-                        continue;
-                    }
-
-                    // Update root ID with the dynamically generated ID
-                    lootItem.Root = createItemResult.Items.FirstOrDefault().Id;
-                    lootItem.Items = createItemResult.Items;
-                    lootLocationTemplates.Add(lootItem);
-                }
-            }
-        }
+        var result = new List<SpawnpointTemplate>();
 
         var seasonalEventActive = _seasonalEventService.SeasonalEventEnabled();
         var seasonalItemTplBlacklist = _seasonalEventService.GetInactiveSeasonalEventItems();
 
-        // Add remaining forced loot to array
         foreach (var forcedLootLocation in forcedSpawnPoints)
         {
-            var firstLootItemTpl = forcedLootLocation.Template.Items.FirstOrDefault().Template;
+            var locationTemplateToAdd = forcedLootLocation.Template;
+            var rootItem = locationTemplateToAdd.Items.FirstOrDefault();
 
-            // Skip spawn positions processed already
-            if (spawnLimitedLoot?.ContainsKey(firstLootItemTpl) ?? false)
+            if (counterTrackerHelper.IncrementCount(rootItem.Template))
             {
                 continue;
             }
 
             // Skip adding seasonal items when seasonal event is not active
-            if (!seasonalEventActive && seasonalItemTplBlacklist.Contains(firstLootItemTpl))
+            if (!seasonalEventActive && seasonalItemTplBlacklist.Contains(rootItem.Template))
             {
                 continue;
             }
 
-            var locationTemplateToAdd = forcedLootLocation.Template;
             var createItemResult = CreateDynamicLootItem(
-                locationTemplateToAdd.Items.FirstOrDefault().Id,
+                rootItem.Id,
                 forcedLootLocation.Template.Items,
                 staticAmmoDist
             );
 
-            // Update root ID with the dynamically generated ID
+            // Update root ID with the above dynamically generated ID
             forcedLootLocation.Template.Root = createItemResult.Items.FirstOrDefault().Id;
             forcedLootLocation.Template.Items = createItemResult.Items;
 
-            // Push forced location into array as long as it doesnt exist already
-            var existingLocation = lootLocationTemplates.Any(spawnPoint =>
+            // Push forced location into array as long as it doesn't exist already
+            var existingLocation = result.Any(spawnPoint =>
                 spawnPoint.Id == locationTemplateToAdd.Id
             );
             if (!existingLocation)
             {
-                lootLocationTemplates.Add(locationTemplateToAdd);
+                result.Add(locationTemplateToAdd);
             }
             else
             {
@@ -1143,6 +1062,8 @@ public class LocationLootGenerator(
                 }
             }
         }
+
+        return result;
     }
 
     /// <summary>
