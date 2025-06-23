@@ -54,6 +54,7 @@ public class RagfairServer(
 
         // Regenerate expired offers when over threshold limit
         _ragfairOfferHolder.FlagExpiredOffersAfterDate(timeUtil.GetTimeStamp());
+
         if (_ragfairOfferService.EnoughExpiredOffersExistToProcess())
         {
             // Must occur BEFORE "RemoveExpiredOffers" + clone items as they'll be purged by `RemoveExpiredOffers()`
