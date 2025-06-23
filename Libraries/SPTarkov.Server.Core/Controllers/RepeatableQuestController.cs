@@ -1,5 +1,4 @@
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Generators.RepeatableQuestGeneration;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -230,7 +229,7 @@ public class RepeatableQuestController(
                 // Not free, Charge player + apply charisma bonus to cost of replacement
                 cost.Count = (int)
                     Math.Truncate(
-                        cost.Count.Value * (1 - Math.Truncate(charismaBonus / 100) * 0.001)
+                        cost.Count.Value * (1 - (Math.Truncate(charismaBonus / 100) * 0.001))
                     );
                 _paymentService.AddPaymentToOutput(
                     pmcData,
@@ -439,13 +438,10 @@ public class RepeatableQuestController(
             .ToList();
 
         var traderId = _randomUtil.DrawRandomFromList(traders).FirstOrDefault();
-
         if (traderId is null)
         {
-            // TODO: Localize me!
-            _logger.Error(
-                "Could not draw traderId from whitelist during repeatable quest generation"
-            );
+            _logger.Error(_localisationService.GetText("repeatable-unable_to_find_trader_in_pool"));
+
             return null;
         }
 
@@ -517,7 +513,7 @@ public class RepeatableQuestController(
     /// <param name="questId">Id of quest to find</param>
     /// <param name="pmcData">Profile that contains quests to look through</param>
     /// <returns></returns>
-    protected GetRepeatableByIdResult GetRepeatableById(string questId, PmcData pmcData)
+    protected GetRepeatableByIdResult? GetRepeatableById(string questId, PmcData pmcData)
     {
         foreach (var repeatablesInProfile in pmcData.RepeatableQuests)
         {
@@ -834,7 +830,7 @@ public class RepeatableQuestController(
                 questsToKeep.Add(activeQuest);
                 if (_logger.IsLogEnabled(LogLevel.Debug))
                 {
-                    _logger.Debug( // TODO: this shouldnt happen, doesnt on live
+                    _logger.Debug( // TODO: this shouldn't happen, doesn't on live
                         $"Keeping repeatable quest: {activeQuest.Id} in activeQuests since it is available to hand in"
                     );
                 }

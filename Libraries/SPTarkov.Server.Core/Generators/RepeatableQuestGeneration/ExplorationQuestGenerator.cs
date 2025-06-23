@@ -67,10 +67,8 @@ public class ExplorationQuestGenerator(
             ) || locationInfo is null
         )
         {
-            // TODO - Localize me
-            logger.Warning(
-                "Generating exploration repeatable quest failed, no remaining locations available"
-            );
+            logger.Warning(localisationService.GetText("repeatable-no_location_found_for_exploration_quest_generation"));
+
             return null;
         }
 
@@ -84,18 +82,14 @@ public class ExplorationQuestGenerator(
 
         if (quest is null)
         {
-            // TODO - Localize me
-            logger.Error("Generating quest failed, no quest template available");
+            logger.Error(localisationService.GetText("repeatable-quest_generation_failed_no_template", "exploration"));
             return null;
         }
 
         // Generate the available for finish exit condition
         if (!TryGenerateAvailableForFinish(quest, locationInfo))
         {
-            // TODO - Localize me
-            logger.Error(
-                $"Generating AvailableForFinish failed for location {locationInfo.LocationName}"
-            );
+            logger.Error(localisationService.GetText("repeatable-available_for_finish_condition_failed_to_generate", locationInfo.LocationName));
             return null;
         }
 
@@ -105,10 +99,7 @@ public class ExplorationQuestGenerator(
             && !TryGenerateSpecificExtractRequirement(quest, repeatableConfig, locationInfo)
         )
         {
-            // TODO - Localize me
-            logger.Error(
-                $"Generating SpecificExtractRequirement failed for location {locationInfo.LocationName}"
-            );
+            logger.Error(localisationService.GetText("repeatable-specific_extract_condition_failed_to_generate", locationInfo.LocationName));
             return null;
         }
 
@@ -232,8 +223,7 @@ public class ExplorationQuestGenerator(
 
         if (location is null)
         {
-            // TODO - Localize me
-            logger.Error($"Unable to get locationId for {locationInfo.LocationName}");
+            logger.Error(localisationService.GetText("repeatable-unable_to_find_location_id_for_location_name", locationInfo.LocationName));
             return false;
         }
 
@@ -288,8 +278,7 @@ public class ExplorationQuestGenerator(
 
         if (mapExits is null)
         {
-            // TODO: Localize me
-            logger.Error($"Unable to get location list for location {locationInfo.LocationName}");
+            logger.Error(localisationService.GetText("repeatable-unable_to_find_exits_for_location", locationInfo.LocationName));
             return false;
         }
 
@@ -308,10 +297,7 @@ public class ExplorationQuestGenerator(
 
         if (possibleExits.Count == 0)
         {
-            // TODO - Localize me!
-            logger.Error(
-                $"Unable to choose specific exit on map: {locationInfo.LocationName}, Possible exit pool was empty"
-            );
+            logger.Error(localisationService.GetText("repeatable-unable_choose_exit_pool_empty", locationInfo.LocationName));
 
             return false;
         }
