@@ -81,15 +81,9 @@ public class GameCallbacks(
     ///     Handle client/putHWMetrics
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> PutHwMetrics(
-        string url,
-        EmptyRequestData info,
-        string sessionID
-    )
+    public ValueTask<string> PutHwMetrics(string url, EmptyRequestData info, string sessionID)
     {
-        return new ValueTask<string>(
-            _httpResponseUtil.GetBody<string>(null!)
-            );
+        return new ValueTask<string>(_httpResponseUtil.GetBody<string>(null!));
     }
 
     /// <summary>

@@ -28,11 +28,7 @@ public class GameStaticRouter : StaticRouter
                 new RouteAction(
                     "/client/putHWMetrics",
                     async (url, info, sessionID, output) =>
-                        await gameCallbacks.PutHwMetrics(
-                            url,
-                            info as EmptyRequestData,
-                            sessionID
-                        )
+                        await gameCallbacks.PutHwMetrics(url, info as EmptyRequestData, sessionID)
                 ),
                 new RouteAction(
                     "/client/game/mode",
