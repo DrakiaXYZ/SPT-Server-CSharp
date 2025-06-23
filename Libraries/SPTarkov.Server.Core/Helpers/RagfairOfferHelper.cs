@@ -854,7 +854,7 @@ public class RagfairOfferHelper(
         };
 
         var storageTimeSeconds = _timeUtil.GetHoursAsSeconds(
-            (int) _questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
+            (int)_questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
         );
         _mailSendService.SendDirectNpcMessageToPlayer(
             offerOwnerSessionId,
