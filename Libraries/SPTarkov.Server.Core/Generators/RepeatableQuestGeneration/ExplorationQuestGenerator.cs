@@ -67,7 +67,11 @@ public class ExplorationQuestGenerator(
             ) || locationInfo is null
         )
         {
-            logger.Warning(localisationService.GetText("repeatable-no_location_found_for_exploration_quest_generation"));
+            logger.Warning(
+                localisationService.GetText(
+                    "repeatable-no_location_found_for_exploration_quest_generation"
+                )
+            );
 
             return null;
         }
@@ -82,14 +86,24 @@ public class ExplorationQuestGenerator(
 
         if (quest is null)
         {
-            logger.Error(localisationService.GetText("repeatable-quest_generation_failed_no_template", "exploration"));
+            logger.Error(
+                localisationService.GetText(
+                    "repeatable-quest_generation_failed_no_template",
+                    "exploration"
+                )
+            );
             return null;
         }
 
         // Generate the available for finish exit condition
         if (!TryGenerateAvailableForFinish(quest, locationInfo))
         {
-            logger.Error(localisationService.GetText("repeatable-available_for_finish_condition_failed_to_generate", locationInfo.LocationName));
+            logger.Error(
+                localisationService.GetText(
+                    "repeatable-available_for_finish_condition_failed_to_generate",
+                    locationInfo.LocationName
+                )
+            );
             return null;
         }
 
@@ -99,7 +113,12 @@ public class ExplorationQuestGenerator(
             && !TryGenerateSpecificExtractRequirement(quest, repeatableConfig, locationInfo)
         )
         {
-            logger.Error(localisationService.GetText("repeatable-specific_extract_condition_failed_to_generate", locationInfo.LocationName));
+            logger.Error(
+                localisationService.GetText(
+                    "repeatable-specific_extract_condition_failed_to_generate",
+                    locationInfo.LocationName
+                )
+            );
             return null;
         }
 
@@ -223,7 +242,12 @@ public class ExplorationQuestGenerator(
 
         if (location is null)
         {
-            logger.Error(localisationService.GetText("repeatable-unable_to_find_location_id_for_location_name", locationInfo.LocationName));
+            logger.Error(
+                localisationService.GetText(
+                    "repeatable-unable_to_find_location_id_for_location_name",
+                    locationInfo.LocationName
+                )
+            );
             return false;
         }
 
@@ -278,7 +302,12 @@ public class ExplorationQuestGenerator(
 
         if (mapExits is null)
         {
-            logger.Error(localisationService.GetText("repeatable-unable_to_find_exits_for_location", locationInfo.LocationName));
+            logger.Error(
+                localisationService.GetText(
+                    "repeatable-unable_to_find_exits_for_location",
+                    locationInfo.LocationName
+                )
+            );
             return false;
         }
 
@@ -297,7 +326,12 @@ public class ExplorationQuestGenerator(
 
         if (possibleExits.Count == 0)
         {
-            logger.Error(localisationService.GetText("repeatable-unable_choose_exit_pool_empty", locationInfo.LocationName));
+            logger.Error(
+                localisationService.GetText(
+                    "repeatable-unable_choose_exit_pool_empty",
+                    locationInfo.LocationName
+                )
+            );
 
             return false;
         }
