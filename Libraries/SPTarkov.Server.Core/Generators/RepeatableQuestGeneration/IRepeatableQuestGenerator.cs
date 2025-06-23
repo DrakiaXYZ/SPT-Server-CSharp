@@ -12,5 +12,5 @@ public interface IRepeatableQuestGenerator
         string traderId,
         QuestTypePool questTypePool,
         RepeatableQuestConfig repeatableConfig
-        );
+    );
 }

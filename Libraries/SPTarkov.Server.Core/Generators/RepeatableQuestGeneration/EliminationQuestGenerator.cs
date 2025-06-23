@@ -321,9 +321,7 @@ public class EliminationQuestGenerator(
         {
             var weaponRequirement = weaponRequirementConfig.Draw(1, false);
             var specificAllowedWeaponCategory = weaponRequirementConfig.Data(weaponRequirement[0]);
-            var allowedWeapons = itemHelper.GetItemTplsOfBaseType(
-                specificAllowedWeaponCategory[0]
-            );
+            var allowedWeapons = itemHelper.GetItemTplsOfBaseType(specificAllowedWeaponCategory[0]);
             allowedWeapon = randomUtil.GetArrayValue(allowedWeapons);
         }
 

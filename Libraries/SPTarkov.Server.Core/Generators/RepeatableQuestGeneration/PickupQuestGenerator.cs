@@ -23,14 +23,14 @@ public class PickupQuestGenerator(
     HashUtil hashUtil
 ) : IRepeatableQuestGenerator
 {
-
     // TODO: This isn't really implemented well at all, what even is this.
     public RepeatableQuest? Generate(
         string sessionId,
         int pmcLevel,
         string traderId,
         QuestTypePool questTypePool,
-        RepeatableQuestConfig repeatableConfig)
+        RepeatableQuestConfig repeatableConfig
+    )
     {
         var pickupConfig = repeatableConfig.QuestConfig.Pickup;
 

@@ -24,14 +24,14 @@ public class ExplorationQuestGenerator(
     RandomUtil randomUtil,
     MathUtil mathUtil,
     HashUtil hashUtil
-    ) : IRepeatableQuestGenerator
+) : IRepeatableQuestGenerator
 {
     protected record LocationInfo(
         ELocationName LocationName,
         List<string> LocationTarget,
         bool RequiresSpecificExtract,
         int NumOfExtractsRequired
-        );
+    );
 
     protected QuestConfig QuestConfig = configServer.GetConfig<QuestConfig>();
 
@@ -58,11 +58,19 @@ public class ExplorationQuestGenerator(
         var explorationConfig = repeatableConfig.QuestConfig.Exploration;
 
         // Try and get a location to generate for
-        if (!TryGetLocationInfo(repeatableConfig, explorationConfig, questTypePool, out var locationInfo)
-            || locationInfo is null)
+        if (
+            !TryGetLocationInfo(
+                repeatableConfig,
+                explorationConfig,
+                questTypePool,
+                out var locationInfo
+            ) || locationInfo is null
+        )
         {
             // TODO - Localize me
-            logger.Warning("Generating exploration repeatable quest failed, no remaining locations available");
+            logger.Warning(
+                "Generating exploration repeatable quest failed, no remaining locations available"
+            );
             return null;
         }
 
@@ -85,16 +93,22 @@ public class ExplorationQuestGenerator(
         if (!TryGenerateAvailableForFinish(quest, locationInfo))
         {
             // TODO - Localize me
-            logger.Error($"Generating AvailableForFinish failed for location {locationInfo.LocationName}");
+            logger.Error(
+                $"Generating AvailableForFinish failed for location {locationInfo.LocationName}"
+            );
             return null;
         }
 
         // If we require a specific extract requirement, generate it
-        if (locationInfo.RequiresSpecificExtract
-            && !TryGenerateSpecificExtractRequirement(quest, repeatableConfig, locationInfo))
+        if (
+            locationInfo.RequiresSpecificExtract
+            && !TryGenerateSpecificExtractRequirement(quest, repeatableConfig, locationInfo)
+        )
         {
             // TODO - Localize me
-            logger.Error($"Generating SpecificExtractRequirement failed for location {locationInfo.LocationName}");
+            logger.Error(
+                $"Generating SpecificExtractRequirement failed for location {locationInfo.LocationName}"
+            );
             return null;
         }
 
@@ -130,7 +144,8 @@ public class ExplorationQuestGenerator(
         RepeatableQuestConfig repeatableConfig,
         Exploration explorationConfig,
         QuestTypePool pool,
-        out LocationInfo? locationInfo)
+        out LocationInfo? locationInfo
+    )
     {
         if (pool.Pool?.Exploration?.Locations?.Count is null or 0)
         {
@@ -142,19 +157,23 @@ public class ExplorationQuestGenerator(
 
         // If location drawn is factory, it's possible to either get factory4_day and factory4_night use index 0,
         // as the key is factory4_day
-        var locationKey = randomUtil.DrawRandomFromDict(pool.Pool.Exploration.Locations)[
-            0
-        ];
+        var locationKey = randomUtil.DrawRandomFromDict(pool.Pool.Exploration.Locations)[0];
 
         // Make the location info object
         var locationTarget = pool.Pool!.Exploration!.Locations![locationKey];
 
-        var requiresSpecificExtract =
-            randomUtil.GetChance100(repeatableConfig.QuestConfig.Exploration.SpecificExits.Chance);
+        var requiresSpecificExtract = randomUtil.GetChance100(
+            repeatableConfig.QuestConfig.Exploration.SpecificExits.Chance
+        );
 
         var numExtracts = GetNumberOfExits(explorationConfig, requiresSpecificExtract);
 
-        locationInfo = new LocationInfo(locationKey,  locationTarget.ToList(), requiresSpecificExtract, numExtracts);
+        locationInfo = new LocationInfo(
+            locationKey,
+            locationTarget.ToList(),
+            requiresSpecificExtract,
+            numExtracts
+        );
 
         // Remove the location from the available pool
         pool.Pool.Exploration.Locations.Remove(locationKey);
@@ -207,7 +226,9 @@ public class ExplorationQuestGenerator(
         }
 
         // Lookup the location
-        var location = repeatableQuestHelper.GetQuestLocationByMapId(locationInfo.LocationName.ToString());
+        var location = repeatableQuestHelper.GetQuestLocationByMapId(
+            locationInfo.LocationName.ToString()
+        );
 
         if (location is null)
         {
@@ -241,8 +262,6 @@ public class ExplorationQuestGenerator(
         quest.Conditions.AvailableForFinish[0].Value = locationInfo.NumOfExtractsRequired;
         quest.Conditions.AvailableForFinish[0].Id = hashUtil.Generate();
 
-
-
         quest.Location = location;
 
         return true;
@@ -255,10 +274,17 @@ public class ExplorationQuestGenerator(
     /// <param name="repeatableConfig">repeatable config</param>
     /// <param name="locationInfo">LocationInfo object with the generated data</param>
     /// <returns>True if generated, false if not</returns>
-    protected bool TryGenerateSpecificExtractRequirement(RepeatableQuest quest, RepeatableQuestConfig repeatableConfig, LocationInfo locationInfo)
+    protected bool TryGenerateSpecificExtractRequirement(
+        RepeatableQuest quest,
+        RepeatableQuestConfig repeatableConfig,
+        LocationInfo locationInfo
+    )
     {
         // Fetch extracts for the requested side
-        var mapExits = GetLocationExitsForSide(locationInfo.LocationName.ToString(), repeatableConfig.Side);
+        var mapExits = GetLocationExitsForSide(
+            locationInfo.LocationName.ToString(),
+            repeatableConfig.Side
+        );
 
         if (mapExits is null)
         {
