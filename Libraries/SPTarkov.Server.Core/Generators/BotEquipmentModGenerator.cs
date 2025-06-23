@@ -1891,14 +1891,10 @@ public class BotEquipmentModGenerator(
         }
 
         _logger.Warning(
-            _localisationService.GetText(
-                "bot-unable_to_filter_mod_slot_all_blacklisted",
-                modSlot
-            )
+            _localisationService.GetText("bot-unable_to_filter_mod_slot_all_blacklisted", modSlot)
         );
 
         return modsFromDynamicPool;
-
     }
 
     /// <summary>
@@ -1922,7 +1918,10 @@ public class BotEquipmentModGenerator(
 
         // Get item blacklist and mod equipment blacklist as one Set
         var blacklist = _itemFilterService.GetBlacklistedItems();
-        if (botEquipBlacklist?.Equipment is not null && botEquipBlacklist.Equipment.TryGetValue(modSlot, out var equipmentBlacklistValues))
+        if (
+            botEquipBlacklist?.Equipment is not null
+            && botEquipBlacklist.Equipment.TryGetValue(modSlot, out var equipmentBlacklistValues)
+        )
         {
             blacklist.UnionWith(equipmentBlacklistValues);
         }

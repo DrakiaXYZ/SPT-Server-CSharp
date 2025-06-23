@@ -255,7 +255,8 @@ public class BotEquipmentModPoolService(
             .GetItems()
             .Values.Where(item =>
                 string.Equals(item.Type, "Item", StringComparison.OrdinalIgnoreCase)
-                && itemHelper.IsOfBaseclasses(item.Id, [BaseClasses.WEAPON, BaseClasses.MOD]));
+                && itemHelper.IsOfBaseclasses(item.Id, [BaseClasses.WEAPON, BaseClasses.MOD])
+            );
         logger.Warning("generating weapon pool");
 
         return GeneratePool(weaponsAndMods, "weapon");
@@ -280,7 +281,7 @@ public class BotEquipmentModPoolService(
                         BaseClasses.VEST,
                         BaseClasses.ARMOR,
                         BaseClasses.HEADWEAR,
-                        BaseClasses.MOD
+                        BaseClasses.MOD,
                     ]
                 )
             );
