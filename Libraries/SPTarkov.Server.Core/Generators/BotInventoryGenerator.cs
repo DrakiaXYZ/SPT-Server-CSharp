@@ -410,7 +410,7 @@ public class BotInventoryGenerator(
     /// <param name="templateInventory"></param>
     /// <param name="isPmc">is bot a PMC</param>
     /// <returns></returns>
-    protected Dictionary<string, double> GetPocketPoolByGameEdition(
+    protected Dictionary<string, double>? GetPocketPoolByGameEdition(
         string chosenGameVersion,
         BotTypeInventory templateInventory,
         bool isPmc
@@ -510,7 +510,7 @@ public class BotInventoryGenerator(
         var shouldSpawn = _randomUtil.GetChance100(spawnChance ?? 0);
         if (shouldSpawn && settings.RootEquipmentPool.Any())
         {
-            TemplateItem pickedItemDb = null;
+            TemplateItem? pickedItemDb = null;
             var found = false;
 
             // Limit attempts to find a compatible item as it's expensive to check them all
@@ -590,7 +590,7 @@ public class BotInventoryGenerator(
 
             var botEquipBlacklist = _botEquipmentFilterService.GetBotEquipmentBlacklist(
                 settings.BotData.EquipmentRole,
-                settings.GeneratingPlayerLevel.Value
+                settings.GeneratingPlayerLevel.GetValueOrDefault(1)
             );
 
             // Edge case: Filter the armor items mod pool if bot exists in config dict + config has armor slot

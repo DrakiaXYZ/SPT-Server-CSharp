@@ -183,7 +183,7 @@ public class BotEquipmentModGenerator(
                 var plateSlotFilteringOutcome = FilterPlateModsForSlotByLevel(
                     settings,
                     modSlotName.ToLower(),
-                    compatibleModsPool[modSlotName],
+                    compatibleModsPool.GetValueOrDefault(modSlotName),
                     parentTemplate
                 );
                 switch (plateSlotFilteringOutcome.Result)
@@ -210,7 +210,7 @@ public class BotEquipmentModGenerator(
             }
 
             // Choose random mod from pool and check its compatibility
-            string modTpl = null;
+            string? modTpl = null;
             var found = false;
             var exhaustableModPool = CreateExhaustableArray(modPoolToChooseFrom);
             while (exhaustableModPool.HasValues())
@@ -1837,9 +1837,11 @@ public class BotEquipmentModGenerator(
             return;
         }
 
+        var supportedSubModsSet = supportedSubMods.ToHashSet();
+
         // Filter mods
         var filteredMods = FilterModsByBlacklist(
-            supportedSubMods.ToHashSet(),
+            supportedSubModsSet,
             botEquipBlacklist,
             desiredSlotName
         );
@@ -1855,7 +1857,7 @@ public class BotEquipmentModGenerator(
 
         modPool.TryAdd(modTemplate.Id, new Dictionary<string, HashSet<string>>());
 
-        modPool[modTemplate.Id][desiredSlotObject.Name] = supportedSubMods.ToHashSet();
+        modPool[modTemplate.Id][desiredSlotObject.Name] = supportedSubModsSet;
     }
 
     /// <summary>
@@ -1875,51 +1877,62 @@ public class BotEquipmentModGenerator(
             _botEquipmentModPoolService.GetCompatibleModsForWeaponSlot(parentItemId, modSlot)
         );
 
-        var filteredMods = FilterModsByBlacklist(modsFromDynamicPool, botEquipBlacklist, modSlot);
-        if (!filteredMods.Any())
+        if (modsFromDynamicPool.Count == 0)
         {
-            _logger.Warning(
-                _localisationService.GetText(
-                    "bot-unable_to_filter_mod_slot_all_blacklisted",
-                    modSlot
-                )
-            );
-
+            // Mod pool has no items, don't bother doing any filtering below
             return modsFromDynamicPool;
         }
 
-        return filteredMods;
+        var filteredMods = FilterModsByBlacklist(modsFromDynamicPool, botEquipBlacklist, modSlot);
+        if (filteredMods.Any())
+        {
+            // Filtering left at least 1 item, return it
+            return filteredMods;
+        }
+
+        _logger.Warning(
+            _localisationService.GetText(
+                "bot-unable_to_filter_mod_slot_all_blacklisted",
+                modSlot
+            )
+        );
+
+        return modsFromDynamicPool;
+
     }
 
     /// <summary>
     ///     Take a list of tpls and filter out blacklisted values using itemFilterService + botEquipmentBlacklist
     /// </summary>
-    /// <param name="allowedMods">Base mods to filter</param>
-    /// <param name="botEquipBlacklist">Equipment blacklist</param>
-    /// <param name="modSlot">Slot mods belong to</param>
-    /// <returns>Filtered array of mod tpls</returns>
+    /// <param name="modTplPool">Base mod tpls to filter</param>
+    /// <param name="botEquipBlacklist">Equipment blacklist details for bot level range</param>
+    /// <param name="modSlot">Mod slot mods belong to</param>
+    /// <returns>New set of tpls not in blacklist(s)</returns>
     public HashSet<string> FilterModsByBlacklist(
-        HashSet<string> allowedMods,
+        HashSet<string> modTplPool,
         EquipmentFilterDetails? botEquipBlacklist,
         string modSlot
     )
     {
-        // No blacklist, nothing to filter out
-        if (botEquipBlacklist is null)
+        if (!modTplPool.Any())
         {
-            return allowedMods;
+            // Mod pool has no items, don't bother doing any filtering below
+            return modTplPool;
         }
 
-        var result = new HashSet<string>();
+        // Get item blacklist and mod equipment blacklist as one Set
+        var blacklist = _itemFilterService.GetBlacklistedItems();
+        if (botEquipBlacklist?.Equipment is not null && botEquipBlacklist.Equipment.TryGetValue(modSlot, out var equipmentBlacklistValues))
+        {
+            blacklist.UnionWith(equipmentBlacklistValues);
+        }
 
-        // Get item blacklist and mod equipment blacklist as one array
-        botEquipBlacklist.Equipment.TryGetValue(modSlot, out var equipmentBlacklistValues);
-        var blacklist = _itemFilterService
-            .GetBlacklistedItems()
-            .Concat(equipmentBlacklistValues ?? []);
-        result = allowedMods.Where(tpl => !blacklist.Contains(tpl)).ToHashSet();
+        var result = _cloner.Clone(modTplPool);
 
-        return result;
+        // Filter out blacklisted tpls
+        result.ExceptWith(blacklist);
+
+        return modTplPool;
     }
 
     /// <summary>
@@ -1963,7 +1976,7 @@ public class BotEquipmentModGenerator(
             itemModPool = modPool[cylinderMagTemplate.Id];
         }
 
-        ExhaustableArray<string> exhaustableModPool = null;
+        ExhaustableArray<string>? exhaustableModPool = null;
         var modSlot = "cartridges";
         const string camoraFirstSlot = "camora_000";
         if (itemModPool.TryGetValue(modSlot, out var value))
