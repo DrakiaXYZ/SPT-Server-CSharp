@@ -665,7 +665,7 @@
   "repeatable-quest_generation_failed_no_template": "Generating: %s quest failed, no quest template available",
   "repeatable-available_for_finish_condition_failed_to_generate": "Generating AvailableForFinish condition failed for location: %s",
   "repeatable-specific_extract_condition_failed_to_generate": "Generating SpecificExtractRequirement failed for location: %s",
-  "repeatable-no_location_found_for_exploration_quest_generation": "Unable tp generate Exploration repeatable quest, no remaining locations available",
+  "repeatable-no_location_found_for_exploration_quest_generation": "Unable to generate Exploration repeatable quest, no remaining locations available",
   "repeatable-unable_to_find_location_id_for_location_name": "Unable to find a locationId for: %s",
   "repeatable-unable_to_find_exits_for_location": "Unable to get location exits for location: %s",
   "repeatable-unable_choose_exit_pool_empty": "Unable to choose specific exit for map: %s as exit pool is empty",
