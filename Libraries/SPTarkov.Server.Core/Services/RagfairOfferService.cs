@@ -192,7 +192,7 @@ public class RagfairOfferService(
         var isPlayer = profileHelper.IsPlayer(staleOffer.User.Id.RegexReplace("^pmc", ""));
         if (flagOfferAsExpired && !isPlayer)
         {
-            // Not trader/player offer
+            // Not trader or a player offer
             ragfairOfferHolder.FlagOfferAsExpired(staleOffer.Id);
         }
 

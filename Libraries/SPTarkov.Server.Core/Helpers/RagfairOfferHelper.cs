@@ -653,6 +653,12 @@ public class RagfairOfferHelper(
         for (var index = profileOffers.Count - 1; index >= 0; index--)
         {
             var offer = profileOffers[index];
+            if (currentTimestamp > offer.EndTime)
+            {
+                // Offer has expired before selling, skip as it will be processed in RemoveExpiredOffers()
+                continue;
+            }
+
             if (
                 offer.SellResults is null
                 || offer.SellResults.Count == 0
@@ -848,7 +854,7 @@ public class RagfairOfferHelper(
         };
 
         var storageTimeSeconds = _timeUtil.GetHoursAsSeconds(
-            (int)_questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
+            (int) _questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
         );
         _mailSendService.SendDirectNpcMessageToPlayer(
             offerOwnerSessionId,
