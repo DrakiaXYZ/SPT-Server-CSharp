@@ -21,16 +21,16 @@ public class RagfairHelper(
     ICloner cloner
 )
 {
-    protected RagfairConfig _ragfairConfig = configServer.GetConfig<RagfairConfig>();
+    protected readonly RagfairConfig _ragfairConfig = configServer.GetConfig<RagfairConfig>();
 
-    /**
-     * Gets currency TAG from TPL
-     * @param {string} currency
-     * @returns string
-     */
-    public string GetCurrencyTag(string currency)
+    /// <summary>
+    /// Gets currency TAG from currency tpl value
+    /// </summary>
+    /// <param name="currencyTpl">Currency tpl</param>
+    /// <returns>Currency tag, e.g. RUB</returns>
+    public string GetCurrencyTag(string currencyTpl)
     {
-        switch (currency)
+        switch (currencyTpl)
         {
             case Money.EUROS:
                 return "EUR";
@@ -42,6 +42,26 @@ public class RagfairHelper(
                 return "GP";
             default:
                 return "";
+        }
+    }
+
+    /// <summary>
+    /// Get a currency TAG by its search filter value (e.g. 0 = all, 1 = RUB)
+    /// </summary>
+    /// <param name="currencyFilter">Search filter choice</param>
+    /// <returns>Currency tag</returns>
+    public string GetCurrencyTag(int currencyFilter)
+    {
+        switch (currencyFilter)
+        {
+            case 3:
+                return "EUR";
+            case 2:
+                return "USD";
+            case 1:
+                return "RUB";
+            default:
+                return "all";
         }
     }
 
@@ -133,7 +153,7 @@ public class RagfairHelper(
     public List<Item> MergeStackable(List<Item> items)
     {
         var list = new List<Item>();
-        Item rootItem = null;
+        Item? rootItem = null;
 
         foreach (var item in items)
         {

@@ -1,4 +1,3 @@
-using System.Collections.Frozen;
 using SPTarkov.Common.Extensions;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -42,13 +41,11 @@ public class RagfairOfferHelper(
 )
 {
     protected const string _goodSoldTemplate = "5bdabfb886f7743e152e867e 0"; // Your {soldItem} {itemCount} items were bought by {buyerNickname}.
-
-    protected static readonly FrozenSet<string> _currencies = ["all", "RUB", "USD", "EUR"];
-    protected BotConfig _botConfig = _configServer.GetConfig<BotConfig>();
-    protected RagfairConfig _ragfairConfig = _configServer.GetConfig<RagfairConfig>();
+    protected readonly BotConfig _botConfig = _configServer.GetConfig<BotConfig>();
+    protected readonly RagfairConfig _ragfairConfig = _configServer.GetConfig<RagfairConfig>();
 
     /// <summary>
-    ///     Passthrough to ragfairOfferService.getOffers(), get flea offers a player should see
+    ///     Pass through to ragfairOfferService.getOffers(), get flea offers a player should see
     /// </summary>
     /// <param name="searchRequest">Data from client</param>
     /// <param name="itemsToAdd">ragfairHelper.filterCategories()</param>
@@ -434,14 +431,14 @@ public class RagfairOfferHelper(
         // filter those out
         if (isTraderOffer)
         {
-            if (!traderAssorts.ContainsKey(offer.User.Id))
+            if (!traderAssorts.TryGetValue(offer.User.Id, out var assort))
             // trader not visible on flea market
             {
                 return false;
             }
 
             if (
-                !traderAssorts[offer.User.Id]
+                !assort
                     .Items.Any(item =>
                     {
                         return item.Id == offer.Root;
@@ -852,7 +849,7 @@ public class RagfairOfferHelper(
         };
 
         var storageTimeSeconds = _timeUtil.GetHoursAsSeconds(
-            (int)_questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
+            (int) _questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
         );
         _mailSendService.SendDirectNpcMessageToPlayer(
             offerOwnerSessionId,
@@ -935,9 +932,8 @@ public class RagfairOfferHelper(
     )
     {
         var isDefaultUserOffer = offer.User.MemberType == MemberCategory.Default;
-        var offerRootItem = offer.Items[0];
-        var offerMoneyTypeTpl = offer.Requirements[0].Template;
-        var isTraderOffer = OfferIsFromTrader(offer);
+        var offerRootItem = offer.Items.FirstOrDefault();
+        var offerMoneyTypeTpl = offer.Requirements.FirstOrDefault().Template;
 
         if (
             pmcData.Info.Level < _databaseService.GetGlobals().Configuration.RagFair.MinUserLevel
@@ -948,6 +944,7 @@ public class RagfairOfferHelper(
             return false;
         }
 
+        var isTraderOffer = OfferIsFromTrader(offer);
         if (searchRequest.OfferOwnerType == OfferOwnerType.TRADEROWNERTYPE && !isTraderOffer)
         // don't include player offers
         {
@@ -973,7 +970,7 @@ public class RagfairOfferHelper(
             searchRequest.QuantityFrom > 0
             && offerRootItem.Upd.StackObjectsCount < searchRequest.QuantityFrom
         )
-        // too little items to offer
+        // Too few items to offer
         {
             return false;
         }
@@ -1028,10 +1025,10 @@ public class RagfairOfferHelper(
 
         if (searchRequest.Currency > 0 && _paymentHelper.IsMoneyTpl(offerMoneyTypeTpl))
         {
-            // Use 'currencies' as mapping for the money choice dropdown, e.g. 0 = all, 2 = "USD;
-            if (!_currencies.Contains(_ragfairHelper.GetCurrencyTag(offerMoneyTypeTpl)))
-            // Don't include item paid in wrong currency
+            // Only want offers with specific currency
+            if (_ragfairHelper.GetCurrencyTag(offerMoneyTypeTpl) != _ragfairHelper.GetCurrencyTag(searchRequest.Currency.GetValueOrDefault(0)))
             {
+                // Offer is for different currency to what search params allow, skip
                 return false;
             }
         }
