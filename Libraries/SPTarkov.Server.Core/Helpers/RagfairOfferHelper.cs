@@ -438,11 +438,10 @@ public class RagfairOfferHelper(
             }
 
             if (
-                !assort
-                    .Items.Any(item =>
-                    {
-                        return item.Id == offer.Root;
-                    })
+                !assort.Items.Any(item =>
+                {
+                    return item.Id == offer.Root;
+                })
             )
             // skip (quest) locked items
             {
@@ -849,7 +848,7 @@ public class RagfairOfferHelper(
         };
 
         var storageTimeSeconds = _timeUtil.GetHoursAsSeconds(
-            (int) _questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
+            (int)_questHelper.GetMailItemRedeemTimeHoursForProfile(sellerProfile)
         );
         _mailSendService.SendDirectNpcMessageToPlayer(
             offerOwnerSessionId,
@@ -1026,7 +1025,10 @@ public class RagfairOfferHelper(
         if (searchRequest.Currency > 0 && _paymentHelper.IsMoneyTpl(offerMoneyTypeTpl))
         {
             // Only want offers with specific currency
-            if (_ragfairHelper.GetCurrencyTag(offerMoneyTypeTpl) != _ragfairHelper.GetCurrencyTag(searchRequest.Currency.GetValueOrDefault(0)))
+            if (
+                _ragfairHelper.GetCurrencyTag(offerMoneyTypeTpl)
+                != _ragfairHelper.GetCurrencyTag(searchRequest.Currency.GetValueOrDefault(0))
+            )
             {
                 // Offer is for different currency to what search params allow, skip
                 return false;
