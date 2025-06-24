@@ -679,18 +679,20 @@ public class BotGenerator(
             return null;
         }
 
-        return bodyParts.Select(bp => new
+        return bodyParts
+            .Select(bp => new
             {
                 BodyPart = bp,
-                TotalMaxHp = bp.Head.Max +
-                             bp.Chest.Max +
-                             bp.LeftArm.Max +
-                             bp.RightArm.Max +
-                             bp.LeftLeg.Max +
-                             bp.RightLeg.Max
+                TotalMaxHp = bp.Head.Max
+                    + bp.Chest.Max
+                    + bp.LeftArm.Max
+                    + bp.RightArm.Max
+                    + bp.LeftLeg.Max
+                    + bp.RightLeg.Max,
             })
             .OrderBy(x => x.TotalMaxHp)
-            .FirstOrDefault()?.BodyPart;
+            .FirstOrDefault()
+            ?.BodyPart;
     }
 
     /// <summary>
