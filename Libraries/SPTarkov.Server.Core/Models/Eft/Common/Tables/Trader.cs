@@ -85,6 +85,9 @@ public record TraderBase
     [JsonPropertyName("items_buy_prohibited")]
     public ItemBuyData? ItemsBuyProhibited { get; set; }
 
+    [JsonPropertyName("items_sell")]
+    public Dictionary<string, ItemSellData>? ItemsSell { get; set; }
+
     [JsonPropertyName("isCanTransferItems")]
     public bool? IsCanTransferItems { get; set; }
 
@@ -138,6 +141,15 @@ public record ItemBuyData
     // MongoId
     [JsonPropertyName("id_list")]
     public List<string>? IdList { get; set; }
+}
+
+public record ItemSellData
+{
+    [JsonPropertyName("category")]
+    public required List<string> Category { get; set; }
+
+    [JsonPropertyName("id_list")]
+    public required List<string> IdList { get; set; }
 }
 
 public record TraderInsurance
