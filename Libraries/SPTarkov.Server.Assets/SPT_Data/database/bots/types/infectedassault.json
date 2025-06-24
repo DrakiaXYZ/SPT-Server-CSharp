@@ -2129,7 +2129,9 @@
   },
   "experience": {
     "aggressorBonus": {
-      "normal": 0
+      "easy": 0,
+      "normal": 0,
+      "hard": 0
     },
     "level": {
       "max": 1,
