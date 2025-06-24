@@ -8,6 +8,7 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
+using LogLevel = SPTarkov.Server.Core.Models.Spt.Logging.LogLevel;
 
 namespace SPTarkov.Server.Core.Services;
 
@@ -20,7 +21,7 @@ public class SeasonalEventService(
     LocalisationService _localisationService,
     ProfileHelper _profileHelper,
     ConfigServer _configServer,
-    LocaleService _localeService
+    RandomUtil _randomUtil
 )
 {
     private bool _christmasEventActive;
@@ -804,19 +805,26 @@ public class SeasonalEventService(
         var globalInfectionDict = globals.LocationInfection.GetAllPropsAsDict();
         foreach (var (locationId, infectionPercentage) in zombieSettings.MapInfectionAmount)
         {
+            // calculate a random value unless the rate is 100
+            double randomInfectionPercentage = infectionPercentage == 100
+                ? infectionPercentage
+                : Convert.ToDouble(_randomUtil.GetInt(Convert.ToInt32(infectionPercentage), 100));
+            if (_logger.IsLogEnabled(LogLevel.Debug))
+                _logger.Debug($"Percent infected from map {locationId} is {randomInfectionPercentage}");
             // Infection rates sometimes apply to multiple maps, e.g. Factory day/night or Sandbox/sandbox_high
             // Get the list of maps that should have infection value applied to their base
             // 90% of locations are just 1 map e.g. bigmap = customs
             var mappedLocations = GetLocationFromInfectedLocation(locationId);
             foreach (var locationKey in mappedLocations)
             {
+
                 _databaseService
                     .GetLocation(locationKey)
-                    .Base.Events.Halloween2024.InfectionPercentage = infectionPercentage;
+                    .Base.Events.Halloween2024.InfectionPercentage = randomInfectionPercentage;
             }
 
             // Globals data needs value updated too
-            globalInfectionDict[locationId] = infectionPercentage;
+            globalInfectionDict[locationId] = randomInfectionPercentage;
         }
 
         foreach (var locationId in zombieSettings.DisableBosses)

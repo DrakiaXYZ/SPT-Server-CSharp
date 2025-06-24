@@ -9691,14 +9691,14 @@
             "Sandbox": 5,
             "factory4": 5,
             "laboratory": 100,
-			"Woods": 5,
-			"bigmap": 5,
-			"Shoreline": 5,
-			"Interchange": 5,
-			"RezervBase": 5,
-			"laboratory": 5,
-			"Lighthouse": 5,
-			"TarkovStreets": 5
+            "Woods": 5,
+            "bigmap": 5,
+            "Shoreline": 5,
+            "Interchange": 5,
+            "RezervBase": 5,
+            "laboratory": 5,
+            "Lighthouse": 5,
+            "TarkovStreets": 5
           }
         }
       },
