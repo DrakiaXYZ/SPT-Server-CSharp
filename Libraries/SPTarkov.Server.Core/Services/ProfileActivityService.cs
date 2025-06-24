@@ -31,6 +31,16 @@ public class ProfileActivityService(TimeUtil timeUtil)
         );
     }
 
+    public bool ContainsActiveProfile(string sessionId)
+    {
+        if (_activeProfiles.ContainsKey(sessionId))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     // Yes this is terrible, the other alternative is re-doing half of bot-gen which is currently doing guess-work anyway
     public ProfileActivityRaidData? GetFirstProfileActivityRaidData()
     {
@@ -42,8 +52,14 @@ public class ProfileActivityService(TimeUtil timeUtil)
         return null;
     }
 
-    public ProfileActivityRaidData? GetProfileActivityRaidData(string sessionId)
+    public ProfileActivityRaidData GetProfileActivityRaidData(string sessionId)
     {
+        // Handle edge cases where people might close the server but keep the client alive
+        if (!ContainsActiveProfile(sessionId))
+        {
+            AddActiveProfile(sessionId, timeUtil.GetTimeStamp());
+        }
+
         if (_activeProfiles.TryGetValue(sessionId, out var currentActiveProfile))
         {
             currentActiveProfile.RaidData ??= new();
@@ -51,7 +67,7 @@ public class ProfileActivityService(TimeUtil timeUtil)
             return currentActiveProfile.RaidData;
         }
 
-        return null;
+        throw new Exception($"Unable to retrieve active profile for session: {sessionId}");
     }
 
     /// <summary>
