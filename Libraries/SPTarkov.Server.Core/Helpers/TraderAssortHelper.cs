@@ -1,10 +1,7 @@
 using SPTarkov.DI.Annotations;
-using SPTarkov.Server.Core.Generators;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Enums;
-using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
@@ -15,25 +12,21 @@ namespace SPTarkov.Server.Core.Helpers;
 [Injectable(InjectionType.Singleton)]
 public class TraderAssortHelper(
     ISptLogger<TraderAssortHelper> _logger,
-    MathUtil _mathUtil,
     TimeUtil _timeUtil,
     DatabaseService _databaseService,
     ProfileHelper _profileHelper,
     AssortHelper _assortHelper,
-    PaymentHelper _paymentHelper,
-    RagfairAssortGenerator _ragfairAssortGenerator,
-    RagfairOfferGenerator _ragfairOfferGenerator,
-    LocalisationService _localisationService,
     TraderPurchasePersisterService _traderPurchasePersisterService,
     TraderHelper _traderHelper,
     FenceService _fenceService,
-    ConfigServer _configServer,
     ICloner _cloner
 )
 {
-    protected Dictionary<string, Dictionary<string, string>> _mergedQuestAssorts = new();
-    protected TraderConfig _traderConfig = _configServer.GetConfig<TraderConfig>();
-    protected bool createdMergedQuestAssorts;
+    private Dictionary<string, Dictionary<string, string>>? _mergedQuestAssorts;
+    protected virtual Dictionary<string, Dictionary<string, string>> MergedQuestAssorts
+    {
+        get { return _mergedQuestAssorts ??= HydrateMergedQuestAssorts(); }
+    }
 
     /// <summary>
     ///     Get a traders assorts
@@ -109,18 +102,11 @@ public class TraderAssortHelper(
             );
         }
 
-        // Get rid of quest locked assorts
-        if (!createdMergedQuestAssorts)
-        {
-            HydrateMergedQuestAssorts();
-            createdMergedQuestAssorts = true;
-        }
-
         traderClone.Assort = _assortHelper.StripLockedQuestAssort(
             pmcProfile,
             traderId,
             traderClone.Assort,
-            _mergedQuestAssorts,
+            MergedQuestAssorts,
             showLockedAssorts
         );
 
@@ -170,38 +156,42 @@ public class TraderAssortHelper(
     }
 
     /// <summary>
-    ///     Create a dict of all assort id = quest id mappings used to work out what items should be shown to player based on the quests they've started/completed/failed
+    /// Create a dictionary keyed by quest status (started/success) with every assortId to QuestId from every trader
     /// </summary>
-    protected void HydrateMergedQuestAssorts()
+    /// <returns>Dictionary</returns>
+    protected Dictionary<string, Dictionary<string, string>> HydrateMergedQuestAssorts()
     {
+        var result = new Dictionary<string, Dictionary<string, string>>();
+
         // Loop every trader
         var traders = _databaseService.GetTraders();
-        foreach (var traderId in traders)
+        foreach (var (_, trader) in traders)
         {
-            // Trader has quest assort data
-            var trader = traders[traderId.Key];
-            if (trader.QuestAssort is not null)
-            // Started/Success/fail
+            if (trader?.QuestAssort is null)
             {
-                foreach (var questStatus in trader.QuestAssort)
-                // Each assort to quest id record
-                foreach (var assortId in trader.QuestAssort[questStatus.Key])
-                {
-                    // Null guard
-                    if (!_mergedQuestAssorts.TryGetValue(questStatus.Key, out _))
-                    {
-                        _mergedQuestAssorts.TryAdd(
-                            questStatus.Key,
-                            new Dictionary<string, string>()
-                        );
-                    }
+                // No assort to quest mappings, ignore
+                continue;
+            }
 
-                    _mergedQuestAssorts[questStatus.Key][assortId.Key] = trader.QuestAssort[
-                        questStatus.Key
-                    ][assortId.Key];
+            foreach (var (unlockStatus, assortToQuestDict) in trader.QuestAssort)
+            {
+                if (!assortToQuestDict.Any())
+                {
+                    // Empty assort dict, ignore
+                    continue;
+                }
+
+                // Null guard - ensure Started/Success/fail exists
+                result.TryAdd(unlockStatus, new Dictionary<string, string>());
+
+                foreach (var (assortId, questId) in assortToQuestDict)
+                {
+                    result[unlockStatus][assortId] = questId;
                 }
             }
         }
+
+        return result;
     }
 
     /// <summary>
