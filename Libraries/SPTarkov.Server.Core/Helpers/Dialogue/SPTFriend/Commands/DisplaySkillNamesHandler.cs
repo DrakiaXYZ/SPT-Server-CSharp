@@ -7,11 +7,8 @@ using SPTarkov.Server.Core.Services;
 namespace SPTarkov.Server.Core.Helpers.Dialogue.SPTFriend.Commands;
 
 [Injectable]
-public class DisplaySkillNamesHandler(
-    MailSendService _mailSendService
-) : IChatMessageHandler
+public class DisplaySkillNamesHandler(MailSendService _mailSendService) : IChatMessageHandler
 {
-
     public int GetPriority()
     {
         return 99;
