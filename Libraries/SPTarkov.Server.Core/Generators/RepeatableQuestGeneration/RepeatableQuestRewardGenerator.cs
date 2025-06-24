@@ -107,9 +107,7 @@ public class RepeatableQuestRewardGenerator(
         }
 
         // Add money reward
-        rewards.Success.Add(
-            GetMoneyReward(traderId, rewardParams.RewardRoubles, rewardIndex)
-        );
+        rewards.Success.Add(GetMoneyReward(traderId, rewardParams.RewardRoubles, rewardIndex));
         rewardIndex++;
 
         // Add GP coin reward
@@ -134,10 +132,7 @@ public class RepeatableQuestRewardGenerator(
             && randomUtil.GetChance100(traderWhitelistDetails.WeaponRewardChancePercent)
         )
         {
-            var chosenWeapon = GetRandomWeaponPresetWithinBudget(
-                itemRewardBudget,
-                rewardIndex
-            );
+            var chosenWeapon = GetRandomWeaponPresetWithinBudget(itemRewardBudget, rewardIndex);
             if (chosenWeapon is not null)
             {
                 rewards.Success.Add(chosenWeapon.Value.Key);
@@ -156,9 +151,9 @@ public class RepeatableQuestRewardGenerator(
         if (rewardTplBlacklist is not null)
         {
             // Filter reward pool of items from blacklist, only use if there's at least 1 item remaining
-            var filteredRewardItemPool = inBudgetRewardItemPool.Where(item =>
-                !rewardTplBlacklist.Contains(item.Id)
-            ).ToList();
+            var filteredRewardItemPool = inBudgetRewardItemPool
+                .Where(item => !rewardTplBlacklist.Contains(item.Id))
+                .ToList();
 
             if (filteredRewardItemPool.Count != 0)
             {
@@ -309,9 +304,7 @@ public class RepeatableQuestRewardGenerator(
         var interpolatedXp = mathUtil.Interp1(pmcLevel, levelsConfig, xpConfig);
         var randomSpread = randomUtil.GetDouble(1 - rewardSpreadConfig, 1 + rewardSpreadConfig);
 
-        return Math.Floor(
-            effectiveDifficulty * interpolatedXp * randomSpread
-        );
+        return Math.Floor(effectiveDifficulty * interpolatedXp * randomSpread);
     }
 
     protected double GetGpCoinRewardCount(
@@ -325,9 +318,7 @@ public class RepeatableQuestRewardGenerator(
         var interpolatedGpCoins = mathUtil.Interp1(pmcLevel, levelsConfig, gpCoinConfig);
         var randomSpread = randomUtil.GetDouble(1 - rewardSpreadConfig, 1 + rewardSpreadConfig);
 
-        return Math.Ceiling(
-            effectiveDifficulty * interpolatedGpCoins * randomSpread
-        );
+        return Math.Ceiling(effectiveDifficulty * interpolatedGpCoins * randomSpread);
     }
 
     protected double GetRewardRep(
@@ -338,7 +329,6 @@ public class RepeatableQuestRewardGenerator(
         double rewardSpreadConfig
     )
     {
-
         var difficultyMod = 100 * effectiveDifficulty;
         var interpolatedRep = mathUtil.Interp1(pmcLevel, levelsConfig, reputationConfig);
         var randomSpread = randomUtil.GetDouble(1 - rewardSpreadConfig, 1 + rewardSpreadConfig);
@@ -355,10 +345,7 @@ public class RepeatableQuestRewardGenerator(
     {
         var interpolatedNumItems = mathUtil.Interp1(pmcLevel, levelsConfig, itemsConfig);
 
-        return randomUtil.RandInt(
-            1,
-            (int)Math.Round(interpolatedNumItems) + 1
-        );
+        return randomUtil.RandInt(1, (int)Math.Round(interpolatedNumItems) + 1);
     }
 
     protected double GetRewardRoubles(
@@ -372,9 +359,7 @@ public class RepeatableQuestRewardGenerator(
         var interpolatedRoubles = mathUtil.Interp1(pmcLevel, levelsConfig, roublesConfig);
         var randomSpread = randomUtil.GetDouble(1d - rewardSpreadConfig, 1d + rewardSpreadConfig);
 
-        return Math.Floor(
-            effectiveDifficulty * interpolatedRoubles * randomSpread
-        );
+        return Math.Floor(effectiveDifficulty * interpolatedRoubles * randomSpread);
     }
 
     /// <summary>
