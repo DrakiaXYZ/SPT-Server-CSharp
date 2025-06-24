@@ -22,71 +22,91 @@
     {
       "id": "67d135bc9e0d93daf71d555e",
       "pic": {
-        "path": "CONTENT/banners/banner_bigmap.png",
-        "rcid": ""
+        "file": "67e4046922d6081b78031dda.png",
+        "path": "banners/67e4046922d6081b78031dda.png",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5464e0404bdc2d2a708b4567",
       "pic": {
-        "path": "CONTENT/banners/banner_usec.jpg",
-        "rcid": ""
+        "file": "67e404de22d6081b78031de2.jpg",
+        "path": "banners/67e404de22d6081b78031de2.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5464e0454bdc2d06708b4567",
       "pic": {
-        "path": "CONTENT/banners/banner_bear.jpg",
-        "rcid": ""
+        "file": "67e4045225a1aca9270117e7.jpg",
+        "path": "banners/67e4045225a1aca9270117e7.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5803a58524597710ca36fcb2",
       "pic": {
-        "path": "CONTENT/banners/banner_terragroup.jpg",
-        "rcid": ""
+        "file": "67e404d9bec96f5d8e097331.jpg",
+        "path": "banners/67e404d9bec96f5d8e097331.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5807bfe124597742a92e0a4c",
       "pic": {
-        "path": "CONTENT/banners/norvinskzone.jpg",
-        "rcid": ""
+        "file": "67e404ffbec96f5d8e097333.jpg",
+        "path": "banners/67e404ffbec96f5d8e097333.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5807c3f124597746bf2db2ce",
       "pic": {
-        "path": "CONTENT/banners/banner_scav.jpg",
-        "rcid": ""
+        "file": "67e404c222d6081b78031ddf.jpg",
+        "path": "banners/67e404c222d6081b78031ddf.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5807be8924597742c603fa19",
       "pic": {
-        "path": "CONTENT/banners/banner_tarkov.jpg",
-        "rcid": ""
+        "file": "67e4046dbec96f5d8e09732a.jpg",
+        "path": "banners/67e4046dbec96f5d8e09732a.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5805f617245977100b2c1f41",
       "pic": {
-        "path": "CONTENT/banners/tglabs.jpg",
-        "rcid": ""
+        "file": "67e404d9bec96f5d8e097331.jpg",
+        "path": "banners/67e404d9bec96f5d8e097331.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5c1b857086f77465f465faa4",
       "pic": {
-        "path": "CONTENT/banners/banner_scavraider.jpg",
-        "rcid": ""
+        "file": "67e404c722d6081b78031de0.jpg",
+        "path": "banners/67e404c722d6081b78031de0.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "64c0ad6af99768b777048f4e",
       "pic": {
-        "path": "CONTENT/banners/banner_emissary.jpg",
-        "rcid": ""
+        "file": "67e4047d22d6081b78031ddb.jpg",
+        "path": "banners/67e4047d22d6081b78031ddb.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     }
   ],
@@ -106,6 +126,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": true,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -152,6 +174,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -176,6 +200,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -200,6 +226,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -224,6 +252,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -247,6 +277,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -270,6 +302,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -293,6 +327,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -316,6 +352,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -360,6 +398,8 @@
       "DependKarma": false,
       "DependKarmaPVE": false,
       "ForceSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
       "SpawnMode": [
@@ -382,6 +422,8 @@
       "BossZone": "ZoneFactoryCenter,ZoneScavBase",
       "Delay": 0,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -411,7 +453,24 @@
           "bossSanitar",
           "bossKolontay",
           "bossGluhar",
-          "bossKnight"
+          "bossKnight",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBigPipe",
+          "followerBirdEye",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -458,7 +517,22 @@
           "bossKojaniy",
           "bossSanitar",
           "bossKolontay",
-          "bossGluhar"
+          "bossGluhar",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -10024,7 +10098,7 @@
     },
     {
       "TemplateId": "675aaab74bca0b001d02f356",
-      "Value": 2
+      "Value": 3
     },
     {
       "TemplateId": "676bf44c5539167c3603e869",

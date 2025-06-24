@@ -12,36 +12,46 @@
     {
       "id": "67d1ad1b5df2d64de808e1da",
       "pic": {
-        "path": "CONTENT/banners/banner_laboratory.jpg",
-        "rcid": ""
+        "file": "67e4049a22d6081b78031ddd.jpg",
+        "path": "banners/67e4049a22d6081b78031ddd.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5805f617245977100b2c1f41",
       "pic": {
-        "path": "CONTENT/banners/tglabs.jpg",
-        "rcid": ""
+        "file": "67e404d9bec96f5d8e097331.jpg",
+        "path": "banners/67e404d9bec96f5d8e097331.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5807be8924597742c603fa19",
       "pic": {
-        "path": "CONTENT/banners/banner_tarkov.jpg",
-        "rcid": ""
+        "file": "67e4046dbec96f5d8e09732a.jpg",
+        "path": "banners/67e4046dbec96f5d8e09732a.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5c1b857086f77465f465faa4",
       "pic": {
-        "path": "CONTENT/banners/banner_scavraider.jpg",
-        "rcid": ""
+        "file": "67e404c722d6081b78031de0.jpg",
+        "path": "banners/67e404c722d6081b78031de0.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "64c0acf85174e095610734a0",
       "pic": {
-        "path": "CONTENT/banners/banner_sherpa.jpg",
-        "rcid": ""
+        "file": "67e404c5bec96f5d8e09732f.jpg",
+        "path": "banners/67e404c5bec96f5d8e09732f.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     }
   ],
@@ -58,6 +68,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -79,6 +91,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -100,6 +114,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -121,6 +137,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -142,6 +160,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -163,6 +183,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -184,6 +206,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -205,6 +229,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -226,6 +252,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -247,6 +275,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -268,6 +298,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -289,6 +321,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -310,6 +344,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -331,6 +367,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -352,6 +390,8 @@
       "Delay": 8,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -373,6 +413,8 @@
       "Delay": 8,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -394,6 +436,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -414,6 +458,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -434,6 +480,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -454,6 +502,8 @@
       "Delay": 0,
       "IgnoreMaxBots": false,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -482,7 +532,24 @@
           "bossSanitar",
           "bossKolontay",
           "bossGluhar",
-          "bossKnight"
+          "bossKnight",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBigPipe",
+          "followerBirdEye",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -529,7 +596,22 @@
           "bossKojaniy",
           "bossSanitar",
           "bossKolontay",
-          "bossGluhar"
+          "bossGluhar",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -4237,7 +4319,7 @@
             "y": 0,
             "z": 0
           },
-          "Radius": 27
+          "Radius": 75
         }
       },
       "CorePointId": 8,
@@ -5739,7 +5821,7 @@
     },
     {
       "TemplateId": "5c0530ee86f774697952d952",
-      "Value": 2
+      "Value": 3
     },
     {
       "TemplateId": "676bf44c5539167c3603e869",

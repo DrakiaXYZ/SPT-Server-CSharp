@@ -22,22 +22,28 @@
     {
       "id": "67d1ac822b87c1a5a30e5ae8",
       "pic": {
-        "path": "CONTENT/banners/banner_Sandbox.jpg",
-        "rcid": ""
+        "file": "67e404a9bec96f5d8e09732e.jpg",
+        "path": "banners/67e404a9bec96f5d8e09732e.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "63a9c1f5662a5b0a2c7fbde5",
       "pic": {
-        "path": "CONTENT/banners/banner_City_final.jpg",
-        "rcid": ""
+        "file": "67e4046dbec96f5d8e09732a.jpg",
+        "path": "banners/67e4046dbec96f5d8e09732a.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "64c0acf85174e095610734a0",
       "pic": {
-        "path": "CONTENT/banners/banner_sherpa.jpg",
-        "rcid": ""
+        "file": "67e404c5bec96f5d8e09732f.jpg",
+        "path": "banners/67e404c5bec96f5d8e09732f.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     }
   ],
@@ -53,6 +59,8 @@
       "BossZone": "ZoneSandbox",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -73,6 +81,8 @@
       "BossZone": "ZoneSandbox",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -93,6 +103,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -112,6 +124,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -131,6 +145,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -150,6 +166,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -169,6 +187,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -188,6 +208,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -207,6 +229,8 @@
       "BossZone": "",
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -236,7 +260,24 @@
           "bossSanitar",
           "bossKolontay",
           "bossGluhar",
-          "bossKnight"
+          "bossKnight",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBigPipe",
+          "followerBirdEye",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -283,7 +324,22 @@
           "bossKojaniy",
           "bossSanitar",
           "bossKolontay",
-          "bossGluhar"
+          "bossGluhar",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -6496,6 +6552,24 @@
     }
   ],
   "matching_min_seconds": 60,
+  "maxItemCountInLocation": [
+    {
+      "TemplateId": "57347ca924597744596b4e71",
+      "Value": 2
+    },
+    {
+      "TemplateId": "634959225289190e5e773b3b",
+      "Value": 7
+    },
+    {
+      "TemplateId": "675aaae75a3ab8372d0b02a7",
+      "Value": 3
+    },
+    {
+      "TemplateId": "676bf44c5539167c3603e869",
+      "Value": 0
+    }
+  ],
   "sav_summon_seconds": 60,
   "secretExits": [
     {

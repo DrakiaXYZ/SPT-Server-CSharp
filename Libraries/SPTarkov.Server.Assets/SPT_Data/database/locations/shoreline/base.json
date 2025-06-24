@@ -22,29 +22,37 @@
     {
       "id": "67d1ac995df2d64de808e1d6",
       "pic": {
-        "path": "CONTENT/banners/banner_shoreline.jpg",
-        "rcid": ""
+        "file": "67e404ccbec96f5d8e097330.jpg",
+        "path": "banners/67e404ccbec96f5d8e097330.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5807c3f124597746bf2db2ce",
       "pic": {
-        "path": "CONTENT/banners/banner_scav.jpg",
-        "rcid": ""
+        "file": "67e404c222d6081b78031ddf.jpg",
+        "path": "banners/67e404c222d6081b78031ddf.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5c1b857086f77465f465faa4",
       "pic": {
-        "path": "CONTENT/banners/banner_scavraider.jpg",
-        "rcid": ""
+        "file": "67e404c722d6081b78031de0.jpg",
+        "path": "banners/67e404c722d6081b78031de0.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "64c0ad6af99768b777048f4e",
       "pic": {
-        "path": "CONTENT/banners/banner_emissary.jpg",
-        "rcid": ""
+        "file": "67e4047d22d6081b78031ddb.jpg",
+        "path": "banners/67e4047d22d6081b78031ddb.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     }
   ],
@@ -59,9 +67,13 @@
       "BossPlayer": false,
       "BossZone": "ZoneGreenHouses,ZonePort,ZoneSanatorium1,ZoneSanatorium2,ZoneSmuglers",
       "Delay": 0,
+      "DependKarma": false,
+      "DependKarmaPVE": false,
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -86,6 +98,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": true,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -132,6 +146,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -156,6 +172,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -180,6 +198,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve",
         "regular"
@@ -204,6 +224,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -227,6 +249,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -250,6 +274,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -273,6 +299,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -296,6 +324,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -319,6 +349,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -342,6 +374,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -365,6 +399,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -388,6 +424,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -416,7 +454,24 @@
           "bossSanitar",
           "bossKolontay",
           "bossGluhar",
-          "bossKnight"
+          "bossKnight",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBigPipe",
+          "followerBirdEye",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -463,7 +518,22 @@
           "bossKojaniy",
           "bossSanitar",
           "bossKolontay",
-          "bossGluhar"
+          "bossGluhar",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -9912,7 +9982,7 @@
   "maxItemCountInLocation": [
     {
       "TemplateId": "57347ca924597744596b4e71",
-      "Value": 1
+      "Value": 2
     },
     {
       "TemplateId": "634959225289190e5e773b3b",
@@ -9920,7 +9990,7 @@
     },
     {
       "TemplateId": "675aab0d6b6addc02a08f097",
-      "Value": 2
+      "Value": 3
     },
     {
       "TemplateId": "676bf44c5539167c3603e869",

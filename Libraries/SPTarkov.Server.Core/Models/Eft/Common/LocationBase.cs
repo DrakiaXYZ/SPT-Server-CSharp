@@ -516,11 +516,17 @@ public record Pic
     [JsonExtensionData]
     public Dictionary<string, object> ExtensionData { get; set; }
 
+    [JsonPropertyName("file")]
+    public string? File { get; set; }
+
     [JsonPropertyName("path")]
     public string? Path { get; set; }
 
     [JsonPropertyName("rcid")]
     public string? Rcid { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
 }
 
 public record BossLocationSpawn
@@ -554,6 +560,12 @@ public record BossLocationSpawn
 
     [JsonPropertyName("RandomTimeSpawn")]
     public bool? IsRandomTimeSpawn { get; set; }
+
+    [JsonPropertyName("ShowOnTarkovMap")]
+    public bool? ShowOnTarkovMap { get; set; }
+
+    [JsonPropertyName("ShowOnTarkovMapPvE")]
+    public bool? ShowOnTarkovMapPvE { get; set; }
 
     [JsonPropertyName("Time")]
     public double? Time { get; set; }

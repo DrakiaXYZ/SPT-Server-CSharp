@@ -22,29 +22,37 @@
     {
       "id": "67d1acda2fb6a5d11b09d6fd",
       "pic": {
-        "path": "CONTENT/banners/banner_woods.jpg",
-        "rcid": ""
+        "file": "67e404e4bec96f5d8e097332.jpg",
+        "path": "banners/67e404e4bec96f5d8e097332.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5803a58524597710ca36fcb2",
       "pic": {
-        "path": "CONTENT/banners/banner_terragroup.jpg",
-        "rcid": ""
+        "file": "67e404d9bec96f5d8e097331.jpg",
+        "path": "banners/67e404d9bec96f5d8e097331.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "5c1b857086f77465f465faa4",
       "pic": {
-        "path": "CONTENT/banners/banner_scavraider.jpg",
-        "rcid": ""
+        "file": "67e404c722d6081b78031de0.jpg",
+        "path": "banners/67e404c722d6081b78031de0.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     },
     {
       "id": "64c0ad6af99768b777048f4e",
       "pic": {
-        "path": "CONTENT/banners/banner_emissary.jpg",
-        "rcid": ""
+        "file": "67e4047d22d6081b78031ddb.jpg",
+        "path": "banners/67e4047d22d6081b78031ddb.jpg",
+        "rcid": "",
+        "type": "banners"
       }
     }
   ],
@@ -64,6 +72,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": true,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -110,6 +120,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -134,6 +146,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -158,6 +172,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "regular",
         "pve"
@@ -182,6 +198,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -205,6 +223,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -228,6 +248,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -251,6 +273,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -274,6 +298,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -297,6 +323,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -343,6 +371,8 @@
       "ForceSpawn": false,
       "IgnoreMaxBots": true,
       "RandomTimeSpawn": false,
+      "ShowOnTarkovMap": false,
+      "ShowOnTarkovMapPvE": false,
       "SpawnMode": [
         "pve"
       ],
@@ -371,7 +401,24 @@
           "bossSanitar",
           "bossKolontay",
           "bossGluhar",
-          "bossKnight"
+          "bossKnight",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBigPipe",
+          "followerBirdEye",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -418,7 +465,22 @@
           "bossKojaniy",
           "bossSanitar",
           "bossKolontay",
-          "bossGluhar"
+          "bossGluhar",
+          "bossBoarSniper",
+          "bossPartisan",
+          "followerBoar",
+          "followerBoarClose1",
+          "followerBoarClose2",
+          "followerBully",
+          "followerGluharAssault",
+          "followerGluharScout",
+          "followerGluharSecurity",
+          "followerGluharSnipe",
+          "followerKojaniy",
+          "followerKolontayAssault",
+          "followerKolontaySecurity",
+          "followerSanitar",
+          "followerTagilla"
         ],
         "AlwaysFriends": [
           "bossZryachiy",
@@ -867,7 +929,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "027273fa-04bc-48d1-acfb-74f008bb196c",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 365.905029,
         "y": 13.94,
@@ -1019,7 +1081,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "0629d023-ea80-45cb-8376-9ea211e740f9",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -63.1000061,
         "y": 9.763999,
@@ -1134,7 +1196,7 @@
             "y": 0,
             "z": 0
           },
-          "Radius": 100
+          "Radius": 130
         }
       },
       "CorePointId": 7,
@@ -1564,7 +1626,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "158e0a94-64fb-4555-afa0-90109713db91",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -265.82,
         "y": 10.58,
@@ -1685,7 +1747,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "191b6c5a-0fb7-40b2-95b4-3a33397eb872",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -54.1099854,
         "y": 8.883999,
@@ -2263,7 +2325,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "2685c5c9-9bde-40c1-bbc2-3a0f3b024106",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 61.22003,
         "y": 9.033999,
@@ -3325,7 +3387,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "43598be9-9042-4e06-8ee9-11a3d346d570",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -63.6699829,
         "y": 9.714,
@@ -3476,7 +3538,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "4bef69e6-18dd-4c33-8b74-39eba90908cd",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -256.58,
         "y": 10.61,
@@ -3901,7 +3963,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "57b4786d-ee61-4c7f-b6ef-94467e39a3cf",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -260.32,
         "y": 11.27,
@@ -4177,7 +4239,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "5beb21e5-df5f-4db0-b607-202cb7a62ecf",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 59.18402,
         "y": 8.883999,
@@ -4389,7 +4451,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "6767b1b7-da32-4b62-90f0-0d44712a642b",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 370.773,
         "y": 13.9,
@@ -4906,7 +4968,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "76582ea6-095f-494d-83b8-c9335ba3f14f",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 59.8300171,
         "y": 8.794,
@@ -5026,7 +5088,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "794c2ad7-29fa-4faf-8bcf-649c8925444a",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 367.12,
         "y": 13.2439995,
@@ -7311,7 +7373,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "b43bd5a4-aa6c-4dd6-9052-d3359fa6b53c",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -260.74,
         "y": 10.41,
@@ -7464,7 +7526,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "b593e2ff-9764-4bbe-9f8f-e05781071e7b",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 372.94,
         "y": 15.3039989,
@@ -7827,7 +7889,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "bf2a6323-087e-4d49-a160-ea86b8295ac0",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 63.3200073,
         "y": 8.99399948,
@@ -8041,7 +8103,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "c5021df7-1750-44ff-ae44-137022a8bdac",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 365.55,
         "y": 13.35,
@@ -8619,7 +8681,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "ceb25518-5a40-42cd-b57d-076d40d29890",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -60.97,
         "y": 9.24399948,
@@ -9043,7 +9105,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "da22cead-d753-44c4-b44e-131a3d9690b7",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -59.6399841,
         "y": 9.093999,
@@ -9288,7 +9350,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "e0fb7ebc-0a4c-45a3-b5a3-ba5e6b1456ba",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": 64.6600342,
         "y": 9.084,
@@ -9318,7 +9380,7 @@
       "CorePointId": 0,
       "DelayToCanSpawnSec": 4,
       "Id": "e1986567-8367-44cd-9bfa-e5c20e9e1460",
-      "Infiltration": "House",
+      "Infiltration": "Old Station",
       "Position": {
         "x": -253.669983,
         "y": 11.57,
@@ -10470,7 +10532,7 @@
             "y": 0,
             "z": 0
           },
-          "Radius": 100
+          "Radius": 130
         }
       },
       "CorePointId": 7,
@@ -10745,7 +10807,7 @@
             "y": 0,
             "z": 0
           },
-          "Radius": 100
+          "Radius": 130
         }
       },
       "CorePointId": 7,
@@ -10898,7 +10960,7 @@
             "y": 0,
             "z": 0
           },
-          "Radius": 100
+          "Radius": 130
         }
       },
       "CorePointId": 7,
@@ -11192,7 +11254,7 @@
     },
     {
       "TemplateId": "675aaa9a3107dac100063331",
-      "Value": 2
+      "Value": 3
     },
     {
       "TemplateId": "676bf44c5539167c3603e869",
