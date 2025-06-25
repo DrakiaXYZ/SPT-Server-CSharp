@@ -21,7 +21,7 @@ public class JsonExtensionDataGeneratorLauncher
     private static readonly Regex _extensionCleanup = new(",.*");
 
     private const string Insertion =
-        "    [JsonExtensionData]\r\n    public Dictionary<string, object> ExtensionData { get; set; }\r\n\r\n";
+        "    [JsonExtensionData]\r\n    public Dictionary<string, object>? ExtensionData { get; set; }\r\n\r\n";
 
     private const string Using = "using System.Text.Json.Serialization;\r\n";
 
