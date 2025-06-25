@@ -11,13 +11,13 @@ namespace SPTarkov.Server.Core.Utils;
 [Injectable]
 public class WatermarkLocale
 {
-    protected List<string> description;
-    protected List<string> modding;
-    protected List<string> warning;
+    protected readonly List<string> Description;
+    protected readonly List<string> Modding;
+    protected readonly List<string> Warning;
 
     public WatermarkLocale(LocalisationService localisationService)
     {
-        description =
+        Description =
         [
             localisationService.GetText("watermark-discord_url"),
             "",
@@ -25,7 +25,7 @@ public class WatermarkLocale
             localisationService.GetText("watermark-paid_scammed"),
             localisationService.GetText("watermark-commercial_use_prohibited"),
         ];
-        warning =
+        Warning =
         [
             "",
             localisationService.GetText("watermark-testing_build"),
@@ -36,7 +36,7 @@ public class WatermarkLocale
             "",
             localisationService.GetText("watermark-use_at_own_risk"),
         ];
-        modding =
+        Modding =
         [
             "",
             localisationService.GetText("watermark-modding_disabled"),
@@ -48,17 +48,17 @@ public class WatermarkLocale
 
     public List<string> GetDescription()
     {
-        return description;
+        return Description;
     }
 
     public List<string> GetWarning()
     {
-        return warning;
+        return Warning;
     }
 
     public List<string> GetModding()
     {
-        return modding;
+        return Modding;
     }
 }
 
@@ -119,7 +119,15 @@ public class Watermark : IOnLoad
         }
 
         SetTitle();
-        Draw();
+
+        if (ProgramStatics.DEBUG())
+        {
+            Draw(LogTextColor.Magenta);
+        }
+        else
+        {
+            Draw();
+        }
 
         return Task.CompletedTask;
     }
@@ -170,7 +178,7 @@ public class Watermark : IOnLoad
     /// <summary>
     ///     Draw watermark on screen
     /// </summary>
-    protected void Draw()
+    protected void Draw(LogTextColor color = LogTextColor.Yellow)
     {
         var result = new List<string>();
 
@@ -207,7 +215,7 @@ public class Watermark : IOnLoad
         // Log watermark to screen
         foreach (var text in result)
         {
-            _logger.LogWithColor(text, LogTextColor.Yellow);
+            _logger.LogWithColor(text, color);
         }
     }
 }
