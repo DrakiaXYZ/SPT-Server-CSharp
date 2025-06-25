@@ -172,6 +172,7 @@ public class LocationLifecycleService
                 TransitionCount = 0,
                 VisitedLocations = [],
             },
+            ExcludedBosses = [],
         };
 
         // Only has value when transitioning into map from previous one

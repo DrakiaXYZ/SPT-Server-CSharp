@@ -28,6 +28,9 @@ public record StartLocalRaidResponseData
 
     [JsonPropertyName("transition")]
     public Transition? Transition { get; set; }
+
+    [JsonPropertyName("excludedBosses")]
+    public List<string>? ExcludedBosses { get; set; }
 }
 
 public record ProfileInsuredItems
