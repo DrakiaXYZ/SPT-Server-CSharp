@@ -474,29 +474,32 @@ public class BotGenerator(
     /// <param name="botInventory">Bot to filter</param>
     public void RemoveBlacklistedLootFromBotTemplate(BotTypeInventory botInventory)
     {
-        List<string> lootContainersToFilter = ["Backpack", "Pockets", "TacticalVest"];
-        var props = botInventory.Items.GetType().GetProperties();
-
-        // Remove blacklisted loot from loot containers
-        foreach (var lootContainerKey in lootContainersToFilter)
+        var containersToProcess = new List<Dictionary<string, double>>
         {
-            var propInfo = props.FirstOrDefault(x =>
-                string.Equals(x.Name, lootContainerKey, StringComparison.CurrentCultureIgnoreCase)
-            );
-            var prop = (Dictionary<string, double>?)propInfo.GetValue(botInventory.Items);
+            botInventory.Items.Backpack,
+            botInventory.Items.Pockets,
+            botInventory.Items.TacticalVest,
+        };
 
-            // No container, skip
-            if (prop is null)
+        foreach (var container in containersToProcess)
+        {
+            if (!container.Any())
             {
+                // Nothing in container, skip
                 continue;
             }
 
-            var newProp = prop.Where(tpl =>
-                {
-                    return !_itemFilterService.IsLootableItemBlacklisted(tpl.Key);
-                })
-                .ToDictionary();
-            propInfo.SetValue(botInventory.Items, newProp);
+            // Create a set of tpls to remove
+            var keysToRemove = container
+                .Where(item => _itemFilterService.IsLootableItemBlacklisted(item.Key))
+                .Select(item => item.Key)
+                .ToHashSet();
+
+            // Remove from container by key
+            foreach (var key in keysToRemove)
+            {
+                container.Remove(key);
+            }
         }
     }
 
