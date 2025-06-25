@@ -1,3 +1,4 @@
+using System.Globalization;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -55,7 +56,7 @@ public class PlayerScavGenerator(
         // use karma level to get correct karmaSettings
         if (
             !_playerScavConfig.KarmaLevel.TryGetValue(
-                scavKarmaLevel.ToString(),
+                scavKarmaLevel.ToString(CultureInfo.InvariantCulture),
                 out var playerScavKarmaSettings
             )
         )
@@ -72,6 +73,7 @@ public class PlayerScavGenerator(
 
         // Edit baseBotNode values
         var baseBotNode = ConstructBotBaseTemplate(playerScavKarmaSettings.BotTypeForLoot);
+
         AdjustBotTemplateWithKarmaSpecificSettings(playerScavKarmaSettings, baseBotNode);
 
         var scavData = _botGenerator.GeneratePlayerScav(
@@ -247,69 +249,151 @@ public class PlayerScavGenerator(
     ///     Adjust equipment/mod/item generation values based on scav karma levels
     /// </summary>
     /// <param name="karmaSettings">Values to modify the bot template with</param>
-    /// <param name="baseBotNode">bot template to modify according to karama level settings</param>
+    /// <param name="baseBotNode">bot template to modify according to karma level settings</param>
     protected void AdjustBotTemplateWithKarmaSpecificSettings(
         KarmaLevel karmaSettings,
         BotType baseBotNode
     )
     {
         // Adjust equipment chance values
-        foreach (var equipmentKvP in karmaSettings.Modifiers.Equipment)
-        {
-            // Adjustment value zero, nothing to do
-            if (equipmentKvP.Value == 0)
-            {
-                continue;
-            }
-
-            // Try add new key with value
-            if (
-                !baseBotNode.BotChances.EquipmentChances.TryAdd(
-                    equipmentKvP.Key,
-                    equipmentKvP.Value
-                )
-            )
-            // Unable to add new, update existing
-            {
-                baseBotNode.BotChances.EquipmentChances[equipmentKvP.Key] += equipmentKvP.Value;
-            }
-        }
+        AdjustEquipmentWeights(
+            karmaSettings.Modifiers.Equipment,
+            baseBotNode.BotChances.EquipmentChances
+        );
 
         // Adjust mod chance values
-        foreach (var modKvP in karmaSettings.Modifiers.Mod)
+        AdjustWeaponModWeights(
+            karmaSettings.Modifiers.Mod,
+            baseBotNode.BotChances.WeaponModsChances
+        );
+
+        // Adjust item spawn quantity values
+        AdjustItemWeights(karmaSettings.ItemLimits, baseBotNode.BotGeneration.Items);
+
+        // Blacklist equipment, keyed by equipment slot
+        BlacklistEquipment(karmaSettings, baseBotNode);
+    }
+
+    protected static void AdjustEquipmentWeights(
+        Dictionary<string, double> equipmentChangesToApply,
+        Dictionary<string, double> botEquipmentChances
+    )
+    {
+        foreach (var (equipmentSlot, chanceToAdd) in equipmentChangesToApply)
         {
             // Adjustment value zero, nothing to do
-            if (modKvP.Value == 0)
+            if (chanceToAdd == 0)
             {
                 continue;
             }
 
-            if (karmaSettings.Modifiers.Mod.TryGetValue(modKvP.Key, out var value))
+            // Try and add new key with value
+            if (!botEquipmentChances.TryAdd(equipmentSlot, chanceToAdd))
             {
-                baseBotNode.BotChances.WeaponModsChances.TryAdd(modKvP.Key, 0);
-                baseBotNode.BotChances.WeaponModsChances[modKvP.Key] += value;
+                // Unable to add new, update existing
+                botEquipmentChances[equipmentSlot] += chanceToAdd;
             }
-            ;
         }
+    }
 
-        // Adjust item spawn quantity values
-        var props = baseBotNode.BotGeneration.Items.GetType().GetProperties();
-        foreach (var itemLimitKvP in karmaSettings.ItemLimits)
+    /// <summary>
+    /// Get a bots item type weightings based on the desired key
+    /// </summary>
+    /// <param name="key">e.g. "healing" / "looseLoot"</param>
+    /// <param name="botItemWeights"></param>
+    /// <returns>GenerationData</returns>
+    protected GenerationData? GetKarmaLimitValuesByKey(
+        string key,
+        GenerationWeightingItems botItemWeights
+    )
+    {
+        switch (key)
         {
-            var prop = props.FirstOrDefault(x =>
-                string.Equals(x.Name, itemLimitKvP.Key, StringComparison.OrdinalIgnoreCase)
-            );
-            prop.SetValue(baseBotNode.BotGeneration.Items, itemLimitKvP.Value);
+            case "healing":
+                return botItemWeights.Healing;
+            case "drugs":
+                return botItemWeights.Drugs;
+            case "stims":
+                return botItemWeights.Stims;
+            case "looseLoot":
+                return botItemWeights.LooseLoot;
+            case "magazines":
+                return botItemWeights.Magazines;
+            case "grenades":
+                return botItemWeights.Grenades;
+            case "backpackLoot":
+                return botItemWeights.BackpackLoot;
+            case "drink":
+                return botItemWeights.Drink;
+            case "currency":
+                return botItemWeights.Currency;
+            case "pocketLoot":
+                return botItemWeights.PocketLoot;
+            case "vestLoot":
+                return botItemWeights.VestLoot;
+            case "specialItems":
+                return botItemWeights.SpecialItems;
+            default:
+                _logger.Error($"Subtype: {key} not found");
+                return null;
         }
+    }
 
-        // Blacklist equipment, keyed by equipment slot
-        foreach (var equipmentBlacklistKvP in karmaSettings.EquipmentBlacklist)
+    protected static void AdjustWeaponModWeights(
+        Dictionary<string, double> modChangesToApply,
+        Dictionary<string, double> weaponModChances
+    )
+    {
+        foreach (var (modSlot, weight) in modChangesToApply)
         {
-            baseBotNode.BotInventory.Equipment.TryGetValue(
-                equipmentBlacklistKvP.Key,
-                out var equipmentDict
-            );
-            foreach (var itemToRemove in equipmentBlacklistKvP.Value)
+            // Adjustment value zero, nothing to do
+            if (weight == 0)
+            {
+                continue;
+            }
+
+            if (modChangesToApply.TryGetValue(modSlot, out var value))
+            {
+                weaponModChances.TryAdd(modSlot, 0);
+                weaponModChances[modSlot] += value;
+            }
+        }
+    }
+
+    protected void AdjustItemWeights(
+        Dictionary<string, GenerationData> karmaSettingsItemLimits,
+        GenerationWeightingItems? botGenerationItems
+    )
+    {
+        foreach (var (subType, limitData) in karmaSettingsItemLimits)
+        {
+            var playerValues = GetKarmaLimitValuesByKey(subType, botGenerationItems);
+            if (playerValues is null)
+            {
+                continue;
+            }
+
+            if (limitData.Weights is not null)
+            {
+                playerValues.Weights = limitData.Weights;
+            }
+
+            if (limitData.Whitelist is not null)
+            {
+                playerValues.Whitelist = limitData.Whitelist;
+            }
+        }
+    }
+
+    protected static void BlacklistEquipment(KarmaLevel karmaSettings, BotType baseBotNode)
+    {
+        foreach (var (slot, blacklist) in karmaSettings.EquipmentBlacklist)
+        {
+            if (!baseBotNode.BotInventory.Equipment.TryGetValue(slot, out var equipmentDict))
+            {
+                continue;
+            }
+            foreach (var itemToRemove in blacklist)
             {
                 equipmentDict.Remove(itemToRemove);
             }
