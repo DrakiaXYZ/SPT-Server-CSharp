@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Profile;
 public record GetOtherProfileResponse
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -54,7 +54,7 @@ public record GetOtherProfileResponse
 public record OtherProfileInfo
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("nickname")]
     public string? Nickname { get; set; }
@@ -81,7 +81,7 @@ public record OtherProfileInfo
 public record OtherProfileCustomization
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("head")]
     public string? Head { get; set; }
@@ -102,7 +102,7 @@ public record OtherProfileCustomization
 public record OtherProfileEquipment
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("Id")]
     public string? Id { get; set; }
@@ -114,7 +114,7 @@ public record OtherProfileEquipment
 public record OtherProfileStats
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("eft")]
     public OtherProfileSubStats? Eft { get; set; }
@@ -123,7 +123,7 @@ public record OtherProfileStats
 public record OtherProfileSubStats
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("totalInGameTime")]
     public long? TotalInGameTime { get; set; }

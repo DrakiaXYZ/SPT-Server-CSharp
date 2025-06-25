@@ -7,7 +7,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Hideout;
 public record HideoutProductionData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("recipes")]
     public List<HideoutProduction>? Recipes { get; set; }
@@ -22,7 +22,7 @@ public record HideoutProductionData
 public record HideoutProduction
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("_id")]
     public string? Id { get; set; }
@@ -67,7 +67,7 @@ public record HideoutProduction
 public record Requirement
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("templateId")]
     public string? TemplateId { get; set; }
@@ -106,7 +106,7 @@ public record Requirement
 public record ScavRecipe
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("_id")]
     public string? Id { get; set; }
@@ -124,7 +124,7 @@ public record ScavRecipe
 public record EndProducts
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("Common")]
     public MinMax<int>? Common { get; set; }
@@ -139,7 +139,7 @@ public record EndProducts
 public record CultistRecipe
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("_id")]
     public string? Id { get; set; }

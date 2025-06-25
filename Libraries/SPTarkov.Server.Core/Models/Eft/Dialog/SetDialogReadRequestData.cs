@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Dialog;
 public record SetDialogReadRequestData : IRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("dialogs")]
     public List<string>? Dialogs { get; set; }

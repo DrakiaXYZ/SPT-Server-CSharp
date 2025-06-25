@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Spt.Bots;
 public record GenerateWeaponRequest
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Weapon to add mods to / result that is returned
@@ -72,7 +72,7 @@ public record GenerateWeaponRequest
 public record BotData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Role of bot weapon is generated for
@@ -96,7 +96,7 @@ public record BotData
 public record WeaponStats
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("hasOptic")]
     public bool? HasOptic { get; set; }
@@ -111,7 +111,7 @@ public record WeaponStats
 public record BotModLimits
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("scope")]
     public ItemCount? Scope { get; set; }
@@ -135,7 +135,7 @@ public record BotModLimits
 public record ItemCount
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("count")]
     public int? Count { get; set; }

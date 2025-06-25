@@ -5,7 +5,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Ws;
 public record WsNotificationEvent
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("type")]
     [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -42,7 +42,7 @@ public record RagfairConfig : BaseConfig
 public record Sell
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Should a fee be deducted from player when listing an item for sale
@@ -72,7 +72,7 @@ public record Sell
 public record Chance
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Base chance percent to sell an item
@@ -102,7 +102,7 @@ public record Chance
 public record Dynamic
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Should a purchased dynamic offers items be flagged as found in raid
@@ -243,7 +243,7 @@ public record Dynamic
 public record PriceRanges
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("default")]
     public MinMax<double> Default { get; set; }
@@ -258,7 +258,7 @@ public record PriceRanges
 public record BarterDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Percentage change an offer is listed as a barter
@@ -306,7 +306,7 @@ public record BarterDetails
 public record PackDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Percentage change an offer is listed as a pack
@@ -336,7 +336,7 @@ public record PackDetails
 public record OfferAdjustment
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Shuld offer price be adjusted when below handbook price
@@ -366,7 +366,7 @@ public record OfferAdjustment
 public record Condition
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Percentage change durability is altered
@@ -387,7 +387,7 @@ public record Condition
 public record RagfairBlacklist
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Damaged ammo packs
@@ -441,7 +441,7 @@ public record RagfairBlacklist
 public record ArmorPlateBlacklistSettings
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Max level of plates an armor can have without being removed
@@ -459,7 +459,7 @@ public record ArmorPlateBlacklistSettings
 public record UnreasonableModPrices
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Enable a system that adjusts very high ragfair prices to be below a max multiple of items the handbook values
@@ -486,7 +486,7 @@ public record UnreasonableModPrices
 public record ArmorSettings
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     % chance / 100 that armor plates will be removed from an offer before listing
@@ -504,7 +504,7 @@ public record ArmorSettings
 public record TieredFlea
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("enabled")]
     public bool Enabled { get; set; }

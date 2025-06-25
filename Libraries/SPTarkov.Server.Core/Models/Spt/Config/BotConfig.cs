@@ -146,7 +146,7 @@ public record BotConfig : BaseConfig
 public record PresetBatch
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("assault")]
     public int Assault { get; set; }
@@ -287,7 +287,7 @@ public record PresetBatch
 public record WalletLootSettings
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Chance wallets have loot in them
@@ -314,7 +314,7 @@ public record WalletLootSettings
 public record EquipmentFilters
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Limits for mod types per weapon .e.g. scopes
@@ -425,7 +425,7 @@ public record EquipmentFilters
 public record ModLimits
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     How many scopes are allowed on a weapon - hard coded to work with OPTIC_SCOPE, ASSAULT_SCOPE, COLLIMATOR, COMPACT_COLLIMATOR
@@ -443,7 +443,7 @@ public record ModLimits
 public record RandomisationDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Between what levels do these randomisation setting apply to
@@ -497,7 +497,7 @@ public record RandomisationDetails
 public record NighttimeChanges
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Applies changes to values stored in equipmentMods
@@ -512,7 +512,7 @@ public record NighttimeChanges
 public record EquipmentFilterDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Between what levels do these equipment filter setting apply to
@@ -542,7 +542,7 @@ public record EquipmentFilterDetails
 public record WeightingAdjustmentDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Between what levels do these weight settings apply to
@@ -572,7 +572,7 @@ public record WeightingAdjustmentDetails
 public record AdjustmentDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("add")]
     public Dictionary<string, Dictionary<string, float>> Add { get; set; }
@@ -584,7 +584,7 @@ public record AdjustmentDetails
 public class ArmorPlateWeights
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("levelRange")]
     public MinMax<int> LevelRange { get; set; }
@@ -596,7 +596,7 @@ public class ArmorPlateWeights
 public record RandomisedResourceDetails
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("food")]
     public RandomisedResourceValues Food { get; set; }
@@ -608,7 +608,7 @@ public record RandomisedResourceDetails
 public record RandomisedResourceValues
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Minimum percent of item to randomized between min and max resource

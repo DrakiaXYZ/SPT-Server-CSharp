@@ -7,7 +7,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Hideout;
 public record HideoutSingleProductionStartRequestData : InventoryBaseActionRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("recipeId")]
     public string? RecipeId { get; set; }

@@ -146,6 +146,9 @@ public record ItemBuyData
 
 public record ItemSellData
 {
+    [JsonExtensionData]
+    public Dictionary<string, object>? ExtensionData { get; set; }
+
     [JsonPropertyName("category")]
     public required List<string> Category { get; set; }
 

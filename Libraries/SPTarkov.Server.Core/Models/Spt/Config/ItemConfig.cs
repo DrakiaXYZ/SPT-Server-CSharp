@@ -51,7 +51,7 @@ public record ItemConfig : BaseConfig
 public record HandbookPriceOverride
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Price in roubles

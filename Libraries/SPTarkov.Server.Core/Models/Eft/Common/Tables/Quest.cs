@@ -8,7 +8,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Common.Tables;
 public record Quest
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     SPT addition - human readable quest name
@@ -141,7 +141,7 @@ public record Quest
 public record QuestStatus
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("qid")]
     public required string QId { get; set; }
@@ -165,7 +165,7 @@ public record QuestStatus
 public record QuestConditionTypes
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("Started")]
     public List<QuestCondition>? Started { get; set; }
@@ -186,7 +186,7 @@ public record QuestConditionTypes
 public record QuestCondition
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
     public required string Id { get; set; }
@@ -327,7 +327,7 @@ public record QuestCondition
 public record QuestConditionCounter
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -339,7 +339,7 @@ public record QuestConditionCounter
 public record QuestConditionCounterCondition
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -433,7 +433,7 @@ public record QuestConditionCounterCondition
 public record EnemyHealthEffect
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("bodyParts")]
     public List<string>? BodyParts { get; set; }
@@ -445,7 +445,7 @@ public record EnemyHealthEffect
 public record ValueCompare
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("compareMethod")]
     public string? CompareMethod { get; set; }
@@ -457,7 +457,7 @@ public record ValueCompare
 public record CounterConditionDistance
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("value")]
     public double? Value { get; set; }
@@ -469,7 +469,7 @@ public record CounterConditionDistance
 public record DaytimeCounter
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("from")]
     public int? From { get; set; }
@@ -481,7 +481,7 @@ public record DaytimeCounter
 public record VisibilityCondition
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -505,7 +505,7 @@ public record VisibilityCondition
 public record QuestRewards
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("AvailableForStart")]
     public List<Reward>? AvailableForStart { get; set; }

@@ -5,7 +5,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Bot;
 public record RandomisedBotLevelResult
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("level")]
     public int? Level { get; set; }

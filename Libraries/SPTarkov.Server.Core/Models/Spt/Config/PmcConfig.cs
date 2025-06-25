@@ -164,7 +164,7 @@ public record PmcConfig : BaseConfig
 public record HostilitySettings
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Bot roles that are 100% an enemy
@@ -200,7 +200,7 @@ public record HostilitySettings
 public record SlotLootSettings
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Item Type whitelist

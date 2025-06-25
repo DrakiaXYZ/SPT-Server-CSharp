@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Customization;
 public record BuyClothingRequestData : InventoryBaseActionRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("offer")]
     public string? Offer { get; set; }
@@ -18,7 +18,7 @@ public record BuyClothingRequestData : InventoryBaseActionRequestData
 public record PaymentItemForClothing
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("del")]
     public bool? Del { get; set; }

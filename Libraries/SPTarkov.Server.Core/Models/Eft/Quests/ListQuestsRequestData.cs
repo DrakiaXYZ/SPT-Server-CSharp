@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Quests;
 public record ListQuestsRequestData : IRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("completed")]
     public bool? Completed { get; set; }

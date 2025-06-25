@@ -5,7 +5,7 @@ namespace SPTarkov.Server.Core.Models.Spt.Logging;
 public record SptLogger
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public object Error { get; set; } // error: (msg: string | Record<string, unknown>) => void;
 

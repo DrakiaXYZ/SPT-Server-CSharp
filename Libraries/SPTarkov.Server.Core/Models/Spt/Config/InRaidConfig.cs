@@ -77,7 +77,7 @@ public record InRaidConfig : BaseConfig
 public record RaidMenuSettings
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("aiAmount")]
     public required string AiAmount { get; set; }
@@ -107,7 +107,7 @@ public record RaidMenuSettings
 public record RaidSave
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Should loot gained from raid be saved

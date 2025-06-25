@@ -37,7 +37,7 @@ public record TraderConfig : BaseConfig
 public record UpdateTime
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("_name")]
     public string Name { get; set; } = string.Empty;
@@ -55,7 +55,7 @@ public record UpdateTime
 public record FenceConfig
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("discountOptions")]
     public required DiscountOptions DiscountOptions { get; set; }
@@ -160,7 +160,7 @@ public record FenceConfig
 public record ItemDurabilityCurrentMax
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("current")]
     public required MinMax<double> Current { get; set; }
@@ -187,7 +187,7 @@ public record CoopExtractReward : LootRequest
 public record DiscountOptions
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("assortSize")]
     public int AssortSize { get; set; }
@@ -211,7 +211,7 @@ public record DiscountOptions
 public record ModdedTraders
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Trader Ids to enable the clothing service for

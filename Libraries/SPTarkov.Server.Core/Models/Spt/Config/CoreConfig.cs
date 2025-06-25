@@ -66,7 +66,7 @@ public record CoreConfig : BaseConfig
 public record BsgLogging
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     verbosity of what to log, yes I know this is backwards, but its how nlog deals with ordinals. <br />
@@ -93,7 +93,7 @@ public record BsgLogging
 public record Release
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Disclaimer outlining the intended usage of bleeding edge
@@ -177,7 +177,7 @@ public record Release
 public record GameFixes
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     /// <summary>
     ///     Shotguns use a different value than normal guns causing huge pellet dispersion
@@ -207,7 +207,7 @@ public record GameFixes
 public record ServerFeatures
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("compressProfile")]
     public bool CompressProfile { get; set; }
@@ -231,7 +231,7 @@ public record ServerFeatures
 public record ChatbotFeatures
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("sptFriendGiftsEnabled")]
     public bool SptFriendGiftsEnabled { get; set; }
@@ -258,7 +258,7 @@ public record ChatbotFeatures
 public record CommandoFeatures
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("giveCommandEnabled")]
     public bool GiveCommandEnabled { get; set; }

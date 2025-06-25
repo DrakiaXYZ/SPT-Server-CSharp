@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Spt.Launcher;
 public class LauncherV2PingResponse : IRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public required string Response { get; set; }
 }

@@ -15,7 +15,7 @@ public record NoteActionRequest : BaseInteractionRequestData
 public record Note
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("Time")]
     public double? Time { get; set; }

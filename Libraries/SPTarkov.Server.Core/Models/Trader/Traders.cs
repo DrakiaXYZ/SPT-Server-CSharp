@@ -8,7 +8,7 @@ namespace SPTarkov.Server.Core.Models;
 public record Prapor() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Prapor";
     public string Id { get; } = Traders.PRAPOR;
@@ -18,7 +18,7 @@ public record Prapor() : ITrader
 public record Therapist() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Therapist";
     public string Id { get; } = Traders.THERAPIST;
@@ -28,7 +28,7 @@ public record Therapist() : ITrader
 public record Fence() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Fence";
     public string Id { get; } = Traders.FENCE;
@@ -38,7 +38,7 @@ public record Fence() : ITrader
 public record Skier() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Skier";
     public string Id { get; } = Traders.SKIER;
@@ -48,7 +48,7 @@ public record Skier() : ITrader
 public record Peacekeeper() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Peacekeeper";
     public string Id { get; } = Traders.PEACEKEEPER;
@@ -58,7 +58,7 @@ public record Peacekeeper() : ITrader
 public record Mechanic() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Mechanic";
     public string Id { get; } = Traders.MECHANIC;
@@ -68,7 +68,7 @@ public record Mechanic() : ITrader
 public record Ragman() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Ragman";
     public string Id { get; } = Traders.RAGMAN;
@@ -78,7 +78,7 @@ public record Ragman() : ITrader
 public record Jaeger() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Jaeger";
     public string Id { get; } = Traders.JAEGER;
@@ -88,7 +88,7 @@ public record Jaeger() : ITrader
 public record LighthouseKeeper() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "LighthouseKeeper";
     public string Id { get; } = Traders.LIGHTHOUSEKEEPER;
@@ -98,7 +98,7 @@ public record LighthouseKeeper() : ITrader
 public record Btr() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Btr";
     public string Id { get; } = Traders.BTR;
@@ -108,7 +108,7 @@ public record Btr() : ITrader
 public record Ref() : ITrader
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     public string Name { get; } = "Ref";
     public string Id { get; } = Traders.REF;

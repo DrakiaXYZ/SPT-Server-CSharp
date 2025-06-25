@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Health;
 public record OffraidHealRequestData : InventoryBaseActionRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
     public string? Item { get; set; }

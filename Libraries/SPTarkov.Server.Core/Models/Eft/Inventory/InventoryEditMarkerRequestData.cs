@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Inventory;
 public record InventoryEditMarkerRequestData : InventoryBaseActionRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("item")]
     public string? Item { get; set; }

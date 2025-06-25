@@ -7,7 +7,7 @@ namespace SPTarkov.Server.Core.Models.Eft.Builds;
 public record SetMagazineRequest : IRequestData
 {
     [JsonExtensionData]
-    public Dictionary<string, object> ExtensionData { get; set; }
+    public Dictionary<string, object>? ExtensionData { get; set; }
 
     [JsonPropertyName("Id")]
     public string? Id { get; set; }
