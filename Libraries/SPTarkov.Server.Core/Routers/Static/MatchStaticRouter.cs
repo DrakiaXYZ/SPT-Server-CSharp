@@ -39,10 +39,10 @@ public class MatchStaticRouter : StaticRouter
                     async (url, info, sessionID, output) =>
                         await matchCallbacks.JoinMatch(
                             url,
-                            info as MatchGroupStartGameRequest,
+                            info as MatchGroupJoinRequest,
                             sessionID
                         ),
-                    typeof(MatchGroupStartGameRequest)
+                    typeof(MatchGroupJoinRequest)
                 ),
                 new RouteAction(
                     "/client/match/exit",
@@ -72,7 +72,7 @@ public class MatchStaticRouter : StaticRouter
                 new RouteAction(
                     "/client/match/group/start_game",
                     async (url, info, sessionID, output) =>
-                        await matchCallbacks.JoinMatch(
+                        await matchCallbacks.StartGameAsGroupLeader(
                             url,
                             info as MatchGroupStartGameRequest,
                             sessionID

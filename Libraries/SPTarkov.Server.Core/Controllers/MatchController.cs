@@ -2,7 +2,6 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Match;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Spt.Services;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
@@ -14,7 +13,6 @@ namespace SPTarkov.Server.Core.Controllers;
 [Injectable]
 public class MatchController(
     ISptLogger<MatchController> _logger,
-    SaveServer _saveServer,
     MatchLocationService _matchLocationService,
     ConfigServer _configServer,
     LocationLifecycleService _locationLifecycleService,
@@ -23,8 +21,8 @@ public class MatchController(
     ICloner _cloner
 )
 {
-    protected MatchConfig _matchConfig = _configServer.GetConfig<MatchConfig>();
-    protected PmcConfig _pmcConfig = _configServer.GetConfig<PmcConfig>();
+    protected readonly MatchConfig _matchConfig = _configServer.GetConfig<MatchConfig>();
+    protected readonly PmcConfig _pmcConfig = _configServer.GetConfig<PmcConfig>();
 
     /// <summary>
     ///     Handle client/match/available
@@ -50,7 +48,7 @@ public class MatchController(
     /// <param name="request">Start game request</param>
     /// <param name="sessionId">Session/Player id</param>
     /// <returns>ProfileStatusResponse</returns>
-    public ProfileStatusResponse JoinMatch(MatchGroupStartGameRequest request, string sessionId)
+    public ProfileStatusResponse JoinMatch(MatchGroupJoinRequest request, string sessionId)
     {
         var output = new ProfileStatusResponse
         {

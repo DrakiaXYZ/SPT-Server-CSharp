@@ -183,14 +183,10 @@ public class MatchCallbacks(
     ///     Handle match/group/start_game
     /// </summary>
     /// <returns></returns>
-    public ValueTask<string> JoinMatch(
-        string url,
-        MatchGroupStartGameRequest info,
-        string sessionID
-    )
+    public ValueTask<string> JoinMatch(string url, MatchGroupJoinRequest request, string sessionID)
     {
         return new ValueTask<string>(
-            _httpResponseUtil.GetBody(_matchController.JoinMatch(info, sessionID))
+            _httpResponseUtil.GetBody(_matchController.JoinMatch(request, sessionID))
         );
     }
 
@@ -331,5 +327,18 @@ public class MatchCallbacks(
     public ValueTask<string> NotRaidReady(string url, EmptyRequestData _, string sessionID)
     {
         return new ValueTask<string>(_httpResponseUtil.GetBody(true));
+    }
+
+    /// <summary>
+    /// Handle client/match/group/start_game
+    /// </summary>
+    public Task<string> StartGameAsGroupLeader(
+        string url,
+        MatchGroupStartGameRequest? request,
+        string? sessionId
+    )
+    {
+        // returns a ProfileStatusResponse object
+        throw new NotImplementedException();
     }
 }
