@@ -21,7 +21,7 @@ public record DatabaseTables
 
     public Templates.Templates? Templates { get; set; }
 
-    public Dictionary<string, Trader>? Traders { get; set; }
+    public Dictionary<string, Trader> Traders { get; set; }
 
     public Globals? Globals { get; set; }
 
