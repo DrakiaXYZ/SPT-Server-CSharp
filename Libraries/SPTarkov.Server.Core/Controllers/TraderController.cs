@@ -199,9 +199,9 @@ public class TraderController(
             Prices = handbookPrices,
             CurrencyCourses = new Dictionary<string, double>
             {
-                { "5449016a4bdc2d6f028b456f", handbookPrices[Money.ROUBLES] },
-                { "569668774bdc2da2298b4568", handbookPrices[Money.EUROS] },
-                { "5696686a4bdc2da3298b456a", handbookPrices[Money.DOLLARS] },
+                { Money.ROUBLES, handbookPrices[Money.ROUBLES] },
+                { Money.EUROS, handbookPrices[Money.EUROS] },
+                { Money.DOLLARS, handbookPrices[Money.DOLLARS] },
             },
         };
     }
