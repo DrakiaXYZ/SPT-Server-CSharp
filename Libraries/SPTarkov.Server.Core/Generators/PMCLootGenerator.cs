@@ -194,6 +194,7 @@ public class PMCLootGenerator(
         blacklist.UnionWith(_pmcConfig.PocketLoot.Blacklist);
         blacklist.UnionWith(_pmcConfig.GlobalLootBlacklist);
         blacklist.UnionWith(itemFilterService.GetBlacklistedItems());
+        blacklist.UnionWith(itemFilterService.GetItemRewardBlacklist());
         blacklist.UnionWith(itemFilterService.GetBlacklistedLootableItems());
         blacklist.UnionWith(seasonalEventService.GetInactiveSeasonalEventItems());
 
