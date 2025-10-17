@@ -210,7 +210,7 @@ public class LocationLifecycleService(
         foreach (var botId in PMCConfig.HostilitySettings)
         {
             var configHostilityChanges = PMCConfig.HostilitySettings[botId.Key];
-            var locationBotHostilityDetails = location.BotLocationModifier.AdditionalHostilitySettings.FirstOrDefault(botSettings =>
+            var locationBotHostilityDetails = location.BotLocationModifier.AdditionalHostilitySettings?.FirstOrDefault(botSettings =>
                 string.Equals(botSettings.BotRole, botId.Key, StringComparison.OrdinalIgnoreCase)
             );
 

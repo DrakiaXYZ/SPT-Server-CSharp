@@ -159,7 +159,13 @@ public class ProbabilityObjectArray<K, V> : List<ProbabilityObject<K, V>>
         for (var i = 0; i < itemCountToDraw; i++)
         {
             var rand = Random.Shared.NextDouble();
-            var randomIndex = cumulativeProbabilities.FindIndex(probability => probability > rand);
+            var randomIndex = cumulativeProbabilities.FindIndex(probability => probability >= rand);
+
+            if (randomIndex == -1)
+            {
+                continue;
+            }
+
             results.Add(this[randomIndex].Key);
         }
 

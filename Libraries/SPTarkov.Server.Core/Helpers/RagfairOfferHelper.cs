@@ -14,6 +14,7 @@ using SPTarkov.Server.Core.Routers;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils;
+using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace SPTarkov.Server.Core.Helpers;
 
@@ -38,7 +39,8 @@ public class RagfairOfferHelper(
     RagfairRequiredItemsService ragfairRequiredItemsService,
     ProfileHelper profileHelper,
     EventOutputHolder eventOutputHolder,
-    ConfigServer configServer
+    ConfigServer configServer,
+    ICloner cloner
 )
 {
     protected const string GoodSoldTemplate = "5bdabfb886f7743e152e867e 0"; // Your {soldItem} {itemCount} items were bought by {buyerNickname}.
@@ -63,8 +65,10 @@ public class RagfairOfferHelper(
         var playerIsFleaBanned = pmcData.PlayerIsFleaBanned(timeUtil.GetTimeStamp());
         var tieredFlea = RagfairConfig.TieredFlea;
         var tieredFleaLimitTypes = tieredFlea.UnlocksType;
-        return ragfairOfferService
-            .GetOffers()
+
+        // Clone offers if tiered flea is enabled as we perform modification of offer data prior to return
+        var offers = tieredFlea.Enabled ? cloner.Clone(ragfairOfferService.GetOffers()) : ragfairOfferService.GetOffers();
+        return offers
             .Where(offer =>
             {
                 var offerRootItem = offer.Items.FirstOrDefault();
@@ -128,6 +132,7 @@ public class RagfairOfferHelper(
             {
                 // Lock the offer if player's level is below the ammo's unlock requirement
                 offer.Locked = true;
+                offer.User.Nickname = $"Unlock level: {unlockLevel}";
 
                 return;
             }
@@ -140,6 +145,7 @@ public class RagfairOfferHelper(
             {
                 // Lock the offer if player's level is below the item's specific requirement
                 offer.Locked = true;
+                offer.User.Nickname = $"Unlock level: {itemLevelRequirement}";
 
                 return;
             }
@@ -152,14 +158,22 @@ public class RagfairOfferHelper(
         }
 
         // Check if the item belongs to any restricted type and if player level is insufficient
-        if (
-            tieredFleaLimitTypes
-                .Where(tieredItemType => itemHelper.IsOfBaseclass(offerItemTpl, tieredItemType))
-                .Any(tieredItemType => playerLevel < tieredFlea.UnlocksType[tieredItemType])
-        )
+        var matchingTypes = tieredFleaLimitTypes.Where(tieredItemType => itemHelper.IsOfBaseclass(offerItemTpl, tieredItemType));
+        if (!matchingTypes.Any())
+        {
+            return;
+        }
+
+        //Get all matches
+        var levelRequirements = tieredFlea.UnlocksType.Where(x => matchingTypes.Contains(x.Key)).Select(x => x.Value);
+
+        // Get highest requirement
+        var highestRequirement = levelRequirements.Max();
+        if (playerLevel < highestRequirement)
         {
             // Players level is below matching types requirement, flag as locked
             offer.Locked = true;
+            offer.User.Nickname = $"Unlock level: {levelRequirements.Max()}";
         }
     }
 
@@ -182,7 +196,7 @@ public class RagfairOfferHelper(
         var result = new List<RagfairOffer>();
         foreach (
             var offer in offerIDsForItem
-                .Select(ragfairOfferService.GetOfferByOfferId)
+                .Select(tieredFlea.Enabled ? cloner.Clone(ragfairOfferService.GetOfferByOfferId) : ragfairOfferService.GetOfferByOfferId) // Clone offer when tiered flea enabled as we may modify offer data
                 .Where(offer => PassesSearchFilterCriteria(searchRequest, offer, offer.Items.FirstOrDefault(), pmcData))
         )
         {
@@ -220,7 +234,10 @@ public class RagfairOfferHelper(
 
         foreach (var desiredItemTpl in searchRequest.BuildItems)
         {
-            var matchingOffers = ragfairOfferService.GetOffersOfType(desiredItemTpl.Key);
+            // Clone offers when tiered flea enabled as we may modify the offer
+            var matchingOffers = tieredFlea.Enabled
+                ? cloner.Clone(ragfairOfferService.GetOffersOfType(desiredItemTpl.Key))
+                : ragfairOfferService.GetOffersOfType(desiredItemTpl.Key);
             if (matchingOffers is null)
             // No offers found for this item, skip
             {

@@ -842,7 +842,7 @@ public class InsuranceController(
                     )
                 )
                 {
-                    logger.Warning(
+                    logger.Debug(
                         $"Unable to add item id: {itemId.ToString()} to client/insurance/items/list/cost response, already exists"
                     );
                 }

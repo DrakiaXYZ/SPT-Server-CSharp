@@ -1,5 +1,6 @@
 ﻿using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando.SptCommands;
+using SPTarkov.Server.Core.Helpers.Dialogue.Commando;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Dialog;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -10,7 +11,7 @@ using SPTarkov.Server.Core.Services;
 namespace SPTarkov.Server.Core.Helpers.Dialog.Commando;
 
 [Injectable]
-public class SptCommandoCommands : IChatCommand
+public class SptCommandoCommands : ICommandoCommand
 {
     protected readonly ServerLocalisationService _serverLocalisationService;
     protected readonly IDictionary<string, ISptCommand> _sptCommands;

@@ -860,7 +860,7 @@ public class InventoryHelper(
             else if (string.Equals(request.FromOwner.Type, "mail", StringComparison.OrdinalIgnoreCase))
             {
                 // Split requests don't use 'use' but 'splitItem' property
-                fromInventoryItems = dialogueHelper.GetMessageItemContents(request.FromOwner.Id.Value, sessionId, itemId);
+                fromInventoryItems = dialogueHelper.GetMessageItemContents(request.FromOwner.Id, sessionId, itemId);
                 fromType = "mail";
             }
         }

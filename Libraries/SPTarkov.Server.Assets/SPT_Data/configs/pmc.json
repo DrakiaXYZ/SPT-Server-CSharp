@@ -182,11 +182,9 @@
   "pmcType": {
     "pmcbear": {
       "factory4_day": {
-        "bossTagilla": 1,
         "pmcBEAR": 10
       },
       "factory4_night": {
-        "bossTagilla": 1,
         "pmcBEAR": 10
       },
       "bigmap": {
@@ -225,11 +223,9 @@
     },
     "pmcusec": {
       "factory4_day": {
-        "bossTagilla": 1,
         "pmcUSEC": 10
       },
       "factory4_night": {
-        "bossTagilla": 1,
         "pmcUSEC": 10
       },
       "bigmap": {

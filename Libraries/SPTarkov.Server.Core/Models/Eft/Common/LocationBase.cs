@@ -586,7 +586,7 @@ public record BotLocationModifier
     public double? AccuracySpeed { get; set; }
 
     [JsonPropertyName("AdditionalHostilitySettings")]
-    public IEnumerable<AdditionalHostilitySettings> AdditionalHostilitySettings { get; set; }
+    public IEnumerable<AdditionalHostilitySettings>? AdditionalHostilitySettings { get; set; }
 
     [JsonPropertyName("DistToActivate")]
     public double? DistanceToActivate { get; set; }

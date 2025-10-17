@@ -17,7 +17,6 @@ public static class SPTWeb
 
         builder.WebHost.UseStaticWebAssets();
         builder.Services.AddMudServices();
-        builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
         var mvcBuilder = builder.Services.AddControllers();
 
@@ -25,6 +24,8 @@ public static class SPTWeb
         {
             mvcBuilder.AddApplicationPart(assembly);
         }
+
+        builder.Services.AddRazorComponents().AddInteractiveServerComponents();
     }
 
     public static void UseSptBlazor(this WebApplication app)
@@ -33,6 +34,7 @@ public static class SPTWeb
 
         app.UseAntiforgery();
         app.UseStaticFiles();
+        app.MapControllers();
 
         var razorBuilder = app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
@@ -67,7 +69,5 @@ public static class SPTWeb
                 );
             }
         }
-
-        app.MapControllers();
     }
 }

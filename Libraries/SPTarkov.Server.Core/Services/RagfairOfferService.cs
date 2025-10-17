@@ -49,6 +49,11 @@ public class RagfairOfferService(
         return ragfairOfferHolder.GetOfferById(offerId);
     }
 
+    /// <summary>
+    /// Get offers for a desired item tpl
+    /// </summary>
+    /// <param name="templateId">Id of item to get offers for</param>
+    /// <returns>IEnumerable <see cref="RagfairOffer"/></returns>
     public IEnumerable<RagfairOffer>? GetOffersOfType(MongoId templateId)
     {
         return ragfairOfferHolder.GetOffersByTemplate(templateId);

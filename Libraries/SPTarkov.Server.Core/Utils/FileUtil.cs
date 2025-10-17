@@ -1,3 +1,4 @@
+using System.Text;
 using SPTarkov.DI.Annotations;
 
 namespace SPTarkov.Server.Core.Utils;
@@ -101,27 +102,52 @@ public class FileUtil
 
     public async Task WriteFileAsync(string filePath, string fileContent)
     {
-        if (!DirectoryExists(Path.GetDirectoryName(filePath)))
-        {
-            CreateDirectory(Path.GetDirectoryName(filePath));
-        }
-
-        if (!FileExists(filePath))
-        {
-            CreateFile(filePath);
-        }
-
-        await File.WriteAllTextAsync(filePath, fileContent);
+        var bytes = Encoding.UTF8.GetBytes(fileContent);
+        await WriteFileAsync(filePath, bytes);
     }
 
+    /// <summary>
+    /// Writes a file atomically by first writing to a temporary file, then replacing the original.
+    /// This prevents corruption if the write operation fails or is interrupted.
+    /// </summary>
     public async Task WriteFileAsync(string filePath, byte[] fileContent)
     {
-        if (!FileExists(filePath))
+        var directoryPath = Path.GetDirectoryName(filePath);
+
+        if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
         {
-            CreateFile(filePath);
+            Directory.CreateDirectory(directoryPath);
         }
 
-        await File.WriteAllBytesAsync(filePath, fileContent);
+        var tempFilePath = filePath + ".bak";
+
+        try
+        {
+            await using (
+                var fs = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true)
+            )
+            {
+                await fs.WriteAsync(fileContent);
+
+                // We flush here so we can be sure it's immediately committed to disk
+                await fs.FlushAsync();
+            }
+
+            // Overwrite over the old file
+            File.Move(tempFilePath, filePath, overwrite: true);
+        }
+        catch
+        {
+            if (File.Exists(tempFilePath))
+            {
+                try
+                {
+                    File.Delete(tempFilePath);
+                }
+                catch { }
+            }
+            throw;
+        }
     }
 
     private void CreateFile(string filePath)

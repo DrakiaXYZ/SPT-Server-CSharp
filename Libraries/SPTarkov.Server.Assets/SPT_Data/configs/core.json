@@ -190,7 +190,7 @@
         "giveCommandEnabled": true
       },
       "commandUseLimits": {
-        "StashRows": 29
+        "StashRows": 28
       },
       "ids": {
         "commando": "6723fd51c5924c57ce0ca01e",

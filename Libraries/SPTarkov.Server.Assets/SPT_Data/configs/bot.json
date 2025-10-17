@@ -2838,5 +2838,6 @@
       "bossKnight"
     ],
     "resetDay": "Monday"
-  }
+  },
+  "replaceScavWith": "assault"
 }

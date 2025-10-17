@@ -131,6 +131,12 @@ public record BotConfig : BaseConfig
     /// </summary>
     [JsonPropertyName("weeklyBoss")]
     public required WeeklyBossSettings WeeklyBoss { get; set; }
+
+    /// <summary>
+    ///     Replace all scavs across all maps with the provided WildSpawnType
+    /// </summary>
+    [JsonPropertyName("replaceScavWith")]
+    public required WildSpawnType ReplaceScavWith { get; set; }
 }
 
 public record WeeklyBossSettings

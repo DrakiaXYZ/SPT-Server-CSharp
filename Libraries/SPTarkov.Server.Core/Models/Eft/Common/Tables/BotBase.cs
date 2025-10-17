@@ -425,6 +425,7 @@ public record MasterySkill
 
 public record CommonSkill
 {
+    [JsonConverter(typeof(SafeDoubleConverter))]
     public double PointsEarnedDuringSession { get; set; }
 
     public long LastAccess { get; set; }

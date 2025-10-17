@@ -1,5 +1,6 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Helpers.Dialog.Commando;
+using SPTarkov.Server.Core.Helpers.Dialogue.Commando;
 using SPTarkov.Server.Core.Models.Eft.Profile;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -15,7 +16,7 @@ public class CommandoDialogChatBot(
     MailSendService mailSendService,
     ServerLocalisationService localisationService,
     ConfigServer configServer,
-    IEnumerable<IChatCommand> chatCommands
+    IEnumerable<ICommandoCommand> chatCommands
 ) : AbstractDialogChatBot(logger, mailSendService, localisationService, chatCommands)
 {
     protected readonly CoreConfig CoreConfig = configServer.GetConfig<CoreConfig>();

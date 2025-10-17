@@ -252,9 +252,15 @@ public class CustomItemService(
             {
                 lazyLoad.AddTransformer(localeData =>
                 {
-                    localeData.Add($"{newItemId} Name", newLocaleDetails.Name);
-                    localeData.Add($"{newItemId} ShortName", newLocaleDetails.ShortName);
-                    localeData.Add($"{newItemId} Description", newLocaleDetails.Description);
+                    if (!localeData.TryAdd($"{newItemId} Name", newLocaleDetails.Name))
+                    {
+                        logger.Error($"Error adding locale `{newItemId} Name` to {shortNameKey.Key}, duplicate key");
+                    }
+                    else
+                    {
+                        localeData.TryAdd($"{newItemId} ShortName", newLocaleDetails.ShortName);
+                        localeData.TryAdd($"{newItemId} Description", newLocaleDetails.Description);
+                    }
 
                     return localeData;
                 });

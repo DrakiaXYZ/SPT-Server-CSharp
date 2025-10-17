@@ -32,7 +32,15 @@ public class App(
 
         if (logger.IsLogEnabled(LogLevel.Debug))
         {
+            var totalMemoryBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+
+            // Convert bytes to GB
+            var totalMemoryGb = totalMemoryBytes / (1024.0 * 1024.0 * 1024.0);
+            var pageFileGb = Environment.SystemPageSize / (1024.0 * 1024.0 * 1024.0);
+
             logger.Debug($"OS: {Environment.OSVersion.Version} | {Environment.OSVersion.Platform}");
+            logger.Debug($"Pagefile: {pageFileGb:F2} GB");
+            logger.Debug($"RAM: {totalMemoryGb:F2} GB");
             logger.Debug($"Ran as admin: {Environment.IsPrivilegedProcess}");
             logger.Debug($"CPU cores: {Environment.ProcessorCount}");
             logger.Debug($"PATH: {(Environment.ProcessPath ?? "null returned").Encode(EncodeType.BASE64)}");

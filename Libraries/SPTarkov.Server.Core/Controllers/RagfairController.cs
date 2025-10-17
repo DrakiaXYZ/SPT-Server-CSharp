@@ -343,7 +343,7 @@ public class RagfairController(
         var offers = ragfairOfferService.GetOffersOfType(getPriceRequest.TemplateId);
 
         // Offers exist for item, get averages of what's listed
-        if (offers.Any())
+        if (offers != null && offers.Any())
         {
             // These get calculated while iterating through the list below
             var minMax = new MinMax<double>(int.MaxValue, 0);
@@ -858,7 +858,7 @@ public class RagfairController(
 
         if (logger.IsLogEnabled(LogLevel.Debug))
         {
-            logger.Debug($"Offer tax to charge: {tax}, pulled from client: {storedClientTaxValue.Count is not null}");
+            logger.Debug($"Offer tax to charge: {tax}, pulled from client: {storedClientTaxValue?.Count is not null}");
         }
 
         // Cleanup of cache now we've used the tax value from it

@@ -198,7 +198,7 @@ public class ProfileFixerService(
         if (customizationDb.ContainsKey(pmcProfile.Customization.Feet.Value))
         {
             var defaultFeet = playerIsUsec
-                ? customizationDbArray.FirstOrDefault(x => x.Name == "DefaultUsecFeet")
+                ? customizationDbArray.FirstOrDefault(x => x.Name == "DefaulUsecFeet")
                 : customizationDbArray.FirstOrDefault(x => x.Name == "DefaultBearFeet");
             pmcProfile.Customization.Feet = defaultFeet.Id;
         }

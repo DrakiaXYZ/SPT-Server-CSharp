@@ -18,7 +18,7 @@ public record BaseInteractionRequestData
 public record OwnerInfo
 {
     [JsonPropertyName("id")]
-    public MongoId? Id { get; set; }
+    public string? Id { get; set; }
 
     [JsonPropertyName("type")]
     public string? Type { get; set; }

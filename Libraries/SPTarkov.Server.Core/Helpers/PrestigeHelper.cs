@@ -28,7 +28,6 @@ public class PrestigeHelper(
         var indexOfPrestigeObtained = Math.Clamp((prestige.PrestigeLevel ?? 1) - 1, 0, prestigeLevels.Count - 1); // Levels are 1 to 4, Index is 0 to 3
 
         // Skill copy
-
         var skillProgressCopyAmount = (float)(1 - prestigeLevels[indexOfPrestigeObtained].TransferConfigs.SkillConfig.TransferMultiplier);
         var masteringProgressCopyAmount = (float)(
             1 - prestigeLevels[indexOfPrestigeObtained].TransferConfigs.MasteringConfig.TransferMultiplier
@@ -90,6 +89,9 @@ public class PrestigeHelper(
 
         AddPrestigeRewardsToProfile(sessionId!.Value, newProfile, prestigeRewards);
 
+        // Copy profile stats
+        CopyStats(newProfile, oldProfile);
+
         // Flag profile as having achieved this prestige level
         if (newProfile.CharacterData?.PmcData?.Prestige?.TryAdd(currentPrestigeData!.Id, timeUtil.GetTimeStamp()) is false)
         {
@@ -124,6 +126,36 @@ public class PrestigeHelper(
         }
 
         newProfile.CharacterData!.PmcData!.Info!.PrestigeLevel = prestige.PrestigeLevel;
+    }
+
+    /// <summary>
+    /// Copy over profile stats from old profile to new
+    /// Remove some stats once copied over
+    /// </summary>
+    /// <param name="newProfile">Profile to add stats to</param>
+    /// <param name="oldProfile">Profile to copy stats from</param>
+    protected void CopyStats(SptProfile newProfile, SptProfile oldProfile)
+    {
+        var newPmcStats = newProfile.CharacterData.PmcData.Stats;
+        var oldPmcStats = oldProfile.CharacterData.PmcData.Stats;
+
+        newPmcStats.Eft = oldPmcStats.Eft;
+
+        // Reset some PMC stats that should not be copied over
+        newPmcStats.Eft.CarriedQuestItems = [];
+        newPmcStats.Eft.FoundInRaidItems = [];
+        newPmcStats.Eft.LastSessionDate = 0;
+
+        // TODO: find evidence scav stats are copied over in live
+        //var newScavStats = newProfile.CharacterData.ScavData.Stats;
+        //var oldScavStats = oldProfile.CharacterData.ScavData.Stats;
+
+        //newPmcStats.Eft = oldScavStats.Eft;
+
+        //// Reset some Scav stats that should not be copied over
+        //newScavStats.Eft.CarriedQuestItems = [];
+        //newScavStats.Eft.FoundInRaidItems = [];
+        //newScavStats.Eft.LastSessionDate = 0;
     }
 
     private void AddPrestigeRewardsToProfile(MongoId sessionId, SptProfile newProfile, IEnumerable<Reward> rewards)

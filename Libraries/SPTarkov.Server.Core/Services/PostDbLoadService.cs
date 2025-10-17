@@ -131,6 +131,30 @@ public class PostDbLoadService(
             var chosenBoss = GetWeeklyBoss(BotConfig.WeeklyBoss.BossPool, BotConfig.WeeklyBoss.ResetDay);
             FlagMapAsGuaranteedBoss(chosenBoss);
         }
+
+        if (BotConfig.ReplaceScavWith != WildSpawnType.assault)
+        {
+            ReplaceScavWavesWithRole(BotConfig.ReplaceScavWith);
+        }
+    }
+
+    protected void ReplaceScavWavesWithRole(WildSpawnType newScavRole)
+    {
+        foreach (var location in databaseService.GetLocations().GetDictionary().Values)
+        {
+            if (location.Base?.Waves is null)
+            {
+                continue;
+            }
+
+            foreach (var wave in location.Base.Waves)
+            {
+                if (wave.WildSpawnType == WildSpawnType.assault)
+                {
+                    wave.WildSpawnType = newScavRole;
+                }
+            }
+        }
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
-﻿using Range = SemanticVersioning.Range;
+﻿using System.Text.Json.Serialization;
+using SPTarkov.Server.Core.Utils.Json.Converters;
+using Range = SemanticVersioning.Range;
 using Version = SemanticVersioning.Version;
 
 namespace SPTarkov.Server.Core.Models.Spt.Mod;
@@ -40,6 +42,7 @@ public abstract record AbstractModMetadata
     /// <br/>
     /// Version = new Version("1.0.0.0"); is not
     /// </summary>
+    [JsonConverter(typeof(ToStringJsonConverter<Version>))]
     public abstract Version Version { get; init; }
 
     /// <summary>
@@ -49,6 +52,7 @@ public abstract record AbstractModMetadata
     /// <br/>
     /// Version = new Version("4.0.0.0"); is not
     /// </summary>
+    [JsonConverter(typeof(ToStringJsonConverter<Range>))]
     public abstract Range SptVersion { get; init; }
 
     /// <summary>

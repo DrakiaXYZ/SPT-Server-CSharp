@@ -1245,7 +1245,7 @@ public class QuestHelper(
     }
 
     /// <summary>
-    /// Create a clone of the given quest Collection with the rewards updated to reflect the given game version
+    /// Remove rewards from quests that do not fulfil the gameversion requirement
     /// </summary>
     /// <param name="quests">List of quests to check</param>
     /// <param name="gameVersion">Game version of the profile</param>
@@ -1255,15 +1255,15 @@ public class QuestHelper(
         foreach (var quest in quests)
         {
             // Remove any reward that doesn't pass the game edition check
-            var propsAsDict = quest.Rewards;
-            foreach (var rewardType in propsAsDict)
+            foreach (var rewardType in quest.Rewards)
             {
                 if (rewardType.Value is null)
                 {
                     continue;
                 }
 
-                propsAsDict[rewardType.Key] = propsAsDict[rewardType.Key]
+                quest.Rewards[rewardType.Key] = quest
+                    .Rewards[rewardType.Key]
                     .Where(reward => rewardHelper.RewardIsForGameEdition(reward, gameVersion))
                     .ToList();
             }

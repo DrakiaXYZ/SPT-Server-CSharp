@@ -615,7 +615,7 @@ public class SeasonalEventService(
 
             foreach (var settings in newHostilitySettings)
             {
-                var matchingBaseSettings = locationBase.Base.BotLocationModifier.AdditionalHostilitySettings.FirstOrDefault(x =>
+                var matchingBaseSettings = locationBase.Base.BotLocationModifier?.AdditionalHostilitySettings?.FirstOrDefault(x =>
                     x.BotRole == settings.BotRole
                 );
                 if (matchingBaseSettings is null)

@@ -1,4 +1,5 @@
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Constants;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
@@ -155,6 +156,21 @@ public class RaidTimeAdjustmentService(
             // Don't let time fall below 0
             wave.TimeMin -= (int)Math.Max(startSeconds, 0);
             wave.TimeMax -= (int)Math.Max(startSeconds, 0);
+        }
+
+        // Now additionally move all PMCs back so they spawn starting at the beginning of the raid
+        var pmcSpawns = mapBase.BossLocationSpawn.Where(boss => boss.BossName is Sides.PmcUsec or Sides.PmcBear);
+        var firstPmcSpawn = pmcSpawns.OrderBy(boss => boss.Time).FirstOrDefault();
+        if (firstPmcSpawn != null)
+        {
+            var pmcStartSeconds = firstPmcSpawn.Time.GetValueOrDefault(1);
+            foreach (var spawn in pmcSpawns)
+            {
+                // Sanity check, the client won't spawn a time of 0
+                spawn.Time = (double)Math.Max(spawn.Time.GetValueOrDefault(1) - pmcStartSeconds, 1);
+            }
+
+            logger.Debug($"Offset PMC spawns by {pmcStartSeconds} seconds");
         }
 
         logger.Debug(
