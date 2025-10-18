@@ -89,14 +89,14 @@ public class ConfigServer
                 }
                 catch (JsonException ex)
                 {
-                    Logger.Error($"Config file: {file} failed to deserialize", ex);
-                    throw new Exception($"Server will not run until the: {file} config error mentioned above is fixed");
+                    Logger.Error($"Config file: {file} failed to deserialize");
+                    throw new Exception($"Server will not run until the: {file} config error mentioned above is fixed", ex);
                 }
 
                 if (deserializedContent == null)
                 {
                     Logger.Error($"Config file: {file} is corrupt. Use a site like: https://jsonlint.com to find the issue.");
-                    throw new Exception($"Server will not run until the: {file} config error mentioned below is fixed");
+                    throw new Exception($"Server will not run until the: {file} config error mentioned above is fixed");
                 }
 
                 _configs[$"spt-{FileUtil.StripExtension(file)}"] = deserializedContent;
