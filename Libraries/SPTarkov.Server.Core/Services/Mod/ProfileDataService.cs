@@ -48,7 +48,7 @@ public class ProfileDataService(ISptLogger<ProfileDataService> logger, FileUtil 
             throw new Exception("The profile data when serialized resulted in a null value");
         }
 
-        while (!_profileDataCache.TryAdd($"{profileId}:{modKey}", data)) { }
+        while (!_profileDataCache.TryAdd($"{profileId}:{modKey}", profileData)) { }
 
         fileUtil.WriteFile($"{ProfileDataFilepath}{profileId}/{modKey}.json", data);
     }
