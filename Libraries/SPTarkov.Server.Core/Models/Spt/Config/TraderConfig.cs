@@ -189,15 +189,3 @@ public record DiscountOptions
     [JsonPropertyName("equipmentPresetMinMax")]
     public required MinMax<int> EquipmentPresetMinMax { get; set; }
 }
-
-/// <summary>
-///     Custom trader data needed client side for things such as the clothing service
-/// </summary>
-public record ModdedTraders
-{
-    /// <summary>
-    ///     Trader Ids to enable the clothing service for
-    /// </summary>
-    [JsonPropertyName("clothingService")]
-    public List<string> ClothingService { get; set; } = [];
-}
