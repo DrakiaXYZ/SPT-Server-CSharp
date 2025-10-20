@@ -84,7 +84,7 @@ public class RagfairController(
         var traderAssorts = ragfairHelper.GetDisplayableAssorts(sessionID);
         var result = new GetOffersResult
         {
-            Offers = [],
+            Offers = null,
             OffersCount = searchRequest.Limit,
             SelectedCategory = searchRequest.HandbookId,
         };
