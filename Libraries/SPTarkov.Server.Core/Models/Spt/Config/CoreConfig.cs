@@ -48,6 +48,7 @@ public record CoreConfig : BaseConfig
 
     // ReSharper disable once InconsistentNaming
     private int _noGCRegionMaxMemoryGB = 4;
+
     [JsonPropertyName("noGCRegionMaxMemoryGB")]
     // ReSharper disable once InconsistentNaming
     public required int NoGCRegionMaxMemoryGB
@@ -57,7 +58,9 @@ public record CoreConfig : BaseConfig
         {
             if (value <= 0)
             {
-                throw new Exception($"Invalid value {nameof(NoGCRegionMaxMemoryGB)}: {value}. Must be greater than zero.");
+                throw new ArgumentOutOfRangeException(
+                    $"Invalid value: {nameof(NoGCRegionMaxMemoryGB)}: {value}. Must be greater than zero."
+                );
             }
             _noGCRegionMaxMemoryGB = value;
         }
@@ -65,6 +68,7 @@ public record CoreConfig : BaseConfig
 
     // ReSharper disable once InconsistentNaming
     private int _noGCRegionMaxLOHMemoryGB = 3;
+
     [JsonPropertyName("noGCRegionMaxLOHMemoryGB")]
     // ReSharper disable once InconsistentNaming
     public required int NoGCRegionMaxLOHMemoryGB
@@ -74,7 +78,9 @@ public record CoreConfig : BaseConfig
         {
             if (value <= 0)
             {
-                throw new Exception($"Invalid value {nameof(NoGCRegionMaxLOHMemoryGB)}: {value}. Must be greater than zero.");
+                throw new ArgumentOutOfRangeException(
+                    $"Invalid value {nameof(NoGCRegionMaxLOHMemoryGB)}: {value}. Must be greater than zero."
+                );
             }
             _noGCRegionMaxLOHMemoryGB = value;
         }
