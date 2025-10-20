@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Text;
@@ -118,6 +119,8 @@ public static class Program
             forwardedHeadersOptions.KnownProxies.Clear();
             app.UseForwardedHeaders(forwardedHeadersOptions);
 
+            app.UseRequestTracking();
+
             SetConsoleOutputMode();
 
             await app.Services.GetRequiredService<SptServerStartupService>().Startup();
@@ -147,14 +150,52 @@ public static class Program
 
         app.UseMiddleware<SptLoggerMiddleware>();
 
-        app.Use(
-            async (HttpContext context, RequestDelegate next) =>
-            {
-                await context.RequestServices.GetRequiredService<HttpServer>().HandleRequest(context, next);
-            }
-        );
+        app.Use(async (context, next) => await HandleRequest(context, next));
 
         app.UseSptBlazor();
+    }
+
+    private static async Task HandleRequest(HttpContext context, RequestDelegate next)
+    {
+        var config = context.RequestServices.GetRequiredService<ConfigServer>().GetConfig<CoreConfig>();
+
+        // if no other requests are running, start the no GC region, otherwise dont start it
+        if (!RequestTrackingMiddleware.OtherRequestsActive)
+        {
+            if (config.EnableNoGCRegions && GCSettings.LatencyMode != GCLatencyMode.NoGCRegion)
+            {
+                try
+                {
+                    GC.TryStartNoGCRegion(
+                        1024L * 1024L * 1024L * config.NoGCRegionMaxMemoryGB,
+                        1024L * 1024L * 1024L * config.NoGCRegionMaxLOHMemoryGB,
+                        true
+                    );
+                }
+                catch (Exception)
+                {
+                    // ignored, we keep going
+                }
+            }
+        }
+
+        await context.RequestServices.GetRequiredService<HttpServer>().HandleRequest(context, next);
+
+        // if no other requests are running, end the no GC region, otherwise dont stop it as other requests need it still
+        if (!RequestTrackingMiddleware.OtherRequestsActive)
+        {
+            if (config.EnableNoGCRegions && GCSettings.LatencyMode == GCLatencyMode.NoGCRegion)
+            {
+                try
+                {
+                    GC.EndNoGCRegion();
+                }
+                catch (Exception)
+                {
+                    // ignored, we dont care about handling this
+                }
+            }
+        }
     }
 
     private static void ConfigureKestrel(WebApplicationBuilder builder)

@@ -5,6 +5,9 @@
   "profileSaveIntervalSeconds": 15,
   "sptFriendNickname": "SPT",
   "allowProfileWipe": true,
+  "enableNoGCRegions": true,
+  "noGCRegionMaxMemoryGB": 4,
+  "noGCRegionMaxLOHMemoryGB": 3,
   "bsgLogging": {
     "verbosity": 6,
     "sendToServer": false
