@@ -7,13 +7,13 @@ namespace SPTarkov.Server.Services;
 // ReSharper disable once InconsistentNaming
 public class NoGCRegionMiddleware(RequestDelegate next)
 {
-    private static int _activeRequests;
+    private static long _activeRequests;
 
     private static bool OtherRequestsActive
     {
         get
         {
-            return _activeRequests > 1;
+            return Interlocked.Read(ref _activeRequests) > 1;
         }
     }
 
