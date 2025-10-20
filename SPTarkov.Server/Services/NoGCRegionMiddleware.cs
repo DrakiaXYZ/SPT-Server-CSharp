@@ -11,10 +11,7 @@ public class NoGCRegionMiddleware(RequestDelegate next)
 
     private static bool OtherRequestsActive
     {
-        get
-        {
-            return Interlocked.Read(ref _activeRequests) > 1;
-        }
+        get { return Interlocked.Read(ref _activeRequests) > 1; }
     }
 
     public async Task InvokeAsync(HttpContext context)
