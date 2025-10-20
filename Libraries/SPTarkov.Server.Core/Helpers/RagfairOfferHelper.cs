@@ -232,12 +232,13 @@ public class RagfairOfferHelper(
         var tieredFlea = RagfairConfig.TieredFlea;
         var tieredFleaLimitTypes = tieredFlea.UnlocksType;
 
-        foreach (var desiredItemTpl in searchRequest.BuildItems)
+        // Clone offers when tiered flea enabled as we may modify the offer
+        var buildItems = tieredFlea.Enabled
+            ? cloner.Clone(searchRequest.BuildItems.Keys.ToDictionary(key => key, ragfairOfferService.GetOffersOfType))
+            : searchRequest.BuildItems.Keys.ToDictionary(key => key, ragfairOfferService.GetOffersOfType);
+
+        foreach (var (desiredItemTpl, matchingOffers) in buildItems)
         {
-            // Clone offers when tiered flea enabled as we may modify the offer
-            var matchingOffers = tieredFlea.Enabled
-                ? cloner.Clone(ragfairOfferService.GetOffersOfType(desiredItemTpl.Key))
-                : ragfairOfferService.GetOffersOfType(desiredItemTpl.Key);
             if (matchingOffers is null)
             // No offers found for this item, skip
             {
