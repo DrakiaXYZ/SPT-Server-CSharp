@@ -179,7 +179,7 @@ public class InRaidHelper(
         }
 
         // Remove contents of fast panel
-        pmcData.Inventory.FastPanel = new Dictionary<string, MongoId>();
+        pmcData.Inventory.FastPanel = [];
     }
 
     /// <summary>
