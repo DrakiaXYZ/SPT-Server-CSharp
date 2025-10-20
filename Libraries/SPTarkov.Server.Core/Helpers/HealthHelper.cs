@@ -41,8 +41,10 @@ public class HealthHelper(ISptLogger<HealthHelper> logger, TimeUtil timeUtil, Co
             throw new HealthHelperException(message);
         }
 
+        var playerWasCursed = !PlayerHadGearOnRaidStart(pmcProfileToUpdate.Inventory);
+
         // Alter saved profiles Health with values from post-raid client data
-        ModifyProfileHealthProperties(pmcProfileToUpdate, healthChanges.BodyParts, EffectsToSkip);
+        ModifyProfileHealthProperties(pmcProfileToUpdate, healthChanges.BodyParts, EffectsToSkip, playerWasCursed);
 
         // Adjust hydration/energy/temperature
         AdjustProfileHydrationEnergyTemperature(pmcProfileToUpdate, healthChanges);
@@ -59,15 +61,54 @@ public class HealthHelper(ISptLogger<HealthHelper> logger, TimeUtil timeUtil, Co
     }
 
     /// <summary>
+    /// Did the player start raid with gear, if false, they are 'cursed'
+    /// </summary>
+    /// <param name="inventory">Players inventory at start of raid</param>
+    /// <returns>True = they had enough gear to not be classed as 'cursed'</returns>
+    protected bool PlayerHadGearOnRaidStart(BotBaseInventory inventory)
+    {
+        if (inventory?.Items == null)
+        {
+            return false;
+        }
+
+        var hasWeapon = false;
+        var hasVestRigOrBackpack = false;
+        foreach (var item in inventory.Items)
+        {
+            // Possible early escape
+            if (hasWeapon && hasVestRigOrBackpack)
+            {
+                return true;
+            }
+
+            if (item.SlotId is "FirstPrimaryWeapon" or "SecondPrimaryWeapon" or "Holster")
+            {
+                hasWeapon = true;
+                continue;
+            }
+
+            if (item.SlotId is "Backpack" or "ArmorVest" or "TacticalVest")
+            {
+                hasVestRigOrBackpack = true;
+            }
+        }
+
+        return hasWeapon && hasVestRigOrBackpack;
+    }
+
+    /// <summary>
     ///     Apply Health values to profile
     /// </summary>
     /// <param name="profileToAdjust">Player profile on server</param>
     /// <param name="bodyPartChanges">Changes to apply</param>
     /// <param name="effectsToSkip"></param>
+    /// <param name="playerWasCursed">Did player enter raid with no equipment</param>
     protected void ModifyProfileHealthProperties(
         PmcData profileToAdjust,
         Dictionary<string, BodyPartHealth> bodyPartChanges,
-        HashSet<string>? effectsToSkip = null
+        HashSet<string>? effectsToSkip = null,
+        bool playerWasCursed = false
     )
     {
         foreach (var (partName, partProperties) in bodyPartChanges)
@@ -96,6 +137,12 @@ public class HealthHelper(ISptLogger<HealthHelper> logger, TimeUtil timeUtil, Co
                         : partProperties.Health.Current;
 
                 matchingProfilePart.Health.Maximum = partProperties.Health.Maximum;
+
+                // Cursed player + limb was not lost, reset to 20%
+                if (playerWasCursed && matchingProfilePart.Health.Current > 20)
+                {
+                    matchingProfilePart.Health.Current = 20;
+                }
             }
 
             // Process each effect for each part
