@@ -58,7 +58,22 @@ public class JsonExtensionDataPatch : IPatcher
             get.Body.Instructions.Add(Instruction.Create(OpCodes.Ldfld, field));
             get.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
+            // Add setter
+            var set = new MethodDefinition(
+                "set_ExtensionData",
+                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+                assembly.MainModule.TypeSystem.Void
+            );
+
+            set.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, _dictionaryStringObjectReference));
+            set.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            set.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+            set.Body.Instructions.Add(Instruction.Create(OpCodes.Stfld, field));
+            set.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+            propertyDefinition.SetMethod = set;
             propertyDefinition.GetMethod = get;
+            typeDefinition.Methods.Add(set);
             typeDefinition.Methods.Add(get);
 
             typeDefinition.Properties.Add(propertyDefinition);
