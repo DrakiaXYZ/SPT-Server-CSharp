@@ -70,7 +70,12 @@ public class SaveServer(
         var stopwatch = Stopwatch.StartNew();
         foreach (var file in files)
         {
-            await LoadProfileAsync(fileUtil.StripExtension(file));
+            // Only allow files that fit the criteria of being a mongo id be parsed
+            var filename = Path.GetFileNameWithoutExtension(file);
+            if (MongoId.IsValidMongoId(filename))
+            {
+                await LoadProfileAsync(fileUtil.StripExtension(file));
+            }
         }
 
         stopwatch.Stop();
