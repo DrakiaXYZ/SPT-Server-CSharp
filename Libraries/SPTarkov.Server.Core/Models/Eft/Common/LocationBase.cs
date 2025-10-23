@@ -884,6 +884,12 @@ public record Exit
     public string? Side { get; set; }
 }
 
+public record AllExtractsExit : Exit
+{
+    [JsonPropertyName("SptName")]
+    public string? SptName { get; set; }
+}
+
 public record MaxItemCountInLocation
 {
     [JsonPropertyName("TemplateId")]

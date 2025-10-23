@@ -40,10 +40,10 @@ public record Location
     public StaticContainer? Statics { get; set; }
 
     /// <summary>
-    ///     All possible map extracts
+    ///     All possible map extracts extracted from client via modules patch
     /// </summary>
     [JsonPropertyName("allExtracts")]
-    public IEnumerable<Exit> AllExtracts { get; set; }
+    public IEnumerable<AllExtractsExit> AllExtracts { get; set; }
 }
 
 public record StaticContainer
