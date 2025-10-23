@@ -56,7 +56,7 @@ public class Watermark(
     {
         var versionTag = GetVersionTag();
 
-        versionLabel = $"{sptConfig.ProjectName} {versionTag} | EFT {sptConfig.CompatibleTarkovVersion}";
+        versionLabel = $"{sptConfig.ProjectName} {versionTag}";
 
         text.Add(versionLabel);
         text.AddRange(watermarkLocale.Description);
