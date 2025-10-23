@@ -69,11 +69,9 @@ public class BuyRestrictionMaxStringToInt : AbstractProfileMigration
                     continue;
                 }
 
-                if (itemObj["upd"] is JsonObject updObj &&
-                    updObj.TryGetPropertyValue("BuyRestrictionMax", out var buyRestrictionMaxNode))
+                if (itemObj["upd"] is JsonObject updObj && updObj.TryGetPropertyValue("BuyRestrictionMax", out var buyRestrictionMaxNode))
                 {
-                    if (buyRestrictionMaxNode is JsonValue value &&
-                        value.TryGetValue(out string? strValue))
+                    if (buyRestrictionMaxNode is JsonValue value && value.TryGetValue(out string? strValue))
                     {
                         if (int.TryParse(strValue, out var intValue))
                         {
