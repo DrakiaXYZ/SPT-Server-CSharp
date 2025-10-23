@@ -867,12 +867,6 @@ public record Exit
     [JsonPropertyName("Name")]
     public string? Name { get; set; }
 
-    [JsonPropertyName("_Name")]
-    public string? _Name { get; set; }
-
-    [JsonPropertyName("_name")]
-    public string? _NameLower { get; set; }
-
     [JsonPropertyName("PassageRequirement")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public RequirementState PassageRequirement { get; set; }
