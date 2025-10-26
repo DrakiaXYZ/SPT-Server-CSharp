@@ -13,6 +13,9 @@ public record BackupConfig : BaseConfig
     [JsonPropertyName("maxBackups")]
     public int MaxBackups { get; set; }
 
+    [JsonPropertyName("backupCooldown")]
+    public int BackupCooldown { get; set; }
+
     [JsonPropertyName("directory")]
     public string Directory { get; set; } = string.Empty;
 

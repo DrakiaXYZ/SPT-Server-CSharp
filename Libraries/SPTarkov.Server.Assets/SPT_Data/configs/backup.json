@@ -1,6 +1,7 @@
 {
   "enabled": true,
   "maxBackups": 15,
+  "backupCooldown": 30,
   "directory": "./user/profiles/backups",
   "backupInterval": {
     "enabled": false,
