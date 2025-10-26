@@ -40,7 +40,7 @@
         "question_1_answer_7": "Tag staff to inform them of your displeasure of a mod you don't like being released",
         "question_1_answer_8": "DM the author informing them of your displeasure at their mods existence",
         "question_1_answer_9": "DM the author and inform them you are going to sue them",
-        "question_1_answer_10": "Stalk the author and create dozens of hub accounts to message them",
+        "question_1_answer_10": "Stalk the author and create dozens of forge accounts to message them",
 
         "question_2": "You want to download an older version of SPT but you have been informed old versions cannot be downloaded, what do you do?",
         "question_2_answer_1": "Get mad",
@@ -48,10 +48,27 @@
         "question_2_answer_3": "Travel around various discords informing anyone who listens what bad people SPT are",
         "question_2_answer_4": "Create dozens of alt accounts to DM staff and inform them of your displeasure",
         "question_2_answer_5": "Ask when the old SPT version is coming back every day for weeks",
+		
+		"question_3": "You are requesting help on the discord, what should you do?",
+        "question_3_answer_1": "Ignore the FAQ and any channel vaguely support related",
+        "question_3_answer_2": "Post in the pets channel, haha meow meow",
+        "question_3_answer_3": "Pretend discord search does not exist and has never existed",
+        "question_3_answer_4": "DM staff",
+        "question_3_answer_5": "DM staff AND helpers, its their job to help",
+        "question_3_answer_6": "DM staff, helpers AND anyone with a colored name, one of them will surely know the answer",
+        "question_3_answer_7": "Post no logs, people should know what the problem is without me explaining",
+        "question_3_answer_8": "Post logs in any channel EXCEPT support",
+        "question_3_answer_9": "Ask for help in the support channel, but its for your friend who goes to a different hideout, they wouldn't know them",
+        "question_3_answer_10": "Ask for help in the support channel then immediately disappear for 72 hours and ignore any responses",
+        "question_3_answer_11": "Start insulting helpers when they give you the answer that resolves your problem",
+        "question_3_answer_12": "Go insane and get permabanned when asked basic questions about your problem",
+        "question_3_answer_13": "Ask for help with FIKA and then threaten to kill people when you're told to instead get help in FIKA discord",
+        "question_3_answer_14": "Ask in the correct channel, post logs, get an answer and then when asked if the suggestion fixed the problem, DISAPPEAR AND NEVER BE SEEN FROM EVER AGAIN",
+		
         "title": "Feedback survey",
         "time": "About 1 minute",
-        "description": "This was the second SPT survey, what a valuable use of 20 minutes that was.",
-        "farewell": "You knew the first survey didn't do anything yet you still submitted the second one, you're quite an odd one."
+        "description": "This was the third SPT survey, thanks for the data.",
+        "farewell": "You keep filling these out even after we tell you they don't do anything, curious."
       }
     },
     "survey": {
@@ -67,7 +84,8 @@
       "pages": [
         [
           0,
-          1
+          1,
+		  2
         ]
       ],
       "questions": [
@@ -178,6 +196,100 @@
               "questionId": 1,
               "sortIndex": 1,
               "localeKey": "question_2_answer_5"
+            }
+          ]
+        },
+		{
+          "id": 2,
+          "sortIndex": 1,
+          "titleLocaleKey": "question_3",
+          "hintLocaleKey": "",
+          "answerLimit": 5,
+          "answerType": "MultiOption",
+          "answers": [
+            {
+              "id": 0,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_1"
+            },
+            {
+              "id": 1,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_2"
+            },
+            {
+              "id": 2,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_3"
+            },
+            {
+              "id": 3,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_4"
+            },
+            {
+              "id": 4,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_5"
+            },
+            {
+              "id": 5,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_6"
+            },
+            {
+              "id": 6,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_7"
+            },
+            {
+              "id": 7,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_8"
+            },
+            {
+              "id": 8,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_9"
+            },
+            {
+              "id": 9,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_10"
+            },
+            {
+              "id": 10,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_11"
+            },
+            {
+              "id": 11,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_12"
+            },
+            {
+              "id": 12,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_13"
+            },
+            {
+              "id": 13,
+              "questionId": 2,
+              "sortIndex": 1,
+              "localeKey": "question_3_answer_14"
             }
           ]
         }
