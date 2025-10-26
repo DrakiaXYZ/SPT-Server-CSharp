@@ -48,8 +48,8 @@
         "question_2_answer_3": "Travel around various discords informing anyone who listens what bad people SPT are",
         "question_2_answer_4": "Create dozens of alt accounts to DM staff and inform them of your displeasure",
         "question_2_answer_5": "Ask when the old SPT version is coming back every day for weeks",
-		
-		"question_3": "You are requesting help on the discord, what should you do?",
+
+        "question_3": "You are requesting help on the discord, what should you do?",
         "question_3_answer_1": "Ignore the FAQ and any channel vaguely support related",
         "question_3_answer_2": "Post in the pets channel, haha meow meow",
         "question_3_answer_3": "Pretend discord search does not exist and has never existed",
@@ -64,7 +64,7 @@
         "question_3_answer_12": "Go insane and get permabanned when asked basic questions about your problem",
         "question_3_answer_13": "Ask for help with FIKA and then threaten to kill people when you're told to instead get help in FIKA discord",
         "question_3_answer_14": "Ask in the correct channel, post logs, get an answer and then when asked if the suggestion fixed the problem, DISAPPEAR AND NEVER BE SEEN FROM EVER AGAIN",
-		
+
         "title": "Feedback survey",
         "time": "About 1 minute",
         "description": "This was the third SPT survey, thanks for the data.",
@@ -85,7 +85,7 @@
         [
           0,
           1,
-		  2
+          2
         ]
       ],
       "questions": [
@@ -199,7 +199,7 @@
             }
           ]
         },
-		{
+        {
           "id": 2,
           "sortIndex": 1,
           "titleLocaleKey": "question_3",
