@@ -26,6 +26,7 @@ public class LocationLifecycleService(
     TimeUtil timeUtil,
     DatabaseService databaseService,
     ProfileHelper profileHelper,
+    BackupService backupService,
     ProfileActivityService profileActivityService,
     BotNameService botNameService,
     ICloner cloner,
@@ -77,6 +78,9 @@ public class LocationLifecycleService(
     /// </summary>
     public virtual StartLocalRaidResponseData StartLocalRaid(MongoId sessionId, StartLocalRaidRequestData request)
     {
+        // Backup the profile on raid start
+        backupService.Init().GetAwaiter().GetResult();
+
         logger.Debug($"Starting: {request.Location}");
 
         var playerProfile = profileHelper.GetFullProfile(sessionId);
@@ -409,6 +413,10 @@ public class LocationLifecycleService(
             HandleCoopExtract(sessionId, pmcProfile, request.Results.ExitName);
             SendCoopTakenFenceMessage(sessionId);
         }
+
+        // Save and backup the profile on raid end
+        saveServer.SaveProfileAsync(sessionId).GetAwaiter().GetResult();
+        backupService.Init().GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -622,7 +630,7 @@ public class LocationLifecycleService(
         pmcProfile.Info.LastTimePlayedAsSavage = timeUtil.GetTimeStamp();
 
         // Force a profile save
-        saveServer.SaveProfileAsync(sessionId);
+        saveServer.SaveProfileAsync(sessionId).GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -784,11 +792,7 @@ public class LocationLifecycleService(
         MergePmcAndScavEncyclopedias(serverPmcProfile, scavProfile);
 
         // Handle temp, hydration, limb hp/effects
-        healthHelper.ApplyHealthChangesToProfile(sessionId, serverPmcProfile, postRaidProfile.Health);
-
-        // Required when player loses limb in-raid and fixes it, max now stuck at 50% or less if lost multiple times
-        var profileTemplate = profileHelper.GetProfileTemplateForSide(fullServerProfile.ProfileInfo.Edition, serverPmcProfile.Info.Side);
-        serverPmcProfile.ResetMaxLimbHp(profileTemplate);
+        healthHelper.ApplyHealthChangesToProfile(sessionId, serverPmcProfile, postRaidProfile.Health, isDead);
 
         if (isTransfer)
         {

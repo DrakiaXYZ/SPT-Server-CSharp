@@ -127,7 +127,7 @@ public record BotConfig : BaseConfig
     public required HashSet<string> BotRolesThatMustHaveUniqueName { get; set; }
 
     /// <summary>
-    ///     Bot roles that must have a unique name when generated vs other bots in raid
+    ///     Values relating to the weekly boss system - a boss is randomly picked each week to spawn at 100% of the time
     /// </summary>
     [JsonPropertyName("weeklyBoss")]
     public required WeeklyBossSettings WeeklyBoss { get; set; }

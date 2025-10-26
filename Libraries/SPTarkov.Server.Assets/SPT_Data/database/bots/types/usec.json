@@ -688,7 +688,7 @@
     },
     "hard": {
       "Aiming": {
-        "AIMING_TYPE": 2,
+        "AIMING_TYPE": 4,
         "ANYTIME_LIGHT_WHEN_AIM_100": 70,
         "ANY_PART_SHOOT_TIME": 900,
         "BASE_HIT_AFFECTION_DELAY_SEC": 0.2,

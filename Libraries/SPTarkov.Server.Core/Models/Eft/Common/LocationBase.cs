@@ -867,12 +867,6 @@ public record Exit
     [JsonPropertyName("Name")]
     public string? Name { get; set; }
 
-    [JsonPropertyName("_Name")]
-    public string? _Name { get; set; }
-
-    [JsonPropertyName("_name")]
-    public string? _NameLower { get; set; }
-
     [JsonPropertyName("PassageRequirement")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public RequirementState PassageRequirement { get; set; }
@@ -888,6 +882,12 @@ public record Exit
 
     [JsonPropertyName("Side")]
     public string? Side { get; set; }
+}
+
+public record AllExtractsExit : Exit
+{
+    [JsonPropertyName("SptName")]
+    public string? SptName { get; set; }
 }
 
 public record MaxItemCountInLocation

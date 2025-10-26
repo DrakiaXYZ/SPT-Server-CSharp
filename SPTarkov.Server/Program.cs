@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Text;
@@ -147,12 +148,9 @@ public static class Program
 
         app.UseMiddleware<SptLoggerMiddleware>();
 
-        app.Use(
-            async (HttpContext context, RequestDelegate next) =>
-            {
-                await context.RequestServices.GetRequiredService<HttpServer>().HandleRequest(context, next);
-            }
-        );
+        app.UseNoGCRegions();
+
+        app.Use(async (context, next) => await context.RequestServices.GetRequiredService<HttpServer>().HandleRequest(context, next));
 
         app.UseSptBlazor();
     }

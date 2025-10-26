@@ -29,6 +29,7 @@ public class BotLootCacheService(
     private readonly Lock _grenadeLock = new();
     private readonly Lock _specialLock = new();
     private readonly Lock _healingLock = new();
+    private readonly Lock _lootCacheGeneratedLock = new();
 
     /// <summary>
     ///     Remove cached bot loot data
@@ -47,7 +48,7 @@ public class BotLootCacheService(
     /// <param name="botJsonTemplate">Base json db file for the bot having its loot generated</param>
     /// <param name="itemPriceMinMax">OPTIONAL - item price min and max value filter</param>
     /// <remarks>THIS IS NOT A THREAD SAFE METHOD</remarks>
-    /// <returns>dictionary</returns>
+    /// <returns>dictionary, key = item tpl, value = weight</returns>
     public Dictionary<MongoId, double> GetLootFromCache(
         string botRole,
         bool isPmc,
@@ -56,10 +57,14 @@ public class BotLootCacheService(
         MinMax<double>? itemPriceMinMax = null
     )
     {
-        if (!BotRoleExistsInCache(botRole))
+        // Ensure cache is hydrated before use
+        lock (_lootCacheGeneratedLock)
         {
-            InitCacheForBotRole(botRole);
-            AddLootToCache(botRole, isPmc, botJsonTemplate);
+            if (!BotRoleExistsInCache(botRole))
+            {
+                InitCacheForBotRole(botRole);
+                AddLootToCache(botRole, isPmc, botJsonTemplate);
+            }
         }
 
         if (!_lootCache.TryGetValue(botRole, out var botRoleCache))

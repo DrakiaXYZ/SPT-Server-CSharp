@@ -171,7 +171,7 @@ public class BotGeneratorHelper(
     }
 
     /// <summary>
-    ///     Randomize the HpResource for bots e.g (245/400 resources)
+    ///     Choose a random value between a min and max for a resource to be
     /// </summary>
     /// <param name="maxResource">Max resource value of medical items</param>
     /// <param name="randomizationValues">Value provided from config</param>
@@ -188,12 +188,11 @@ public class BotGeneratorHelper(
             return 1;
         }
 
-        var min = randomUtil.GetPercentOfValue(randomizationValues.ResourcePercent, maxResource, 0);
+        // Generate a randomised min value the resource could have
+        var min = Math.Max(1, randomUtil.GetPercentOfValue(randomizationValues.ResourcePercent, maxResource, 0));
 
-        // Using food at 0 causes client to error
-        var clampedMin = Math.Clamp(min, 1, min);
-
-        return randomUtil.GetDouble(clampedMin, maxResource);
+        // Choose value from randomised min and resource max possible
+        return randomUtil.GetDouble(min, maxResource);
     }
 
     /// <summary>

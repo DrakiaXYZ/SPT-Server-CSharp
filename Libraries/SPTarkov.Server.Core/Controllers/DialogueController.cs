@@ -469,7 +469,6 @@ public class DialogueController(
         foreach (var dialogId in dialogueIds)
         {
             dialogs[dialogId].New = 0;
-            dialogs[dialogId].AttachmentsNew = 0;
         }
     }
 
@@ -490,9 +489,6 @@ public class DialogueController(
 
             return null;
         }
-
-        // Removes corner 'new messages' tag
-        dialogInfo!.AttachmentsNew = 0;
 
         var activeMessages = GetActiveMessagesFromDialog(sessionId, dialogueId);
         var messagesWithAttachments = GetMessageWithAttachments(activeMessages);

@@ -50,14 +50,13 @@ public class DialogueHelper(ISptLogger<DialogueHelper> logger, ProfileHelper pro
     public List<Item>? GetMessageItemContents(MongoId messageId, MongoId sessionId, MongoId itemId)
     {
         var fullProfile = profileHelper.GetFullProfile(sessionId);
-        var dialogueData = fullProfile.DialogueRecords;
-        if (dialogueData is null)
+        if (fullProfile.DialogueRecords is null)
         {
             logger.Error("DialogueData is null when trying to get message item contents");
             return [];
         }
 
-        foreach (var (dialogId, dialog) in dialogueData)
+        foreach (var (dialogId, dialog) in fullProfile.DialogueRecords)
         {
             var message = dialog.Messages?.FirstOrDefault(x => x.Id == messageId);
             if (message is null)
@@ -65,32 +64,21 @@ public class DialogueHelper(ISptLogger<DialogueHelper> logger, ProfileHelper pro
                 continue;
             }
 
-            if (message.Id != messageId)
-            {
-                continue;
-            }
-
-            if (fullProfile.DialogueRecords is null)
-            {
-                continue;
-            }
-
-            var attachmentsNew = fullProfile.DialogueRecords[dialogId].AttachmentsNew;
-            if (attachmentsNew > 0)
-            {
-                fullProfile.DialogueRecords[dialogId].AttachmentsNew = attachmentsNew - 1;
-            }
-
-            // Check reward count when item being moved isn't in reward list
-            // If count is 0, it means after this move occurs the reward array will be empty and all rewards collected
             message.Items ??= new MessageItems();
             message.Items.Data ??= [];
 
-            var messageItems = message.Items.Data?.Where(x => x.Id != itemId);
-            if (messageItems is null || !messageItems.Any())
+            // Check reward count when item being moved isn't in reward list
+            // If count is 0, it means after this move occurs the reward array will be empty and all rewards collected
+            var remainingItems = message.Items.Data.Where(x => x.Id != itemId);
+            if (!remainingItems.Any())
             {
                 message.RewardCollected = true;
                 message.HasRewards = false;
+
+                if (dialog.AttachmentsNew > 0)
+                {
+                    dialog.AttachmentsNew--;
+                }
             }
 
             return message.Items.Data;

@@ -25,7 +25,7 @@
   {
     "Chance": 50,
     "ChancePVE": 50,
-    "Count": 40000,
+    "Count": 5000,
     "CountPVE": 0,
     "EntryPoints": "Customs,Boiler Tanks",
     "EventAvailable": false,

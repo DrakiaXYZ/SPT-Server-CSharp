@@ -1175,17 +1175,23 @@ public class HideoutController(
     /// <param name="finishEffect">Effect data to apply after completing QTE gym event</param>
     protected void HandleMusclePain(PmcData pmcData, QteResult finishEffect)
     {
-        var hasMildPain = pmcData.Health.BodyParts["Chest"].Effects?.ContainsKey("MildMusclePain");
-        var hasSeverePain = pmcData.Health.BodyParts["Chest"].Effects?.ContainsKey("SevereMusclePain");
+        if (!pmcData.Health.BodyParts.TryGetValue("Chest", out var chest))
+        {
+            logger.Error($"Unable to apply muscle pain effect to player: {pmcData.Id.ToString}. They lack a chest");
+
+            return;
+        }
+        var hasMildPain = chest.Effects?.ContainsKey("MildMusclePain");
+        var hasSeverePain = chest.Effects?.ContainsKey("SevereMusclePain");
 
         // Has no muscle pain at all, add mild
         if (!hasMildPain.GetValueOrDefault(false) && !hasSeverePain.GetValueOrDefault(false))
         {
-            // Nullguard
-            pmcData.Health.BodyParts["Chest"].Effects ??= new();
-            pmcData.Health.BodyParts["Chest"].Effects["MildMusclePain"] = new BodyPartEffectProperties
+            // Create effects as it may not exist
+            chest.Effects ??= [];
+            chest.Effects["MildMusclePain"] = new BodyPartEffectProperties
             {
-                Time = finishEffect.RewardEffects.FirstOrDefault().Time, // TODO - remove hard coded access, get value properly
+                Time = finishEffect.RewardEffects.FirstOrDefault()?.Time, // TODO - remove hard coded access, get value properly
             };
 
             return;
@@ -1194,12 +1200,9 @@ public class HideoutController(
         if (hasMildPain.GetValueOrDefault(false))
         {
             // Already has mild pain, remove mild and add severe
-            pmcData.Health.BodyParts["Chest"].Effects.Remove("MildMusclePain");
+            chest.Effects.Remove("MildMusclePain");
 
-            pmcData.Health.BodyParts["Chest"].Effects["SevereMusclePain"] = new BodyPartEffectProperties
-            {
-                Time = finishEffect.RewardEffects.FirstOrDefault().Time,
-            };
+            chest.Effects["SevereMusclePain"] = new BodyPartEffectProperties { Time = finishEffect.RewardEffects.FirstOrDefault()?.Time };
         }
     }
 

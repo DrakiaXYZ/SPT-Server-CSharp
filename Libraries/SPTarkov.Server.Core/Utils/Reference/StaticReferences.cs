@@ -12,5 +12,6 @@ public class StaticReferences
     public Dictionary<string, object> Reference
     {
         get { return _reference; }
+        set { _reference = value; }
     }
 }

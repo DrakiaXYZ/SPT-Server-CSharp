@@ -240,27 +240,34 @@ public class CustomItemService(
     /// <param name="newItemId"> ID of the item being created </param>
     protected void AddToLocaleDbs(Dictionary<string, LocaleDetails> localeDetails, string newItemId)
     {
+        // Validate that there's atleast one locale to use as a default
+        var defaultLocale = localeDetails.Keys.FirstOrDefault();
+        if (defaultLocale == null)
+        {
+            return;
+        }
+
         var languages = databaseService.GetLocales().Languages;
         foreach (var shortNameKey in languages)
         {
             // Get locale details passed in, if not provided by caller use first record in newItemDetails.locales
             localeDetails.TryGetValue(shortNameKey.Key, out var newLocaleDetails);
 
-            newLocaleDetails ??= localeDetails[localeDetails.Keys.FirstOrDefault()];
+            newLocaleDetails ??= localeDetails[defaultLocale];
+
+            // If there's no name defined, don't add a transformer, the mod is probably handling locales elsewhere
+            if (newLocaleDetails.Name == null)
+            {
+                continue;
+            }
 
             if (databaseService.GetLocales().Global.TryGetValue(shortNameKey.Key, out var lazyLoad))
             {
                 lazyLoad.AddTransformer(localeData =>
                 {
-                    if (!localeData.TryAdd($"{newItemId} Name", newLocaleDetails.Name))
-                    {
-                        logger.Error($"Error adding locale `{newItemId} Name` to {shortNameKey.Key}, duplicate key");
-                    }
-                    else
-                    {
-                        localeData.TryAdd($"{newItemId} ShortName", newLocaleDetails.ShortName);
-                        localeData.TryAdd($"{newItemId} Description", newLocaleDetails.Description);
-                    }
+                    localeData![$"{newItemId} Name"] = newLocaleDetails.Name;
+                    localeData[$"{newItemId} ShortName"] = newLocaleDetails.ShortName ?? "";
+                    localeData[$"{newItemId} Description"] = newLocaleDetails.Description ?? "";
 
                     return localeData;
                 });

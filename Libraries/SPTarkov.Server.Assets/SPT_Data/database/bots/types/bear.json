@@ -62,8 +62,8 @@
       "619f94f5b90286142b59d45f": 10,
       "62a9e7d15ea3b87d6f642a28": 10,
       "6574aa9a1b144de18c0fba45": 10,
-      "675ac3957908e416a20861e6": 10,
-      "6644d2da35d958070c02642c": 0
+      "6644d2da35d958070c02642c": 0,
+      "675ac3957908e416a20861e6": 10
     },
     "voice": {
       "5fc1221a95572123ae7384a2": 1,
@@ -697,7 +697,7 @@
     },
     "hard": {
       "Aiming": {
-        "AIMING_TYPE": 2,
+        "AIMING_TYPE": 4,
         "ANYTIME_LIGHT_WHEN_AIM_100": 70,
         "ANY_PART_SHOOT_TIME": 900,
         "BASE_HIT_AFFECTION_DELAY_SEC": 0.2,

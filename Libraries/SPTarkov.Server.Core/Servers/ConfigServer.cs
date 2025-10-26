@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Text.Json;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Config;
@@ -75,12 +76,27 @@ public class ConfigServer
             if (acceptableFileExtensions.Contains(FileUtil.GetFileExtension(file)))
             {
                 var type = GetConfigTypeByFilename(file);
-                var deserializedContent = JsonUtil.DeserializeFromFile(file, type);
+                if (type == null)
+                {
+                    Logger.Error($"Config file: {file} has no associated ConfigTypes entry. Skipping");
+                    continue;
+                }
+
+                object? deserializedContent = null;
+                try
+                {
+                    deserializedContent = JsonUtil.DeserializeFromFile(file, type);
+                }
+                catch (JsonException ex)
+                {
+                    Logger.Error($"Config file: {file} failed to deserialize");
+                    throw new Exception($"Server will not run until the: {file} config error mentioned above is fixed", ex);
+                }
 
                 if (deserializedContent == null)
                 {
                     Logger.Error($"Config file: {file} is corrupt. Use a site like: https://jsonlint.com to find the issue.");
-                    throw new Exception($"Server will not run until the: {file} config error mentioned above is  fixed");
+                    throw new Exception($"Server will not run until the: {file} config error mentioned above is fixed");
                 }
 
                 _configs[$"spt-{FileUtil.StripExtension(file)}"] = deserializedContent;
@@ -88,9 +104,16 @@ public class ConfigServer
         }
     }
 
-    private Type GetConfigTypeByFilename(string filename)
+    private Type? GetConfigTypeByFilename(string filename)
     {
-        var type = Enum.GetValues<ConfigTypes>().First(en => en.GetValue().Contains(FileUtil.StripExtension(filename)));
+        Func<ConfigTypes, bool> filterMethod = (entry => entry.GetValue().Contains(FileUtil.StripExtension(filename)));
+
+        if (!Enum.GetValues<ConfigTypes>().Any(filterMethod))
+        {
+            return null;
+        }
+
+        var type = Enum.GetValues<ConfigTypes>().First(filterMethod);
         return type.GetConfigType();
     }
 }

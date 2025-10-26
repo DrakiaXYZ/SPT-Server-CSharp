@@ -137,7 +137,7 @@ public class RepeatableQuestController(
         var repeatableConfig = QuestConfig.RepeatableQuests.FirstOrDefault(config => config.Name == repeatablesOfTypeInProfile.Name);
 
         // If the configuration dictates to replace with the same quest type, adjust the available quest types
-        if (repeatableConfig?.KeepDailyQuestTypeOnReplacement is not null)
+        if (repeatableConfig?.KeepDailyQuestTypeOnReplacement is not null && repeatableConfig.KeepDailyQuestTypeOnReplacement)
         {
             repeatableConfig.Types = [questToReplace.Type.ToString()];
         }

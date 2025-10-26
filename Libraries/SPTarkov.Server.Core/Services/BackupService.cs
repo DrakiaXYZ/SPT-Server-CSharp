@@ -13,12 +13,16 @@ namespace SPTarkov.Server.Core.Services;
 public class BackupService
 {
     protected const string ProfileDir = "./user/profiles";
+    protected const string activeModsFilename = "activeMods.json";
 
     protected readonly List<string> ActiveServerMods;
     protected readonly BackupConfig BackupConfig;
 
     // Runs Init() every x minutes
     protected Timer _backupIntervalTimer;
+
+    protected SemaphoreSlim BackupLock = new SemaphoreSlim(1, 1);
+    protected long LastBackupTimestamp;
 
     protected readonly FileUtil FileUtil;
     protected readonly JsonUtil JsonUtil;
@@ -77,7 +81,7 @@ public class BackupService
     }
 
     /// <summary>
-    ///     Initializes the backup process. <br />
+    ///     Run the backup process. <br />
     ///     This method orchestrates the profile backup service. Handles copying profiles to a backup directory and cleaning
     ///     up old backups if the number exceeds the configured maximum.
     /// </summary>
@@ -88,63 +92,86 @@ public class BackupService
             return;
         }
 
-        var targetDir = GenerateBackupTargetDir();
-
-        // Fetch all profiles in the profile directory.
-        List<string> currentProfilePaths;
-        try
+        // If the backup lock is already locked, skip backup. This stops multiple backups running at once
+        // Passing 0 is a non-blocking Wait, will return false if the lock can't be acquired
+        bool lockAcquired = await BackupLock.WaitAsync(0);
+        if (!lockAcquired)
         {
-            currentProfilePaths = FileUtil.GetFiles(ProfileDir);
-        }
-        catch (Exception ex)
-        {
-            Logger.Debug($"Skipping profile backup: Unable to read profiles directory, {ex.Message}");
             return;
         }
 
-        if (currentProfilePaths.Count == 0)
+        try
         {
-            if (Logger.IsLogEnabled(LogLevel.Debug))
+            // Make sure we don't back up too often by using a configurable Cooldown
+            var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (currentTimestamp < LastBackupTimestamp + BackupConfig.BackupCooldown)
             {
-                Logger.Debug("No profiles to backup");
+                return;
+            }
+            LastBackupTimestamp = currentTimestamp;
+
+            var targetDir = GenerateBackupTargetDir();
+
+            // Fetch all profiles in the profile directory.
+            List<string> currentProfilePaths;
+            try
+            {
+                currentProfilePaths = FileUtil.GetFiles(ProfileDir);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug($"Skipping profile backup: Unable to read profiles directory, {ex.Message}");
+                return;
             }
 
-            return;
-        }
-
-        try
-        {
-            FileUtil.CreateDirectory(targetDir);
-
-            foreach (var profilePath in currentProfilePaths)
+            if (currentProfilePaths.Count == 0)
             {
-                // Get filename + extension, removing the path
-                var profileFileName = FileUtil.GetFileNameAndExtension(profilePath);
-
-                // Create absolute path to file
-                var relativeSourceFilePath = Path.Combine(ProfileDir, profileFileName);
-                var absoluteDestinationFilePath = Path.Combine(targetDir, profileFileName);
-                if (!FileUtil.CopyFile(relativeSourceFilePath, absoluteDestinationFilePath))
+                if (Logger.IsLogEnabled(LogLevel.Debug))
                 {
-                    Logger.Error($"Source file not found: {relativeSourceFilePath}. Cannot copy to: {absoluteDestinationFilePath}");
+                    Logger.Debug("No profiles to backup");
+                }
+
+                return;
+            }
+
+            try
+            {
+                FileUtil.CreateDirectory(targetDir);
+
+                foreach (var profilePath in currentProfilePaths)
+                {
+                    // Get filename + extension, removing the path
+                    var profileFileName = FileUtil.GetFileNameAndExtension(profilePath);
+
+                    // Create absolute path to file
+                    var relativeSourceFilePath = Path.Combine(ProfileDir, profileFileName);
+                    var absoluteDestinationFilePath = Path.Combine(targetDir, profileFileName);
+                    if (!FileUtil.CopyFile(relativeSourceFilePath, absoluteDestinationFilePath))
+                    {
+                        Logger.Error($"Source file not found: {relativeSourceFilePath}. Cannot copy to: {absoluteDestinationFilePath}");
+                    }
+                }
+
+                // Write a copy of active mods.
+                await FileUtil.WriteFileAsync(Path.Combine(targetDir, activeModsFilename), JsonUtil.Serialize(ActiveServerMods));
+
+                if (Logger.IsLogEnabled(LogLevel.Debug))
+                {
+                    Logger.Debug($"Profile backup created in: {targetDir}");
                 }
             }
-
-            // Write a copy of active mods.
-            await FileUtil.WriteFileAsync(Path.Combine(targetDir, "activeMods.json"), JsonUtil.Serialize(ActiveServerMods));
-
-            if (Logger.IsLogEnabled(LogLevel.Debug))
+            catch (Exception ex)
             {
-                Logger.Debug($"Profile backup created in: {targetDir}");
+                Logger.Error($"Unable to write to backup profile directory: {ex.Message}");
+                return;
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Unable to write to backup profile directory: {ex.Message}");
-            return;
-        }
 
-        CleanBackups();
+            CleanBackups();
+        }
+        finally
+        {
+            BackupLock.Release();
+        }
     }
 
     /// <summary>
@@ -221,6 +248,24 @@ public class BackupService
         }
 
         return result;
+    }
+
+    protected string? GetMostRecentProfileBackup(IEnumerable<string> backupPaths, string profileId)
+    {
+        var profileFilename = $"{profileId}.json";
+        var backupPathsWithCreationDateTime = GetBackupPathsWithCreationTimestamp(backupPaths);
+
+        foreach (var (backupTimestamp, backupPath) in backupPathsWithCreationDateTime.Reverse())
+        {
+            var profileBackups = FileUtil.GetFiles(backupPath);
+            var profileBackup = profileBackups.FirstOrDefault(path => path.EndsWith(profileFilename));
+            if (profileBackup != null)
+            {
+                return profileBackup;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -307,5 +352,30 @@ public class BackupService
         }
 
         return result;
+    }
+
+    /// <summary>
+    ///     Restores the most recent profile backup for the given profile Id
+    /// </summary>
+    /// <param name="profileId">The profile ID of the backup to restore</param>
+    /// <returns>True on success. False on failure</returns>
+    public bool RestoreProfile(string profileId)
+    {
+        var backupDir = BackupConfig.Directory;
+        var backupPaths = GetBackupPaths(backupDir);
+        var mostRecentBackupForProfile = GetMostRecentProfileBackup(backupPaths, profileId);
+
+        // Verify we have a backup for this profile
+        if (mostRecentBackupForProfile == null)
+        {
+            return false;
+        }
+
+        // Restore the most recent profile backup
+        var profileFileName = FileUtil.GetFileNameAndExtension(mostRecentBackupForProfile);
+        var targetProfilePath = Path.Combine(ProfileDir, profileFileName);
+
+        File.Copy(mostRecentBackupForProfile, targetProfilePath, true);
+        return true;
     }
 }

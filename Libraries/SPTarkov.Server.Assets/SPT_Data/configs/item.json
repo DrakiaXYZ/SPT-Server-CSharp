@@ -101,7 +101,9 @@
     "61b9e1aaef9a1b5d6a79899a",
     "5a43943586f77416ad2f06e2",
     "5a43957686f7742a2c2f11b0",
-    "5c1a1e3f2e221602b66cc4c2"
+    "5c1a1e3f2e221602b66cc4c2",
+    "678f84bb9e85556ca60f0362",
+    "679ba90d269ddfea47012159"
   ],
   "customItemGlobalPresets": [
     {
@@ -587,7 +589,10 @@
     "6866665cdf54e1190902df55",
     "6841b6b674a3c16f5e03d653",
     "679bab714e9ca6b3d80586b4",
-    "64d4b23dc1b37504b41ac2b6"
+    "64d4b23dc1b37504b41ac2b6",
+    "678f84bb9e85556ca60f0362",
+    "67ab3d4b83869afd170fdd3f",
+    "678fa929819ddc4c350c0317"
   ],
   "rewardItemTypeBlacklist": [
     "65649eb40bf0ed77b8044453"
