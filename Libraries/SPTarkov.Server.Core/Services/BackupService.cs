@@ -21,6 +21,9 @@ public class BackupService
     // Runs Init() every x minutes
     protected Timer _backupIntervalTimer;
 
+    protected SemaphoreSlim BackupLock = new SemaphoreSlim(1, 1);
+    protected long LastBackupTimestamp;
+
     protected readonly FileUtil FileUtil;
     protected readonly JsonUtil JsonUtil;
     protected readonly ISptLogger<BackupService> Logger;
@@ -78,7 +81,7 @@ public class BackupService
     }
 
     /// <summary>
-    ///     Initializes the backup process. <br />
+    ///     Run the backup process. <br />
     ///     This method orchestrates the profile backup service. Handles copying profiles to a backup directory and cleaning
     ///     up old backups if the number exceeds the configured maximum.
     /// </summary>
@@ -89,63 +92,86 @@ public class BackupService
             return;
         }
 
-        var targetDir = GenerateBackupTargetDir();
-
-        // Fetch all profiles in the profile directory.
-        List<string> currentProfilePaths;
-        try
+        // Make sure we don't back up too often by using a configurable Cooldown
+        var currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        if (currentTimestamp < LastBackupTimestamp + BackupConfig.BackupCooldown)
         {
-            currentProfilePaths = FileUtil.GetFiles(ProfileDir);
+            return;
         }
-        catch (Exception ex)
+        LastBackupTimestamp = currentTimestamp;
+
+        // If the backup lock is already locked, skip backup. This is to stop TOC/TOU race conditions above
+        // Passing 0 is a non-blocking Wait, will return false if the lock can't be acquired
+        bool lockAcquired = await BackupLock.WaitAsync(0);
+        if (!lockAcquired)
         {
-            Logger.Debug($"Skipping profile backup: Unable to read profiles directory, {ex.Message}");
             return;
         }
 
-        if (currentProfilePaths.Count == 0)
+        try
         {
-            if (Logger.IsLogEnabled(LogLevel.Debug))
+            var targetDir = GenerateBackupTargetDir();
+
+            // Fetch all profiles in the profile directory.
+            List<string> currentProfilePaths;
+            try
             {
-                Logger.Debug("No profiles to backup");
+                currentProfilePaths = FileUtil.GetFiles(ProfileDir);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug($"Skipping profile backup: Unable to read profiles directory, {ex.Message}");
+                return;
             }
 
-            return;
-        }
-
-        try
-        {
-            FileUtil.CreateDirectory(targetDir);
-
-            foreach (var profilePath in currentProfilePaths)
+            if (currentProfilePaths.Count == 0)
             {
-                // Get filename + extension, removing the path
-                var profileFileName = FileUtil.GetFileNameAndExtension(profilePath);
-
-                // Create absolute path to file
-                var relativeSourceFilePath = Path.Combine(ProfileDir, profileFileName);
-                var absoluteDestinationFilePath = Path.Combine(targetDir, profileFileName);
-                if (!FileUtil.CopyFile(relativeSourceFilePath, absoluteDestinationFilePath))
+                if (Logger.IsLogEnabled(LogLevel.Debug))
                 {
-                    Logger.Error($"Source file not found: {relativeSourceFilePath}. Cannot copy to: {absoluteDestinationFilePath}");
+                    Logger.Debug("No profiles to backup");
+                }
+
+                return;
+            }
+
+            try
+            {
+                FileUtil.CreateDirectory(targetDir);
+
+                foreach (var profilePath in currentProfilePaths)
+                {
+                    // Get filename + extension, removing the path
+                    var profileFileName = FileUtil.GetFileNameAndExtension(profilePath);
+
+                    // Create absolute path to file
+                    var relativeSourceFilePath = Path.Combine(ProfileDir, profileFileName);
+                    var absoluteDestinationFilePath = Path.Combine(targetDir, profileFileName);
+                    if (!FileUtil.CopyFile(relativeSourceFilePath, absoluteDestinationFilePath))
+                    {
+                        Logger.Error($"Source file not found: {relativeSourceFilePath}. Cannot copy to: {absoluteDestinationFilePath}");
+                    }
+                }
+
+                // Write a copy of active mods.
+                await FileUtil.WriteFileAsync(Path.Combine(targetDir, activeModsFilename), JsonUtil.Serialize(ActiveServerMods));
+
+                if (Logger.IsLogEnabled(LogLevel.Debug))
+                {
+                    Logger.Debug($"Profile backup created in: {targetDir}");
                 }
             }
-
-            // Write a copy of active mods.
-            await FileUtil.WriteFileAsync(Path.Combine(targetDir, activeModsFilename), JsonUtil.Serialize(ActiveServerMods));
-
-            if (Logger.IsLogEnabled(LogLevel.Debug))
+            catch (Exception ex)
             {
-                Logger.Debug($"Profile backup created in: {targetDir}");
+                Logger.Error($"Unable to write to backup profile directory: {ex.Message}");
+                return;
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Unable to write to backup profile directory: {ex.Message}");
-            return;
-        }
 
-        CleanBackups();
+            CleanBackups();
+        }
+        finally
+        {
+            BackupLock.Release();
+        }
     }
 
     /// <summary>
