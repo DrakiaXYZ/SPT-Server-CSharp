@@ -15,6 +15,6 @@ public class ModdedTraderCustomizationRouter(JsonUtil jsonUtil, ModdedTraderCust
                 "/singleplayer/moddedTraders",
                 async (url, info, sessionID, output) =>
                     await moddedTraderCustomizationCallbacks.GetCustomizationTraders(url, info, sessionID)
-            )
+            ),
         ]
     ) { }

@@ -11,10 +11,7 @@ public class ModdedTraderCustomizationController(DatabaseService databaseService
     public ModdedTraderListResponse GetCustomizationSellerIds()
     {
         var traders = databaseService.GetTraders();
-        var customizationSellers = new ModdedTraderListResponse
-        {
-            ModdedTraders = []
-        };
+        var customizationSellers = new ModdedTraderListResponse { ModdedTraders = [] };
 
         foreach (var trader in traders)
         {
