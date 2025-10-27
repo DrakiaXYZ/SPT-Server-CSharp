@@ -507,6 +507,23 @@ public class SeasonalEventService(
         {
             AdjustBotAppearanceValues(eventType.Type);
         }
+
+        ChangeBtrToTarColaSkin();
+    }
+
+    private void ChangeBtrToTarColaSkin()
+    {
+        var btrSettings = databaseService.GetGlobals().Configuration.BTRSettings;
+
+        if (btrSettings.MapsConfigs.TryGetValue("Woods", out var woodsBtrSettings))
+        {
+            woodsBtrSettings.BtrSkin = "Tarcola";
+        }
+
+        if (btrSettings.MapsConfigs.TryGetValue("TarkovStreets", out var streetsBtrSettings))
+        {
+            streetsBtrSettings.BtrSkin = "Tarcola";
+        }
     }
 
     protected void ApplyNewYearsEvent(SeasonalEvent eventType, Config globalConfig)
