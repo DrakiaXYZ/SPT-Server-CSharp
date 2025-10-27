@@ -135,14 +135,7 @@ public class FileUtil
             }
 
             // Overwrite over the old file
-            if (File.Exists(filePath))
-            {
-                File.Replace(tempFilePath, filePath, null);
-            }
-            else
-            {
-                File.Move(tempFilePath, filePath);
-            }
+            File.Move(tempFilePath, filePath, overwrite: true);
         }
         catch
         {
