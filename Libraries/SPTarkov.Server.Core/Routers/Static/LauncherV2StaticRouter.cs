@@ -12,32 +12,38 @@ public class LauncherV2StaticRouter(LauncherV2Callbacks launcherV2Callbacks, Jso
     : StaticRouter(
         jsonUtil,
         [
-            new RouteAction<EmptyRequestData>("/launcher/v2/ping", async (url, _, sessionID, _) => await launcherV2Callbacks.Ping()),
-            new RouteAction<EmptyRequestData>("/launcher/v2/types", async (url, _, sessionID, _) => await launcherV2Callbacks.Types()),
+            new RouteAction<EmptyRequestData>("/launcher/v2/ping", async (_, _, _, _) => await launcherV2Callbacks.Ping()),
+            new RouteAction<EmptyRequestData>("/launcher/v2/types", async (_, _, _, _) => await launcherV2Callbacks.Types()),
             new RouteAction<LoginRequestData>(
                 "/launcher/v2/login",
-                async (url, info, sessionID, _) => await launcherV2Callbacks.Login(info)
+                async (_, info, _, _) => await launcherV2Callbacks.Login(info)
             ),
             new RouteAction<RegisterData>(
                 "/launcher/v2/register",
-                async (url, info, sessionID, _) => await launcherV2Callbacks.Register(info)
+                async (_, info, _, _) => await launcherV2Callbacks.Register(info)
             ),
             new RouteAction<LoginRequestData>(
                 "/launcher/v2/remove",
-                async (url, info, sessionID, _) => await launcherV2Callbacks.Remove(info)
+                async (_, info, _, _) => await launcherV2Callbacks.Remove(info)
             ),
             new RouteAction<EmptyRequestData>(
                 "/launcher/v2/version",
-                async (url, _, sessionID, _) => await launcherV2Callbacks.CompatibleVersion()
+                async (_, _, _, _) => await launcherV2Callbacks.CompatibleVersion()
             ),
-            new RouteAction<EmptyRequestData>("/launcher/v2/mods", async (url, _, sessionID, _) => await launcherV2Callbacks.Mods()),
+            new RouteAction<EmptyRequestData>("/launcher/v2/mods", async (_, _, _, _) => await launcherV2Callbacks.Mods()),
             new RouteAction<EmptyRequestData>(
                 "/launcher/v2/profiles",
-                async (url, _, sessionID, _) => await launcherV2Callbacks.Profiles()
+                async (_, _, _, _) => await launcherV2Callbacks.Profiles()
             ),
             new RouteAction<LoginRequestData>(
                 "/launcher/v2/profile",
-                async (url, info, sessionID, _) => await launcherV2Callbacks.Profile(info)
+                async (_, info, _, _) => await launcherV2Callbacks.Profile(info)
             ),
+            new RouteAction<RegisterData>(
+                "/launcher/v2/wipe",
+                async (_, info, _, _) => await launcherV2Callbacks.Wipe(info)
+            )
         ]
-    ) { }
+    )
+{
+}
