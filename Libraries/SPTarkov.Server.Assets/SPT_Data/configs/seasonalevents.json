@@ -9688,16 +9688,16 @@
           "disableWaves": [],
           "enabled": true,
           "mapInfectionAmount": {
-            "Sandbox": 0,
+            "Sandbox": 25,
             "factory4": 50,
             "laboratory": 100,
-            "Woods": 50,
+            "Woods": 60,
             "bigmap": 0,
             "Shoreline": 50,
-            "Interchange": 5,
-            "RezervBase": 5,
-            "Lighthouse": 5,
-            "TarkovStreets": 5
+            "Interchange": 0,
+            "RezervBase": 50,
+            "Lighthouse": 50,
+            "TarkovStreets": 50
           }
         }
       },
@@ -9948,9 +9948,11 @@
             "infectedPmc",
             "infectedCivil",
             "infectedLaborant",
-            "infectedTagilla"
+            "infectedTagilla",
+			"pmcBEAR",
+            "pmcUSEC"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "assault",
           "Neutral": [
             "marksman",
@@ -10002,12 +10004,10 @@
             "spiritWinter",
             "spiritSpring",
             "peacemaker",
-            "pmcBEAR",
-            "pmcUSEC",
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10017,7 +10017,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossTest",
           "Neutral": [
             "marksman",
@@ -10074,7 +10074,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10084,7 +10084,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossBully",
           "Neutral": [
             "marksman",
@@ -10141,7 +10141,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10218,7 +10218,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerBully",
           "Neutral": [
             "marksman",
@@ -10275,7 +10275,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10285,7 +10285,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossKilla",
           "Neutral": [
             "marksman",
@@ -10342,7 +10342,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10352,7 +10352,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossKojaniy",
           "Neutral": [
             "marksman",
@@ -10409,7 +10409,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10419,7 +10419,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerKojaniy",
           "Neutral": [
             "marksman",
@@ -10476,7 +10476,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10484,9 +10484,11 @@
             "infectedPmc",
             "infectedCivil",
             "infectedLaborant",
-            "infectedTagilla"
+            "infectedTagilla",
+			"pmcBEAR",
+            "pmcUSEC"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "pmcBot",
           "Neutral": [
             "marksman",
@@ -10538,12 +10540,10 @@
             "spiritWinter",
             "spiritSpring",
             "peacemaker",
-            "pmcBEAR",
-            "pmcUSEC",
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10620,7 +10620,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossGluhar",
           "Neutral": [
             "marksman",
@@ -10677,7 +10677,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10687,7 +10687,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerGluharAssault",
           "Neutral": [
             "marksman",
@@ -10744,7 +10744,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10754,7 +10754,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerGluharSecurity",
           "Neutral": [
             "marksman",
@@ -10811,7 +10811,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10821,7 +10821,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerGluharScout",
           "Neutral": [
             "marksman",
@@ -10878,7 +10878,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10888,7 +10888,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerGluharSnipe",
           "Neutral": [
             "marksman",
@@ -10945,7 +10945,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -10955,7 +10955,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerSanitar",
           "Neutral": [
             "marksman",
@@ -11012,7 +11012,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11022,7 +11022,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossSanitar",
           "Neutral": [
             "marksman",
@@ -11079,7 +11079,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11357,7 +11357,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossTagilla",
           "Neutral": [
             "marksman",
@@ -11414,7 +11414,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11424,7 +11424,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerTagilla",
           "Neutral": [
             "marksman",
@@ -11481,7 +11481,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11625,7 +11625,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossKnight",
           "Neutral": [
             "marksman",
@@ -11682,7 +11682,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11692,7 +11692,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerBigPipe",
           "Neutral": [
             "marksman",
@@ -11749,7 +11749,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11759,7 +11759,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerBirdEye",
           "Neutral": [
             "marksman",
@@ -11816,7 +11816,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -11960,7 +11960,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossBoar",
           "Neutral": [
             "marksman",
@@ -12017,7 +12017,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12027,7 +12027,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerBoar",
           "Neutral": [
             "marksman",
@@ -12084,7 +12084,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12228,7 +12228,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossBoarSniper",
           "Neutral": [
             "marksman",
@@ -12285,7 +12285,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12563,7 +12563,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerBoarClose1",
           "Neutral": [
             "marksman",
@@ -12620,7 +12620,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12630,7 +12630,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerBoarClose2",
           "Neutral": [
             "marksman",
@@ -12687,7 +12687,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12697,7 +12697,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossKolontay",
           "Neutral": [
             "marksman",
@@ -12754,7 +12754,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12764,7 +12764,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerKolontayAssault",
           "Neutral": [
             "marksman",
@@ -12821,7 +12821,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12831,7 +12831,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "followerKolontaySecurity",
           "Neutral": [
             "marksman",
@@ -12888,7 +12888,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -12965,7 +12965,7 @@
             "infectedLaborant",
             "infectedTagilla"
           ],
-          "BearPlayerBehaviour": "Neutral",
+          "BearPlayerBehaviour": "AlwaysEnemies",
           "BotRole": "bossPartisan",
           "Neutral": [
             "marksman",
@@ -13022,7 +13022,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecPlayerBehaviour": "Neutral"
+          "UsecPlayerBehaviour": "AlwaysEnemies"
         },
         {
           "AlwaysEnemies": [
@@ -13231,9 +13231,10 @@
             "infectedPmc",
             "infectedCivil",
             "infectedLaborant",
-            "infectedTagilla"
+            "infectedTagilla",
+            "assault"
           ],
-          "BearEnemyChance": 15,
+          "BearEnemyChance": 90,
           "BearPlayerBehaviour": "ChancedEnemies",
           "BotRole": "pmcBEAR",
           "Neutral": [
@@ -13291,7 +13292,7 @@
             "skier"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecEnemyChance": 30,
+          "UsecEnemyChance": 90,
           "UsecPlayerBehaviour": "ChancedEnemies"
         },
         {
@@ -13300,12 +13301,7 @@
             "infectedPmc",
             "infectedCivil",
             "infectedLaborant",
-            "infectedTagilla"
-          ],
-          "BearEnemyChance": 30,
-          "BearPlayerBehaviour": "ChancedEnemies",
-          "BotRole": "pmcUSEC",
-          "Neutral": [
+            "infectedTagilla",
             "marksman",
             "assault",
             "bossTest",
@@ -13315,14 +13311,19 @@
             "bossKojaniy",
             "followerKojaniy",
             "pmcBot",
-            "cursedAssault",
-            "bossGluhar",
+			"bossGluhar",
             "followerGluharAssault",
             "followerGluharSecurity",
             "followerGluharScout",
             "followerGluharSnipe",
             "followerSanitar",
             "bossSanitar",
+			"bossPartisan",
+            "spiritWinter",
+            "spiritSpring",
+            "peacemaker",
+            "skier",
+			"cursedAssault",
             "test",
             "assaultGroup",
             "sectantWarrior",
@@ -13330,7 +13331,6 @@
             "bossTagilla",
             "followerTagilla",
             "exUsec",
-            "gifter",
             "bossKnight",
             "followerBigPipe",
             "followerBirdEye",
@@ -13342,25 +13342,24 @@
             "arenaFighterEvent",
             "bossBoarSniper",
             "crazyAssaultEvent",
-            "peacefullZryachiyEvent",
             "sectactPriestEvent",
             "ravangeZryachiyEvent",
             "followerBoarClose1",
             "followerBoarClose2",
             "bossKolontay",
             "followerKolontayAssault",
-            "followerKolontaySecurity",
-            "shooterBTR",
-            "bossPartisan",
-            "spiritWinter",
-            "spiritSpring",
-            "peacemaker",
-            "pmcBEAR",
-            "pmcUSEC",
-            "skier"
+            "followerKolontaySecurity"
+          ],
+          "BearEnemyChance": 90,
+          "BearPlayerBehaviour": "ChancedEnemies",
+          "BotRole": "pmcUSEC",
+          "Neutral": [
+			"gifter",
+			"peacefullZryachiyEvent",
+			"shooterBTR"
           ],
           "SavagePlayerBehaviour": "Neutral",
-          "UsecEnemyChance": 15,
+          "UsecEnemyChance": 90,
           "UsecPlayerBehaviour": "ChancedEnemies"
         },
         {
@@ -13369,63 +13368,61 @@
             "infectedPmc",
             "infectedCivil",
             "infectedLaborant",
-            "infectedTagilla"
+            "infectedTagilla",
+			"marksman",
+            "assault",
+            "bossTest",
+            "bossBully",
+            "followerTest",
+            "bossKilla",
+            "bossKojaniy",
+            "followerKojaniy",
+            "pmcBot",
+			"bossGluhar",
+            "followerGluharAssault",
+            "followerGluharSecurity",
+            "followerGluharScout",
+            "followerGluharSnipe",
+            "followerSanitar",
+            "bossSanitar",
+			"bossPartisan",
+            "spiritWinter",
+            "spiritSpring",
+            "peacemaker",
+            "skier",
+			"cursedAssault",
+            "test",
+            "assaultGroup",
+            "sectantWarrior",
+            "sectantPriest",
+            "bossTagilla",
+            "followerTagilla",
+            "exUsec",
+            "bossKnight",
+            "followerBigPipe",
+            "followerBirdEye",
+            "bossZryachiy",
+            "followerZryachiy",
+            "bossBoar",
+            "followerBoar",
+            "arenaFighter",
+            "arenaFighterEvent",
+            "bossBoarSniper",
+            "crazyAssaultEvent",
+            "sectactPriestEvent",
+            "ravangeZryachiyEvent",
+            "followerBoarClose1",
+            "followerBoarClose2",
+            "bossKolontay",
+            "followerKolontayAssault",
+            "followerKolontaySecurity"
           ],
           "BearPlayerBehaviour": "Neutral",
           "BotRole": "skier",
           "Neutral": [
-            "marksman",
-            "assault",
-            "bossTest",
-            "bossBully",
-            "followerTest",
-            "bossKilla",
-            "bossKojaniy",
-            "followerKojaniy",
-            "pmcBot",
-            "cursedAssault",
-            "bossGluhar",
-            "followerGluharAssault",
-            "followerGluharSecurity",
-            "followerGluharScout",
-            "followerGluharSnipe",
-            "followerSanitar",
-            "bossSanitar",
-            "test",
-            "assaultGroup",
-            "sectantWarrior",
-            "sectantPriest",
-            "bossTagilla",
-            "followerTagilla",
-            "exUsec",
             "gifter",
-            "bossKnight",
-            "followerBigPipe",
-            "followerBirdEye",
-            "bossZryachiy",
-            "followerZryachiy",
-            "bossBoar",
-            "followerBoar",
-            "arenaFighter",
-            "arenaFighterEvent",
-            "bossBoarSniper",
-            "crazyAssaultEvent",
-            "peacefullZryachiyEvent",
-            "sectactPriestEvent",
-            "ravangeZryachiyEvent",
-            "followerBoarClose1",
-            "followerBoarClose2",
-            "bossKolontay",
-            "followerKolontayAssault",
-            "followerKolontaySecurity",
-            "shooterBTR",
-            "bossPartisan",
-            "spiritWinter",
-            "spiritSpring",
-            "peacemaker",
-            "pmcBEAR",
-            "pmcUSEC",
-            "skier"
+			"peacefullZryachiyEvent",
+			"shooterBTR"
           ],
           "SavagePlayerBehaviour": "Neutral",
           "UsecPlayerBehaviour": "Neutral"
