@@ -480,6 +480,8 @@ public class SeasonalEventService(
         {
             usec.BotAppearance.Head[new MongoId("6644d2da35d958070c02642c")] = 30;
         }
+
+        AddEventBossesToMaps("halloweennightcult");
     }
 
     protected void ApplyChristmasEvent(SeasonalEvent eventType, Config globalConfig)
@@ -909,7 +911,7 @@ public class SeasonalEventService(
             {
                 if (mapBosses.All(bossSpawn => bossSpawn.BossName != boss.BossName))
                 {
-                    // Zombie doesn't exist in maps boss list yet, add
+                    // Boss doesn't exist in maps boss list yet, add
                     mapBosses.Add(boss);
                 }
             }

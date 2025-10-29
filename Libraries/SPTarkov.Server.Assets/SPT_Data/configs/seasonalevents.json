@@ -9395,7 +9395,138 @@
           "TriggerName": ""
         }
       ]
-    }
+    },
+	"halloweennightcult":{
+		"shoreline": [
+			{
+			  "BossChance": 40,
+			  "BossDifficult": "normal",
+			  "BossEscortAmount": "0",
+			  "BossEscortDifficult": "normal",
+			  "BossEscortType": "exUsec",
+			  "BossName": "sectantPredvestnik",
+			  "BossPlayer": false,
+			  "BossZone": "ZoneMeteoStation",
+			  "Delay": 0,
+			  "DependKarma": false,
+			  "DependKarmaPVE": false,
+			  "ForceSpawn": false,
+			  "IgnoreMaxBots": true,
+			  "RandomTimeSpawn": false,
+			  "ShowOnTarkovMap": false,
+			  "ShowOnTarkovMapPvE": false,
+			  "SpawnMode": [
+				"pve",
+				"regular"
+			  ],
+			  "Supports": [
+				{
+				  "BossEscortType": "sectantOni",
+				  "BossEscortDifficult": [
+					"normal"
+				  ],
+				  "BossEscortAmount": "1"
+				},
+				{
+				  "BossEscortType": "sectantPrizrak",
+				  "BossEscortDifficult": [
+					"normal"
+				  ],
+				  "BossEscortAmount": "1"
+				}
+			  ],
+			  "Time": -1,
+			  "TriggerId": "",
+			  "TriggerName": ""
+			}
+		],
+		"woods": [
+			{
+			  "BossChance": 40,
+			  "BossDifficult": "normal",
+			  "BossEscortAmount": "2",
+			  "BossEscortDifficult": "normal",
+			  "BossEscortType": "exUsec",
+			  "BossName": "sectantPredvestnik",
+			  "BossPlayer": false,
+			  "BossZone": "ZoneScavBase2",
+			  "Delay": 0,
+			  "DependKarma": false,
+			  "DependKarmaPVE": false,
+			  "ForceSpawn": false,
+			  "IgnoreMaxBots": true,
+			  "RandomTimeSpawn": true,
+			  "ShowOnTarkovMap": false,
+			  "ShowOnTarkovMapPvE": false,
+			  "SpawnMode": [
+				"regular",
+				"pve"
+			  ],
+			  "Supports": [
+				{
+				  "BossEscortType": "sectantOni",
+				  "BossEscortDifficult": [
+					"normal"
+				  ],
+				  "BossEscortAmount": "1"
+				},
+				{
+				  "BossEscortType": "sectantPrizrak",
+				  "BossEscortDifficult": [
+					"normal"
+				  ],
+				  "BossEscortAmount": "1"
+				}
+			  ],
+			  "Time": -1,
+			  "TriggerId": "",
+			  "TriggerName": ""
+			}
+		],
+		"bigmap": [
+			{
+          "BossChance": 40,
+          "BossDifficult": "normal",
+          "BossEscortAmount": "2",
+          "BossEscortDifficult": "normal",
+          "BossEscortType": "exUsec",
+          "BossName": "sectantPredvestnik",
+          "BossPlayer": false,
+          "BossZone": "ZoneScavBase",
+          "Delay": 0,
+          "DependKarma": false,
+          "DependKarmaPVE": false,
+          "ForceSpawn": false,
+          "IgnoreMaxBots": true,
+          "RandomTimeSpawn": true,
+          "ShowOnTarkovMap": false,
+          "ShowOnTarkovMapPvE": false,
+          "SpawnMode": [
+            "regular",
+            "pve"
+          ],
+          "Supports": [
+            {
+              "BossEscortType": "sectantOni",
+              "BossEscortDifficult": [
+                "normal"
+              ],
+              "BossEscortAmount": "1"
+            },
+            {
+              "BossEscortType": "sectantPrizrak",
+              "BossEscortDifficult": [
+                "normal"
+              ],
+              "BossEscortAmount": "1"
+            }
+          ],
+          "Time": -1,
+          "TriggerId": "",
+          "TriggerName": ""
+        }
+		]
+	}
   },
   "eventBotMapping": {
     "arenaFighterEvent": "arenaFighterEvent",
