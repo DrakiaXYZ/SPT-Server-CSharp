@@ -898,7 +898,7 @@ public class SeasonalEventService(
                 continue;
             }
 
-            if (mapIdWhitelist is null || !mapIdWhitelist.Contains(locationKey))
+            if (mapIdWhitelist is not null && !mapIdWhitelist.Contains(locationKey))
             {
                 continue;
             }
