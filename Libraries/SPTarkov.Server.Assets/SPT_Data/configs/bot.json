@@ -324,6 +324,48 @@
           "minLimitPercent": 15
         }
       },
+      "sectantoni": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 90,
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        }
+      },
+      "sectantpredvestnik": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 90,
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        }
+      },
+      "sectantprizrak": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 90,
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        }
+      },
       "shooterbtr": {
         "armor": {
           "maxDelta": 0,

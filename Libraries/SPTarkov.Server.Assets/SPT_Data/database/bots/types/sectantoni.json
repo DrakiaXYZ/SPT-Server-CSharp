@@ -26,13 +26,25 @@
       "normal": {
         "min": 2100,
         "max": 2100
+      },
+	  "easy": {
+        "min": 2100,
+        "max": 2100
+      },
+	  "hard": {
+        "min": 2100,
+        "max": 2100
       }
     },
     "standingForKill": {
-      "normal": 0
+      "normal": 0,
+      "easy": 0,
+      "hard": 0
     },
     "aggressorBonus": {
-      "normal": 0
+      "normal": 0,
+      "easy": 0,
+      "hard": 0
     },
     "useSimpleAnimator": false
   },
