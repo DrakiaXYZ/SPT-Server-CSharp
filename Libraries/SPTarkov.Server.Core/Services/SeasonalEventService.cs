@@ -457,7 +457,10 @@ public class SeasonalEventService(
 
         if (eventType.Settings?.ReplaceBotHostility ?? false)
         {
-            ReplaceBotHostility(SeasonalEventConfig.HostilitySettingsForEvent.FirstOrDefault(x => x.Key == "zombies").Value);
+            ReplaceBotHostility(
+                SeasonalEventConfig.HostilitySettingsForEvent.FirstOrDefault(x => x.Key == "zombies").Value,
+                GetLocationsWithZombies(eventType.Settings.ZombieSettings.MapInfectionAmount)
+            );
         }
 
         if (eventType.Settings?.AdjustBotAppearances ?? false)
@@ -602,7 +605,10 @@ public class SeasonalEventService(
         }
     }
 
-    protected void ReplaceBotHostility(Dictionary<string, List<AdditionalHostilitySettings>> hostilitySettings)
+    protected void ReplaceBotHostility(
+        Dictionary<string, List<AdditionalHostilitySettings>> hostilitySettings,
+        HashSet<string>? locationWhitelist = null
+    )
     {
         var locations = databaseService.GetLocations().GetDictionary();
         var ignoreList = LocationConfig.NonMaps;
@@ -628,6 +634,11 @@ public class SeasonalEventService(
                     // no settings for map by name, skip map
                     continue;
                 }
+            }
+
+            if (locationWhitelist is not null && !locationWhitelist.Contains(locationName))
+            {
+                continue;
             }
 
             foreach (var settings in newHostilitySettings)
