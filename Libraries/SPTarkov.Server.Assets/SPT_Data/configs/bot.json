@@ -296,7 +296,7 @@
           "minLimitPercent": 15
         }
       },
-	  "ravangezryachiyevent": {
+      "ravangezryachiyevent": {
         "armor": {
           "maxDelta": 10,
           "minDelta": 0,
