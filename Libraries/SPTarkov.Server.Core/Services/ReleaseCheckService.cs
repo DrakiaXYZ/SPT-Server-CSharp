@@ -62,7 +62,7 @@ internal class ReleaseCheckService(ISptLogger<ReleaseCheckService> logger) : IOn
         catch { }
     }
 
-    private class ReleaseInformation
+    private record ReleaseInformation
     {
         [JsonPropertyName("tag_name")]
         public required string Version { get; init; }
