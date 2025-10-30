@@ -272,7 +272,7 @@ public class RagfairPriceService(
                 continue;
             }
 
-            price += GetDynamicItemPrice(item.Template, desiredCurrency, item, offerItems, isPackOffer).Value;
+            price += GetDynamicItemPrice(item.Template, desiredCurrency, item, offerItems, isPackOffer) ?? 0;
 
             // Check if the item is a weapon preset.
             if (item?.Upd?.SptPresetId is not null && presetHelper.IsPresetBaseClass(item.Upd.SptPresetId.Value, BaseClasses.WEAPON))
@@ -329,7 +329,11 @@ public class RagfairPriceService(
             && presetHelper.IsPresetBaseClass(item.Upd.SptPresetId.Value, BaseClasses.WEAPON)
         )
         {
-            price = GetWeaponPresetPrice(item, offerItems, price);
+            price =
+                RagfairConfig.Dynamic.GenerateBaseFleaPrices.UseHandbookPrice
+                && RagfairConfig.Dynamic.GenerateBaseFleaPrices.GeneratePresetPriceByChildren
+                    ? GetPresetPriceByChildren(offerItems)
+                    : GetWeaponPresetPrice(item, offerItems, price);
             isPreset = true;
         }
 
@@ -520,6 +524,28 @@ public class RagfairPriceService(
 
         // return extra mods price + base gun price
         return existingPrice + extraModsPrice;
+    }
+
+    /// <summary>
+    ///     Calculate the cost of a weapon preset by adding together the price of its mods
+    /// </summary>
+    /// <param name="weaponWithChildren">weapon plus mods</param>
+    /// <returns>price of weapon in roubles</returns>
+    protected double GetPresetPriceByChildren(IEnumerable<Item> weaponWithChildren)
+    {
+        var priceTotal = 0d;
+        foreach (var item in weaponWithChildren)
+        {
+            // Root item uses static price
+            if (item.ParentId == null)
+            {
+                priceTotal += GetStaticPriceForItem(item.Template) ?? 0;
+            }
+
+            priceTotal += GetFleaPriceForItem(item.Template);
+        }
+
+        return priceTotal;
     }
 
     /// <summary>

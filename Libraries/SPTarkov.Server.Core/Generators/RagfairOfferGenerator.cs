@@ -473,7 +473,7 @@ public class RagfairOfferGenerator(
             // Not barter or pack offer
             // Apply randomised properties
             RandomiseOfferItemUpdProperties(sellerId, itemWithChildren, itemToSellDetails, offerCreator);
-            barterScheme = CreateCurrencyBarterScheme(itemWithChildren, isPackOffer);
+            barterScheme = CreateCurrencyBarterScheme(itemWithChildren, false);
         }
 
         var createOfferDetails = new CreateFleaOfferDetails
@@ -487,6 +487,7 @@ public class RagfairOfferGenerator(
             Creator = offerCreator,
             SellInOnePiece = isPackOffer, // sellAsOnePiece - pack offer
         };
+
         CreateAndAddFleaOffer(createOfferDetails);
     }
 

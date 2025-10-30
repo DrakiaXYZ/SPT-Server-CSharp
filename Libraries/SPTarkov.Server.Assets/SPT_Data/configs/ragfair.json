@@ -346,6 +346,7 @@
     "useTraderPriceForOffersIfHigher": true,
     "generateBaseFleaPrices": {
       "useHandbookPrice": true,
+      "generatePresetPriceByChildren": true,
       "priceMultiplier": 1.5,
       "itemTplMultiplierOverride": {
         "5780cf7f2459777de4559322": 1.8
