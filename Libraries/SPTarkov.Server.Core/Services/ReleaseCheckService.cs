@@ -4,7 +4,6 @@ using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
-
 using Range = SemanticVersioning.Range;
 using Version = SemanticVersioning.Version;
 
@@ -14,9 +13,7 @@ namespace SPTarkov.Server.Core.Services;
 //       spam, so we purposely use MaxValue here
 
 [Injectable(TypePriority = int.MaxValue)]
-internal class ReleaseCheckService(
-    ISptLogger<ReleaseCheckService> logger
-) : IOnLoad
+internal class ReleaseCheckService(ISptLogger<ReleaseCheckService> logger) : IOnLoad
 {
     public Task OnLoad()
     {
@@ -37,7 +34,9 @@ internal class ReleaseCheckService(
             httpClient.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
 
             // TODO: We could probably throw this into a config somewhere, for now hard code it
-            var release = await httpClient.GetFromJsonAsync<ReleaseInformation>("https://api.github.com/repos/sp-tarkov/build/releases/latest");
+            var release = await httpClient.GetFromJsonAsync<ReleaseInformation>(
+                "https://api.github.com/repos/sp-tarkov/build/releases/latest"
+            );
             if (release != null)
             {
                 Version latestVersion = new(release.Version);
