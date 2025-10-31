@@ -20,7 +20,7 @@
     <ProjectReference Include="..\SPTarkov.DI\SPTarkov.DI.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.IO.Hashing" Version="9.0.10" />
+    <PackageReference Include="System.IO.Hashing" Version="9.0.9" />
     <PackageReference Include="FastCloner" Version="3.3.16" />
   </ItemGroup>
   <ItemGroup>
