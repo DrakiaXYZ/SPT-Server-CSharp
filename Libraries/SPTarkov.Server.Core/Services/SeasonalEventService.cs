@@ -407,6 +407,7 @@ public class SeasonalEventService(
                 AddEventBossesToMaps("halloweensummon");
                 EnableHalloweenSummonEvent();
                 AddPumpkinsToScavBackpacks();
+                AddEventBossesToMaps("halloweennightcult");
                 RenameBitcoin();
                 if (eventType.Settings is not null && eventType.Settings.ReplaceBotHostility.GetValueOrDefault(false))
                 {
