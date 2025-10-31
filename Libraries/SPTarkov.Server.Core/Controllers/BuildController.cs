@@ -82,11 +82,11 @@ public class BuildController(
     /// <param name="request"></param>
     public void SaveWeaponBuild(MongoId sessionId, PresetBuildActionRequestData request)
     {
-        var pmcData = profileHelper.GetPmcProfile(sessionId);
+        var profile = profileHelper.GetFullProfile(sessionId);
 
         // Replace duplicate Id's. The first item is the base item.
         // The root ID and the base item ID need to match.
-        request.Items = itemHelper.ReplaceIDs(request.Items, pmcData);
+        request.Items = itemHelper.ReplaceIDs(request.Items, profile.CharacterData.PmcData);
         request.Root = request.Items.FirstOrDefault().Id;
 
         // Create new object ready to save into profile userbuilds.weaponBuilds
@@ -98,15 +98,13 @@ public class BuildController(
             Items = request.Items.ToList(),
         };
 
-        var profile = profileHelper.GetFullProfile(sessionId);
-
         var savedWeaponBuilds = profile.UserBuildData.WeaponBuilds;
-        var existingBuild = savedWeaponBuilds.FirstOrDefault(x => x.Id == request.Id);
+        var existingBuild = savedWeaponBuilds.FirstOrDefault(build => build.Name == request.Name || build.Id == request.Id);
         if (existingBuild is not null)
         {
             // exists, replace
             profile.UserBuildData.WeaponBuilds.Remove(existingBuild);
-            profile.UserBuildData.WeaponBuilds.Add(existingBuild);
+            profile.UserBuildData.WeaponBuilds.Add(newBuild);
         }
         else
         {
@@ -123,13 +121,12 @@ public class BuildController(
     public void SaveEquipmentBuild(MongoId sessionID, PresetBuildActionRequestData request)
     {
         var profile = profileHelper.GetFullProfile(sessionID);
-        var pmcData = profile.CharacterData.PmcData;
 
         var existingSavedEquipmentBuilds = saveServer.GetProfile(sessionID).UserBuildData.EquipmentBuilds;
 
         // Replace duplicate ID's. The first item is the base item.
         // Root ID and the base item ID need to match.
-        request.Items = itemHelper.ReplaceIDs(request.Items, pmcData);
+        request.Items = itemHelper.ReplaceIDs(request.Items, profile.CharacterData.PmcData);
 
         var newBuild = new EquipmentBuild
         {
