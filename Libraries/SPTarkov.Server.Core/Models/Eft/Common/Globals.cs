@@ -2929,6 +2929,9 @@ public record BTRSettings
 
 public record BtrMapConfig
 {
+    /// <summary>
+    /// Known values: Tarcola, Cleare, Dirt, HeavyDirt
+    /// </summary>
     [JsonPropertyName("BtrSkin")]
     public string BtrSkin { get; set; }
 

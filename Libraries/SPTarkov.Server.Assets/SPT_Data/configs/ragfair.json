@@ -37,7 +37,8 @@
         "65702610cfc010a0f5006a41",
         "5737250c2459776125652acc",
         "657023a9126cc4a57d0e17a6",
-        "5c1127d0d174af29be75cf68"
+        "5c1127d0d174af29be75cf68",
+        "5af056f186f7746da511291f"
       ],
       "customItemCategoryList": [],
       "damagedAmmoPacks": true,
@@ -346,6 +347,7 @@
     "useTraderPriceForOffersIfHigher": true,
     "generateBaseFleaPrices": {
       "useHandbookPrice": true,
+      "generatePresetPriceByChildren": true,
       "priceMultiplier": 1.5,
       "itemTplMultiplierOverride": {
         "5780cf7f2459777de4559322": 1.8

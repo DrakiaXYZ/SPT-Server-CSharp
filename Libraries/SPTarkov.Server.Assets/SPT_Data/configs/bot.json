@@ -296,6 +296,20 @@
           "minLimitPercent": 15
         }
       },
+      "ravangezryachiyevent": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 80,
+          "maxDelta": 40,
+          "minDelta": 20,
+          "minLimitPercent": 15
+        }
+      },
       "sectantpriest": {
         "armor": {
           "maxDelta": 10,
@@ -311,6 +325,48 @@
         }
       },
       "sectantwarrior": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 90,
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        }
+      },
+      "sectantoni": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 90,
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        }
+      },
+      "sectantpredvestnik": {
+        "armor": {
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        },
+        "weapon": {
+          "highestMax": 100,
+          "lowestMax": 90,
+          "maxDelta": 10,
+          "minDelta": 0,
+          "minLimitPercent": 15
+        }
+      },
+      "sectantprizrak": {
         "armor": {
           "maxDelta": 10,
           "minDelta": 0,
@@ -2758,7 +2814,7 @@
     "bossPartisan": 5,
     "bossSanitar": 5,
     "bossTagilla": 5,
-    "bossTagillaAgro": 5,
+    "bossTagillAagro": 5,
     "bossTest": 10,
     "bossZryachiy": 5,
     "crazyAssaultEvent": 15,

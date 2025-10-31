@@ -407,6 +407,7 @@ public class SeasonalEventService(
                 AddEventBossesToMaps("halloweensummon");
                 EnableHalloweenSummonEvent();
                 AddPumpkinsToScavBackpacks();
+                AddEventBossesToMaps("halloweennightcult");
                 RenameBitcoin();
                 if (eventType.Settings is not null && eventType.Settings.ReplaceBotHostility.GetValueOrDefault(false))
                 {
@@ -457,7 +458,10 @@ public class SeasonalEventService(
 
         if (eventType.Settings?.ReplaceBotHostility ?? false)
         {
-            ReplaceBotHostility(SeasonalEventConfig.HostilitySettingsForEvent.FirstOrDefault(x => x.Key == "zombies").Value);
+            ReplaceBotHostility(
+                SeasonalEventConfig.HostilitySettingsForEvent.FirstOrDefault(x => x.Key == "zombies").Value,
+                GetLocationsWithZombies(eventType.Settings.ZombieSettings.MapInfectionAmount)
+            );
         }
 
         if (eventType.Settings?.AdjustBotAppearances ?? false)
@@ -477,6 +481,8 @@ public class SeasonalEventService(
         {
             usec.BotAppearance.Head[new MongoId("6644d2da35d958070c02642c")] = 30;
         }
+
+        AddEventBossesToMaps("halloweennightcult");
     }
 
     protected void ApplyChristmasEvent(SeasonalEvent eventType, Config globalConfig)
@@ -506,6 +512,23 @@ public class SeasonalEventService(
         if (eventType.Settings?.AdjustBotAppearances ?? false)
         {
             AdjustBotAppearanceValues(eventType.Type);
+        }
+
+        ChangeBtrToTarColaSkin();
+    }
+
+    private void ChangeBtrToTarColaSkin()
+    {
+        var btrSettings = databaseService.GetGlobals().Configuration.BTRSettings;
+
+        if (btrSettings.MapsConfigs.TryGetValue("Woods", out var woodsBtrSettings))
+        {
+            woodsBtrSettings.BtrSkin = "Tarcola";
+        }
+
+        if (btrSettings.MapsConfigs.TryGetValue("TarkovStreets", out var streetsBtrSettings))
+        {
+            streetsBtrSettings.BtrSkin = "Tarcola";
         }
     }
 
@@ -585,7 +608,10 @@ public class SeasonalEventService(
         }
     }
 
-    protected void ReplaceBotHostility(Dictionary<string, List<AdditionalHostilitySettings>> hostilitySettings)
+    protected void ReplaceBotHostility(
+        Dictionary<string, List<AdditionalHostilitySettings>> hostilitySettings,
+        HashSet<string>? locationWhitelist = null
+    )
     {
         var locations = databaseService.GetLocations().GetDictionary();
         var ignoreList = LocationConfig.NonMaps;
@@ -611,6 +637,11 @@ public class SeasonalEventService(
                     // no settings for map by name, skip map
                     continue;
                 }
+            }
+
+            if (locationWhitelist is not null && !locationWhitelist.Contains(locationName))
+            {
+                continue;
             }
 
             foreach (var settings in newHostilitySettings)
@@ -870,7 +901,7 @@ public class SeasonalEventService(
                 continue;
             }
 
-            if (mapIdWhitelist is null || !mapIdWhitelist.Contains(locationKey))
+            if (mapIdWhitelist is not null && !mapIdWhitelist.Contains(locationKey))
             {
                 continue;
             }
@@ -881,7 +912,7 @@ public class SeasonalEventService(
             {
                 if (mapBosses.All(bossSpawn => bossSpawn.BossName != boss.BossName))
                 {
-                    // Zombie doesn't exist in maps boss list yet, add
+                    // Boss doesn't exist in maps boss list yet, add
                     mapBosses.Add(boss);
                 }
             }

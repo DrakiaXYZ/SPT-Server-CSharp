@@ -8,6 +8,7 @@ using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Spt.Mod;
 using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Mod;
 using SPTarkov.Server.Core.Utils;
 using Info = SPTarkov.Server.Core.Models.Eft.Profile.Info;
 
@@ -22,6 +23,7 @@ public class LauncherController(
     ProfileHelper profileHelper,
     DatabaseService databaseService,
     ServerLocalisationService serverLocalisationService,
+    ProfileDataService profileDataService,
     ConfigServer configServer
 )
 {
@@ -168,6 +170,9 @@ public class LauncherController(
             var profileInfo = saveServer.GetProfile(sessionId).ProfileInfo;
             profileInfo!.Edition = info.Edition;
             profileInfo.IsWiped = true;
+
+            // Clear any data modders may have stored
+            profileDataService.ClearProfileData(sessionId);
         }
 
         return sessionId;

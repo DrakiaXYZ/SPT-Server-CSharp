@@ -1,4 +1,5 @@
 using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
 using SPTarkov.Server.Core.Models.Eft.Profile;
@@ -67,9 +68,10 @@ public class DialogueHelper(ISptLogger<DialogueHelper> logger, ProfileHelper pro
             message.Items ??= new MessageItems();
             message.Items.Data ??= [];
 
-            // Check reward count when item being moved isn't in reward list
+            // Check reward count when item being moved (and its children) isn't in reward list
             // If count is 0, it means after this move occurs the reward array will be empty and all rewards collected
-            var remainingItems = message.Items.Data.Where(x => x.Id != itemId);
+            var itemWithChildren = message.Items.Data.GetItemWithChildren(itemId);
+            var remainingItems = message.Items.Data.Except(itemWithChildren);
             if (!remainingItems.Any())
             {
                 message.RewardCollected = true;

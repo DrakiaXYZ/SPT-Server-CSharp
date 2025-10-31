@@ -3,7 +3,6 @@ using SPTarkov.Server.Core.Exceptions.Helpers;
 using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Eft.Health;
 using SPTarkov.Server.Core.Models.Spt.Config;
 using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Servers;
@@ -158,16 +157,37 @@ public class HealthHelper(ISptLogger<HealthHelper> logger, TimeUtil timeUtil, Co
             // Process each effect for each part
             foreach (var (key, effectDetails) in partProperties.Effects ?? [])
             {
-                // Null guard
-                matchingProfilePart.Effects ??= new Dictionary<string, BodyPartEffectProperties?>();
+                // Have effects we need to add, init effect array
+                matchingProfilePart.Effects ??= [];
 
-                // Effect already exists on limb in server profile, skip
+                if (
+                    key.Equals("MildMusclePain", StringComparison.OrdinalIgnoreCase)
+                    && matchingProfilePart.Effects.ContainsKey("SevereMusclePain")
+                )
+                {
+                    // Edge case - client is trying to add mild pain when server already has severe, don't allow this
+                    continue;
+                }
+
+                // Effect on limb already exists in server profile, handle differently
                 if (matchingProfilePart.Effects.ContainsKey(key))
                 {
-                    // Edge case - effect already exists at destination, but we don't want to overwrite details
+                    matchingProfilePart.Effects.TryGetValue(key, out var matchingEffectOnServer);
+
+                    // Edge case - effect already exists at destination, but we don't want to overwrite details e.g. Exhaustion
                     if (effectsToSkip is not null && effectsToSkip.Contains(key))
                     {
                         matchingProfilePart.Effects[key] = null;
+                    }
+
+                    // Effect time has decreased while in raid, persist this reduction into profile
+                    if (
+                        effectDetails?.Time is not null
+                        && matchingEffectOnServer?.Time is not null
+                        && effectDetails.Time < matchingEffectOnServer.Time
+                    )
+                    {
+                        matchingEffectOnServer.Time = effectDetails.Time;
                     }
 
                     continue;

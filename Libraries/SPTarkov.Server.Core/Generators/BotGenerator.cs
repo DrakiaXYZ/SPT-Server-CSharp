@@ -70,6 +70,12 @@ public class BotGenerator(
 
         bot = GenerateBot(sessionId, bot, botTemplate, botGenDetails);
 
+        // Pscavs in live have same limb hp as their pmc character
+        if (profile?.Health?.BodyParts is not null)
+        {
+            CopyLimbHpValuesToBot(bot, profile.Health.BodyParts);
+        }
+
         // Sets the name after scav name shown in parentheses
         bot.Info.MainProfileNickname = profile.Info.Nickname;
 
@@ -104,8 +110,17 @@ public class BotGenerator(
             WishList = bot.WishList,
             MoneyTransferLimitData = bot.MoneyTransferLimitData,
             IsPmc = bot.IsPmc,
-            Prestige = new Dictionary<string, long>(),
+            Prestige = [],
         };
+    }
+
+    protected void CopyLimbHpValuesToBot(BotBase bot, Dictionary<string, BodyPartHealth> bodyParts)
+    {
+        foreach (var (partName, partProperties) in bodyParts)
+        {
+            bot.Health.BodyParts[partName].Health.Maximum = partProperties.Health.Maximum;
+            bot.Health.BodyParts[partName].Health.Current = bot.Health.BodyParts[partName].Health.Maximum;
+        }
     }
 
     /// <summary>
