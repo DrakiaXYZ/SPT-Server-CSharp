@@ -6,7 +6,7 @@ namespace SPTarkov.Server.Core.Migration;
 public abstract class AbstractProfileMigration : IProfileMigration
 {
     public virtual string MigrationName { get; }
-    public virtual IEnumerable<Type> PrerequisiteMigrations { get; }
+    public virtual IEnumerable<Type> PrerequisiteMigrations { get; } = [];
 
     public abstract string FromVersion { get; }
     public abstract string ToVersion { get; }
