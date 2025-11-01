@@ -628,18 +628,18 @@ public class SeasonalEventService(
                 continue;
             }
 
-            // Try to get map 'default' first if it exists
-            if (!hostilitySettings.TryGetValue("default", out var newHostilitySettings))
+            // Try for location-specific hostility settings first
+            if (!hostilitySettings.TryGetValue(locationBase.Base.Id.ToLowerInvariant(), out var newHostilitySettings))
             {
-                // No 'default', try for location name
-                if (!hostilitySettings.TryGetValue(locationName, out newHostilitySettings))
+                // If we don't have location-specific, fall back to defaults
+                if (!hostilitySettings.TryGetValue("default", out newHostilitySettings))
                 {
-                    // no settings for map by name, skip map
+                    // No settings by map, or default fallback, skip map
                     continue;
                 }
             }
 
-            if (locationWhitelist is not null && !locationWhitelist.Contains(locationName))
+            if (locationWhitelist is not null && !locationWhitelist.Contains(locationBase.Base.Id.ToLowerInvariant()))
             {
                 continue;
             }
@@ -823,7 +823,7 @@ public class SeasonalEventService(
     ///     Get location ids of maps with an infection above 0
     /// </summary>
     /// <param name="locationInfections">Dict of locations with their infection percentage</param>
-    /// <returns>List of location ids</returns>
+    /// <returns>List of lowercased location ids</returns>
     protected HashSet<string> GetLocationsWithZombies(Dictionary<string, double> locationInfections)
     {
         var result = new HashSet<string>();
@@ -834,7 +834,7 @@ public class SeasonalEventService(
         // Convert the infected location id into its generic location id
         foreach (var location in infectionKeys)
         {
-            result.UnionWith(GetLocationFromInfectedLocation(location.Key));
+            result.UnionWith(GetLocationFromInfectedLocation(location.Key.ToLowerInvariant()));
         }
 
         return result;
@@ -850,7 +850,7 @@ public class SeasonalEventService(
         return infectedLocationKey switch
         {
             "factory4" => ["factory4_day", "factory4_night"],
-            "Sandbox" => ["sandbox", "sandbox_high"],
+            "sandbox" => ["sandbox", "sandbox_high"],
             _ => [infectedLocationKey],
         };
     }
@@ -910,7 +910,8 @@ public class SeasonalEventService(
             var mapBosses = ((Location)locations[locationName]).Base.BossLocationSpawn;
             foreach (var boss in bossesToAdd)
             {
-                if (mapBosses.All(bossSpawn => bossSpawn.BossName != boss.BossName))
+                // Don't re-add bosses that already exist, unless they're event bosses
+                if (mapBosses.All(bossSpawn => bossSpawn.TriggerName == "botEvent" || bossSpawn.BossName != boss.BossName))
                 {
                     // Boss doesn't exist in maps boss list yet, add
                     mapBosses.Add(boss);
